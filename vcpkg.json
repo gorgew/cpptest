@@ -1,0 +1,13 @@
+{
+    "name" : "testbench",
+    "version" : "1.0.0",
+    "dependencies": [
+        "catch2",
+        "entt",
+        "fmt",
+        "glad",
+        "glm",
+        "robin-hood-hashing",
+        "stb"
+    ]
+}

@@ -1,7 +1,7 @@
 #include <any>
 #include <iostream>
 #include <functional>
-
+#include <vector>
 
 // std::any differentReturn(int a) {
 //     if (a > 0) {
@@ -23,4 +23,16 @@ int main(void) {
     //     std::cout << a.type().name() << "\n";
     //     std::cout << typeid(int).name() << "\n";
     // }
+
+    // int x = 5;
+    // int y = 6;
+    // std::vector<std::reference_wrapper<int>> my_ints {x};
+    // x = 7;
+    // my_ints.emplace_back(y);
+    // y = 0;
+    // std::cout << "x: " << my_ints[0] << '\n'; 
+    // std::cout << "y: " << my_ints[1] << '\n';
+    std::vector<int> my_vec;
+    my_vec.emplace_back();
+    std::cout << "myvec size " << my_vec.size();
 }

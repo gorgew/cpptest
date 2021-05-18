@@ -1,5 +1,3 @@
-add_subdirectory(glad)
-
 add_library(
     robin_hood INTERFACE
     robin_hood/robin_hood.h

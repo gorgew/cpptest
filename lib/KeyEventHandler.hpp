@@ -4,7 +4,7 @@ extern "C" {
     #include <SDL.h>
 }
 
-#include <robin_hood/robin_hood.h>
+#include <robin_hood.h>
 
 #include <array>
 #include <vector>

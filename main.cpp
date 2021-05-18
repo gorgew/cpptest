@@ -3,7 +3,7 @@
  */
 #include <memory>
 #include <iostream>
-#include <glad/glad.c>
+#include <glad/glad.h>
 
 #include <KeyEventHandler.hpp>
 #include <MouseEventHandler.hpp>
