@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-void ShaderManager::add_shader(const std::string name, const std::string filepath) {
+void ShaderManager::add_shader(std::string name, std::string filepath) {
 
     name_to_shader_map.insert({name, 0});
 
@@ -42,5 +42,7 @@ bool ShaderManager::check_shader(GLuint shader_id) {
     if(!success) {
         glGetProgramInfoLog(shader_id, 1024, NULL, log);
         std::cerr << "PROGRAM LINKING ERROR:\n" << log;
+        return true;
     }
+    return false;
 }

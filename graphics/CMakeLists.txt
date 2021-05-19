@@ -8,7 +8,6 @@ add_library(
 
 target_link_libraries(graphics PRIVATE 
         glad::glad
-        ${STB_INCLUDE_DIRS}
-        robin_hood::robin_hood)
+        ${STB_INCLUDE_DIRS})
 
 target_include_directories(graphics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
