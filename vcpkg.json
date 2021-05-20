@@ -7,7 +7,6 @@
         "fmt",
         "glad",
         "glm",
-        "robin-hood-hashing",
         "stb",
         "sdl2"
     ]

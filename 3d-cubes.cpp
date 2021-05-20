@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <TextureManager.cpp>
+#include <ShaderManager.hpp>
 
 int WINDOW_HEIGHT = 800;
 int WINDOW_WIDTH = 600;
@@ -122,54 +123,79 @@ int main(void) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    int imgWidth, imgHeight, numChannels;
+    // int imgWidth, imgHeight, numChannels;
 
-    stbi_set_flip_vertically_on_load(true);
+    // stbi_set_flip_vertically_on_load(true);
     
-    unsigned int texture1, texture2;
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    // unsigned int texture1, texture2;
+    // glGenTextures(1, &texture1);
+    // glBindTexture(GL_TEXTURE_2D, texture1);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    unsigned char *data1 = stbi_load("resources/container.jpg", &imgWidth, &imgHeight, &numChannels, 0);
-    if (data1) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data1);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout<<"TEXTURE1 LOADED\n";
-    } else {
-        std::cout<<"TEXTURE1 LOADING FAILURE\n";
-        return 1;
-    }
+    // unsigned char *data1 = stbi_load("resources/container.jpg", &imgWidth, &imgHeight, &numChannels, 0);
+    // if (data1) {
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data1);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     std::cout<<"TEXTURE1 LOADED\n";
+    // } else {
+    //     std::cout<<"TEXTURE1 LOADING FAILURE\n";
+    //     return 1;
+    // }
 
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    // glGenTextures(1, &texture2);
+    // glBindTexture(GL_TEXTURE_2D, texture2);
 
-    unsigned char *data2 = stbi_load("resources/awesomeface.png", &imgWidth, &imgHeight, &numChannels, 0);
-    if (data2) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout<<"TEXTURE2 LOADED\n";
-    } else {
-        std::cout<<"TEXTURE2 LOADING FAILURE\n";
-        return 1;
-    }
+    // unsigned char *data2 = stbi_load("resources/awesomeface.png", &imgWidth, &imgHeight, &numChannels, 0);
+    // if (data2) {
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     std::cout<<"TEXTURE2 LOADED\n";
+    // } else {
+    //     std::cout<<"TEXTURE2 LOADING FAILURE\n";
+    //     return 1;
+    // }
     
-    stbi_image_free(data1);
-    stbi_image_free(data2);
+    // stbi_image_free(data1);
+    // stbi_image_free(data2);
 
     auto tex_man = std::make_unique<TextureManager>();
     tex_man->add_texture("../resources/awesomeface.png", "awesome-face");
     std::cout << "TexID: " << tex_man->get_id("awesome-face") << "\n"; 
 
+    tex_man->add_texture("../resources/blank.png", "blank");
+
+    auto shader_man = std::make_unique<ShaderManager>();
+    shader_man->add_shader("mvp.vert", "../resources/mvp.vert", GL_VERTEX_SHADER);
+    shader_man->add_shader("mix.frag", "../resources/mix.frag", GL_FRAGMENT_SHADER);
+    shader_man->add_program("my_program", {"mvp.vert", "mix.frag"});
+
+    std::cout << "shadere_program: " << shader_man->get_program_id("my_program") << "\n";
+    
     ShaderProgram shaderProgram("resources/mvp.vert", "resources/mix.frag");
     shaderProgram.use();
     shaderProgram.setUniform("texture1", 0);
-    shaderProgram.setUniform("texture2", 1);
+    //shaderProgram.setUniform("texture2", 1);
+    glUniform1i(glGetUniformLocation(shaderProgram.getID(), "texture2"), 1);
+    
+    shader_man->use("my_program");
+    glUniform1i(glGetUniformLocation(shader_man->get_program_id("my_program"), "texture1"), 0);
+    glUniform1i(glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2"), 1);
+    
+    //bool x = glIsProgram(shaderProgram.getID());
+    bool x = glIsProgram(shader_man->get_program_id("my_program"));
+    std::cout << "is program: " << x << "\n";
 
+    //int loc = glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2");
+    int loc = glGetUniformLocation(shaderProgram.getID(), "texture2");
+    std::cout << loc << "\n";
+    int a[1] {69};
+    glGetUniformiv(shader_man->get_program_id("my_program"), glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2"), a);
+    //glGetUniformiv(shaderProgram.getID(), glGetUniformLocation(shaderProgram.getID(), "texture2"), a);
+    std::cout <<"uniform value " << a[0];
     //Model
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -224,15 +250,20 @@ int main(void) {
         //std::cout << "TIME (S): " << time << std::endl;
         //model = glm::rotate(model, time * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
         projection = glm::perspective(glm::radians(60.0f), (float) WINDOW_HEIGHT / (float) WINDOW_WIDTH, 0.1f, 10.0f);
+
         shaderProgram.setUniformMatrix4("model", GL_FALSE, glm::value_ptr(model));
         shaderProgram.setUniformMatrix4("view", GL_FALSE, glm::value_ptr(view)); 
         shaderProgram.setUniformMatrix4("projection", GL_FALSE, glm::value_ptr(projection)); 
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        glBindTexture(GL_TEXTURE_2D, tex_man->get_id("blank"));
         glActiveTexture(GL_TEXTURE1);
         //glBindTexture(GL_TEXTURE_2D, texture1);
         //glBindTexture(GL_TEXTURE_2D, texture2);
@@ -251,6 +282,7 @@ int main(void) {
             model = glm::rotate(model, angle, glm::vec3(0.5f, 0.5f, 1.0f));
             shaderProgram.setUniformMatrix4("model", GL_FALSE, glm::value_ptr(model));
 
+            glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "model"), 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -260,7 +292,7 @@ int main(void) {
         SDL_Delay(16);
     }
 
-    shaderProgram.close();
+    //shaderProgram.close();
     //glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
 

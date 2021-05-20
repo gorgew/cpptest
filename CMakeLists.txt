@@ -18,7 +18,7 @@ endif()
 
 file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-#find_package(fmt REQUIRED)
+find_package(fmt REQUIRED)
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
@@ -38,20 +38,14 @@ find_package(glm REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(graphics)
+add_subdirectory(ecs)
 
 add_subdirectory(tests)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-   # add_executable(Testbench testbench.cpp)
-    add_executable(Functional functional.cpp)
-   # add_executable(Main main.cpp)
-   # add_executable(3d-cubes 3d-cubes.cpp)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_executable(Testbench testbench.cpp)
-    add_executable(Functional functional.cpp)
-    add_executable(Main main.cpp)
-   add_executable(3d-cubes 3d-cubes.cpp)
-endif()
+add_executable(Testbench testbench.cpp)
+add_executable(Functional functional.cpp)
+add_executable(Main main.cpp)
+add_executable(3d-cubes 3d-cubes.cpp)
 
 target_link_libraries(lib PRIVATE SDL2::SDL2)
 
