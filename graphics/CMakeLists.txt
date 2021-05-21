@@ -7,6 +7,7 @@ add_library(
 )
 
 target_link_libraries(graphics PRIVATE 
+        fmt::fmt
         glad::glad
         ${STB_INCLUDE_DIRS})
 

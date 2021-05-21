@@ -11,8 +11,18 @@ class ShaderManager {
 
     bool check_shader(GLuint shader_id);
 
-    public:
-        void add_shader(std::string name, std::string filepath);
+    bool check_program(GLuint program_id);
 
-        void add_program(std::string name, ...);
+    public:
+        void add_shader(std::string name, std::string filepath, GLenum shader_type);
+
+        void add_program(std::string name, std::initializer_list<std::string> programs);
+
+        void delete_shaders();
+
+        void delete_programs();
+
+        void use(std::string name); 
+
+        GLuint& get_program_id(std::string name);
 };

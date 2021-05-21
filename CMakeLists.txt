@@ -44,15 +44,15 @@ add_subdirectory(tests)
 
 add_executable(Testbench testbench.cpp)
 add_executable(Functional functional.cpp)
-add_executable(Main main.cpp)
+#add_executable(Main main.cpp)
 add_executable(3d-cubes 3d-cubes.cpp)
 
 target_link_libraries(lib PRIVATE SDL2::SDL2)
 
-target_link_libraries(Main PRIVATE SDL2::SDL2
-                                   ${OPENGL_LIBRARIES}
-                                   glad::glad
-                                   lib)
+# target_link_libraries(Main PRIVATE SDL2::SDL2
+#                                    ${OPENGL_LIBRARIES}
+#                                    glad::glad
+#                                    lib)
 #set_target_properties(Main PROPERTIES LINKER_LANGUAGE CXX)
 
 
