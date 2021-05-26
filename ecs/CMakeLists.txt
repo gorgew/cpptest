@@ -1,8 +1,6 @@
-add_library(ecs 
-    GraphicsComponents.hpp
-    PhysicsComponents.hpp
-    GraphicsSystem.cpp
-    GraphicsSystem.hpp)
+add_library(ecs
+    PhysicsSystem.cpp
+    PhysicsComponents.hpp)
 
 target_include_directories(ecs PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 

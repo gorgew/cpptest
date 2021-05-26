@@ -7,20 +7,21 @@
 #include <vector>
 #include <unordered_map>
 
+/**
+ * @brief A class that manages and creates GL Texture Objects
+*/
 class TextureManager {
 
-    std::unordered_map<std::string, size_t> name_to_index_map;
-    std::vector<GLuint> tex_ids;
-    std::vector<GLuint> tex_arr_ids;
+    std::unordered_map<std::string, GLuint> name_to_index_map;
     std::vector<int> heights;
     std::vector<int> widths;
     std::vector<int> channels;
     unsigned char *data;
 
     public:
-
+        ~TextureManager();
         /**
-         * @brief Load an array texture
+         * @brief Load an array texture PNG from left to right and top to bottom
          * @param filepath Filepath to texture
          * @param name Name to bind texture to
          * @param width Width in texels
@@ -35,24 +36,13 @@ class TextureManager {
          * @param filepath filepath to texture
          * @param name name to bind texture to
          */
-        void add_texture(const char* filepath, const std::string name);
-
-        void use_texture(const std::string name);
-
-        int get_height(const std::string name);
-
-        int get_width(const std::string name);
-
-        int get_channels(const std::string name);
-
-        GLuint get_id(const std::string name);
+        void add_texture(const std::string name, const char* filepath);
 
         /**
-         * @brief Gets the location of a uniform
-         * @param tex_name Name of texture
-         * @param uniform_name Name of uniform
-         */
-        GLint& get_uniform_location(const std::string tex_name, const char* uniform_name);
+         * @brief Gets the id of a texture object mapped to the given name
+         * @param name Name of texture object
+         * @return id of texture object. 0 if name not found
+        */
+        GLuint get_id(const std::string name);
 
-        void check_textures();
 };

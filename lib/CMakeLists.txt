@@ -1,5 +1,7 @@
 add_library(
     lib
+    Config.cpp
+    Config.hpp
     KeyEventHandler.cpp
     KeyEventHandler.hpp
     MouseEventHandler.cpp
