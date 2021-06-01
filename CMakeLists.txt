@@ -5,7 +5,7 @@ project(SdlTest VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Wextra")
     message(STATUS "Compiler: GNU/CLANG")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /sdl-")
@@ -18,7 +18,7 @@ endif()
 
 file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(fmt REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
@@ -35,6 +35,10 @@ find_package(EnTT CONFIG REQUIRED)
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 find_package(glm REQUIRED)
+
+find_package(freetype CONFIG REQUIRED)
+
+add_subdirectory(3rdparty)
 
 add_subdirectory(lib)
 add_subdirectory(graphics)
@@ -61,8 +65,26 @@ target_link_libraries(3d-cubes PRIVATE SDL2::SDL2
                                     glad::glad
                                     lib
                                     glm::glm
+                                    fmt::fmt
                                     graphics)
 # set_target_properties(3d-cubes PROPERTIES LINKER_LANGUAGE CXX)
 
 add_executable(entt-test entt-test.cpp)
 target_link_libraries(entt-test PRIVATE EnTT::EnTT)
+
+add_executable(time time-test.cpp)
+target_link_libraries(time PRIVATE SDL2::SDL2 fmt::fmt)
+
+add_executable(game game.cpp)
+target_link_libraries(game PRIVATE
+        dragonbox::dragonbox_to_chars
+        robin_hood
+        SDL2::SDL2
+        ${OPENGL_LIBRARIES}
+        glad::glad
+        fmt::fmt
+        freetype
+        ecs
+        lib
+        graphics
+        )

@@ -26,7 +26,7 @@ void ShaderManager::add_shader(std::string name, std::string filepath, GLenum sh
             shader_code = shader_stream.str();
             //std:: cout << shader_code << "\n";
         } 
-        catch (std::ifstream::failure) {
+        catch (std::ifstream::failure&) {
             fmt::print("Failed to load shader \"{}\" at \"{}\"\n", name, filepath);
         }
 
@@ -115,7 +115,7 @@ void ShaderManager::delete_shaders() {
 
 void ShaderManager::delete_programs() {
     for (auto [k, v] : name_to_program_map) {
-        fmt::print("program name: {}\n", k);
+        fmt::print("program name: {} | program id: {}\n", k, v);
         glDeleteProgram(v);
     }
 }

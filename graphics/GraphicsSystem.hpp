@@ -3,7 +3,7 @@
 extern "C" {
     #include <glad/glad.h>
 }
-
+#include "FontComponents.hpp"
 #include "FrameBufferObject.hpp"
 #include <Injector.hpp>
 #include <memory>
@@ -11,6 +11,9 @@ extern "C" {
 #include <entt/entity/registry.hpp>
 
 class GraphicsSystem {
+
+    //Dimensions of fbo and default buffer
+    int fbo_width, fbo_height, default_width, default_height;
 
     std::shared_ptr<Injector> injector;
 
@@ -28,7 +31,12 @@ class GraphicsSystem {
 
     void draw_component(struct frame f, struct position pos);
 
-    void free_frame_node(struct frame_node);
+    void draw_char_component(struct char_frame_data f, struct position pos);
+
+    /**
+     * Finds
+    */
+    void free_frame_list(struct frame_node);
 
     public:
 
@@ -47,4 +55,7 @@ class GraphicsSystem {
         */
         void draw(entt::registry& registry);
 
+        void free_frame_lists(entt::registry& registry);
+
+        void resize(int width, int height);
 };

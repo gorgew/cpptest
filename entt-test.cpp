@@ -41,8 +41,8 @@ int main(void) {
 
     update(registry);
     
-    auto factory = entt::meta<int>().type("asdf"_hs);
-    entt::meta<int>().data<1>("member"_hs);
+    //auto factory = entt::meta<int>().type("asdf"_hs);
+    //entt::meta<int>().data<1>("member"_hs);
     
     return 0;
 }

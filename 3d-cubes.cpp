@@ -10,7 +10,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <fmt/format.h>
+
 #include <memory>
+#include <VertexArrayManager.hpp>
 #include <TextureManager.cpp>
 #include <ShaderManager.hpp>
 
@@ -73,11 +76,12 @@ float vertices[] = {
 };
 
 int main(void) {
+    fmt::print("");
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 
                         SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     SDL_GL_SetSwapInterval(1);
@@ -95,6 +99,7 @@ int main(void) {
 
     glEnable(GL_DEPTH_TEST);
 
+    /*
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -103,17 +108,7 @@ int main(void) {
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    /*
-    GLuint indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
 
-    GLuint EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -122,80 +117,51 @@ int main(void) {
 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    */
+    auto va_manager = std::make_unique<VertexArrayManager>();
 
-    // int imgWidth, imgHeight, numChannels;
-
-    // stbi_set_flip_vertically_on_load(true);
-    
-    // unsigned int texture1, texture2;
-    // glGenTextures(1, &texture1);
-    // glBindTexture(GL_TEXTURE_2D, texture1);
-
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    // unsigned char *data1 = stbi_load("resources/container.jpg", &imgWidth, &imgHeight, &numChannels, 0);
-    // if (data1) {
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data1);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     std::cout<<"TEXTURE1 LOADED\n";
-    // } else {
-    //     std::cout<<"TEXTURE1 LOADING FAILURE\n";
-    //     return 1;
-    // }
-
-    // glGenTextures(1, &texture2);
-    // glBindTexture(GL_TEXTURE_2D, texture2);
-
-    // unsigned char *data2 = stbi_load("resources/awesomeface.png", &imgWidth, &imgHeight, &numChannels, 0);
-    // if (data2) {
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     std::cout<<"TEXTURE2 LOADED\n";
-    // } else {
-    //     std::cout<<"TEXTURE2 LOADING FAILURE\n";
-    //     return 1;
-    // }
-    
-    // stbi_image_free(data1);
-    // stbi_image_free(data2);
+    va_manager->add_array("cube", vertices, sizeof(vertices), {3, 3, 2});
+    GLuint VAO = va_manager->get_array_id("cube");
 
     auto tex_man = std::make_unique<TextureManager>();
-    tex_man->add_texture("../resources/awesomeface.png", "awesome-face");
-    std::cout << "TexID: " << tex_man->get_id("awesome-face") << "\n"; 
+    //tex_man->add_texture("../resources/awesomeface.png", "awesome-face");
+    //std::cout << "TexID: " << tex_man->get_id("awesome-face") << "\n"; 
 
     tex_man->add_texture("../resources/blank.png", "blank");
-
+    //tex_man->add_2d_array_texture("array-tex-test", "../resources/array-tex-test.png", 1, 1, 4);
+    //tex_man->add_2d_array_texture("array-tex-test", "../resources/nums-h.png", 32, 32, 6);
+    tex_man->add_2d_array_texture("array-tex-test", "../resources/NumsPacked.png", 32, 32, 6);
+    //tex_man->add_2d_array_texture("array-tex-test", "../resources/single-px-h.png", 1, 1, 8);
+    //tex_man->add_2d_array_texture("array-tex-test", "../resources/2-2-px-pack.png", 2, 2, 9);
+    //tex_man->add_2d_array_texture("array-tex-test", "../resources/px.png", 1, 1, 1);
     auto shader_man = std::make_unique<ShaderManager>();
     shader_man->add_shader("mvp.vert", "../resources/mvp.vert", GL_VERTEX_SHADER);
-    shader_man->add_shader("mix.frag", "../resources/mix.frag", GL_FRAGMENT_SHADER);
-    shader_man->add_program("my_program", {"mvp.vert", "mix.frag"});
 
-    std::cout << "shadere_program: " << shader_man->get_program_id("my_program") << "\n";
-    
-    ShaderProgram shaderProgram("resources/mvp.vert", "resources/mix.frag");
-    shaderProgram.use();
-    shaderProgram.setUniform("texture1", 0);
-    //shaderProgram.setUniform("texture2", 1);
-    glUniform1i(glGetUniformLocation(shaderProgram.getID(), "texture2"), 1);
-    
-    shader_man->use("my_program");
-    glUniform1i(glGetUniformLocation(shader_man->get_program_id("my_program"), "texture1"), 0);
-    glUniform1i(glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2"), 1);
+    shader_man->add_shader("array-tex.frag", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
+    shader_man->add_program("array-tex", {"mvp.vert", "array-tex.frag"});
+
+    std::cout << "shadere_program: " << shader_man->get_program_id("array-tex") << "\n";
+
+    shader_man->use("array-tex");
+    glUniform1i(glGetUniformLocation(shader_man->get_program_id("array-tex"), "iTexture"), 0);
+    glUniform1f(glGetUniformLocation(shader_man->get_program_id("array-tex"), "layer"), 5.0);
     
     //bool x = glIsProgram(shaderProgram.getID());
-    bool x = glIsProgram(shader_man->get_program_id("my_program"));
+    bool x = glIsProgram(shader_man->get_program_id("array-tex"));
     std::cout << "is program: " << x << "\n";
 
-    //int loc = glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2");
-    int loc = glGetUniformLocation(shaderProgram.getID(), "texture2");
-    std::cout << loc << "\n";
+    int loc = glGetUniformLocation(shader_man->get_program_id("array-tex"), "layer");
+    //int loc = glGetUniformLocation(shaderProgram.getID(), "texture2");
+    std::cout << "loc " << loc << "\n";
     int a[1] {69};
-    glGetUniformiv(shader_man->get_program_id("my_program"), glGetUniformLocation(shader_man->get_program_id("my_program"), "texture2"), a);
+    glGetUniformiv(shader_man->get_program_id("array-tex"), glGetUniformLocation(shader_man->get_program_id("array-tex"), "iTexture"), a);
     //glGetUniformiv(shaderProgram.getID(), glGetUniformLocation(shaderProgram.getID(), "texture2"), a);
-    std::cout <<"uniform value " << a[0];
+    std::cout <<"uniform value " << a[0] << "\n";
+
+    float b[1] {69.0};
+    glGetUniformfv(shader_man->get_program_id("array-tex"), glGetUniformLocation(shader_man->get_program_id("array-tex"), "layer"), b);
+    //glGetUniformiv(shaderProgram.getID(), glGetUniformLocation(shaderProgram.getID(), "texture2"), a);
+    std::cout <<"b value" << b[0] << "\n";
     //Model
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -246,30 +212,23 @@ int main(void) {
                 }
             }
         }
-        float time = SDL_GetTicks() / 100000.0f;
+        //float time = SDL_GetTicks() / 100000.0f;
         //std::cout << "TIME (S): " << time << std::endl;
         //model = glm::rotate(model, time * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
         projection = glm::perspective(glm::radians(60.0f), (float) WINDOW_HEIGHT / (float) WINDOW_WIDTH, 0.1f, 10.0f);
 
-        shaderProgram.setUniformMatrix4("model", GL_FALSE, glm::value_ptr(model));
-        shaderProgram.setUniformMatrix4("view", GL_FALSE, glm::value_ptr(view)); 
-        shaderProgram.setUniformMatrix4("projection", GL_FALSE, glm::value_ptr(projection)); 
-        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("array-tex"), "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("array-tex"), "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("array-tex"), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex_man->get_id("blank"));
-        glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, texture1);
-        //glBindTexture(GL_TEXTURE_2D, texture2);
-        glBindTexture(GL_TEXTURE_2D, tex_man->get_id("awesome-face"));
+ 
+        int id = tex_man->get_id("array-tex-test");
+        glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(VAO);
 
         for (glm::vec3 cubePos : cubePositions) {
@@ -278,11 +237,9 @@ int main(void) {
             model = glm::translate(model, cubePos);
 
             //float angle = ((rand() % 359) + 1.0f);
-            float angle = glm::radians(90.0f);
-            model = glm::rotate(model, angle, glm::vec3(0.5f, 0.5f, 1.0f));
-            shaderProgram.setUniformMatrix4("model", GL_FALSE, glm::value_ptr(model));
-
-            glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("my_program"), "model"), 1, GL_FALSE, glm::value_ptr(model));
+            //float angle = glm::radians(90.0f);
+            
+            glUniformMatrix4fv(glGetUniformLocation(shader_man->get_program_id("array-tex"), "model"), 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 

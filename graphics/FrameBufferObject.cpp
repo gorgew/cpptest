@@ -1,6 +1,5 @@
 #include "FrameBufferObject.hpp"
 #include <stdexcept>
-#include <iostream>
 
 FrameBufferObject::FrameBufferObject() {
 
@@ -34,19 +33,19 @@ void FrameBufferObject::addTexture2D(int width, int height) {
             GL_TEXTURE_2D, texID, 0);
 }
 
-/*
-void FrameBufferObject::addDepthStencilRenderBuffer() {
+
+void FrameBufferObject::addDepthStencilRenderBuffer(int width, int height) {
 
     glGenRenderbuffers(1, &rboID);
     glBindRenderbuffer(GL_RENDERBUFFER, rboID);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, Config::width, 
-            Config::height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, 
+            height);
     
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 
             GL_RENDERBUFFER, rboID);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
-*/
+
 
 void FrameBufferObject::activate() {
 
@@ -56,7 +55,6 @@ void FrameBufferObject::activate() {
 void FrameBufferObject::checkCompiled() {
     
     activate();
-    std::cout<<"fboID: "<<fboID << "\n";
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 
         throw std::invalid_argument("FrameBufferOBject::checkCompiled() : "
@@ -70,5 +68,7 @@ GLuint FrameBufferObject::getTexID(int pos) {
 }
 
 FrameBufferObject::~FrameBufferObject() {
-    std::cout<<"FBO DYING \n";
+    glDeleteTextures(1, &texID);
+    glDeleteRenderbuffers(1, &rboID);
+    glDeleteFramebuffers(1, &fboID);
 }

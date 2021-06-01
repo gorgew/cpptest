@@ -1,5 +1,8 @@
 add_library(
     graphics
+    FontBuilder.hpp
+    FontBuilder.cpp
+    FontComponents.hpp
     GraphicsComponents.hpp
     GraphicsComponents.cpp
     GraphicsSystem.hpp
@@ -16,13 +19,16 @@ add_library(
     Window.cpp
 )
 
-target_link_libraries(graphics PRIVATE 
+target_link_libraries(graphics PRIVATE
+        dragonbox::dragonbox_to_chars 
+        robin_hood
         fmt::fmt
         glad::glad
         ${STB_INCLUDE_DIRS}
         SDL2::SDL2
         EnTT::EnTT
         glm::glm
+        freetype
         ecs
         lib)
 

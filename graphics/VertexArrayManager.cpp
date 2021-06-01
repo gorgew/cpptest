@@ -71,3 +71,19 @@ void VertexArrayManager::add_rect(std::string name, float width, float height) {
 
         add_array(name, data, 20 * sizeof(float), {3, 2});
 }
+
+void VertexArrayManager::add_rect_flipped(std::string name, float width, float height) {
+
+        float data[20] = {
+            //Bottom left corner
+            -1 * (width / 2.0f), -1 * (height / 2.0f), 0.0f, 0.0f, 1.0f,
+            //Bottom right corner
+            width / 2.0f, -1 * (height / 2.0f), 0.0f, 1.0f, 1.0f,
+            //Top right corner
+            width / 2.0f, height / 2.0f, 0.0f, 1.0f, 0.0f,
+            //Top left corner
+            -1.0f * (width / 2.0f), height / 2.0f, 0.0f, 0.0f, 0.0f,
+        };
+
+        add_array(name, data, 20 * sizeof(float), {3, 2});
+}

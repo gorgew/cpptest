@@ -4,6 +4,7 @@
 #include <PhysicsComponents.hpp>
 #include <GraphicsComponents.hpp>
 #include <GraphicsSystem.hpp>
+#include <FontBuilder.hpp>
 #include <fmt/core.h>
 
 #include <glm/glm.hpp>
@@ -15,23 +16,32 @@
 
 using namespace std::chrono;
 
+struct empty_struct {
+
+};
+
 int main(void) {
 
     auto injector = std::make_shared<Injector>();
+
     fmt::print("Game initializing\n");
     Window window {"Game", injector->config.height, injector->config.width};
     GraphicsSystem g_system{injector};
+    FontBuilder f_builder{injector};
+    f_builder.add_font("arial", "../resources/FantasqueSansMono-Regular.ttf", 96);
+
+    auto my_char_data = f_builder.get_char("arial", 96, 'm');
+    fmt::print("my_char_data info:\n tex_id: {}, bearing_x {}\n", my_char_data.tex_array_id, my_char_data.bearing_x);
 
     entt::registry registry;
-
+    f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
     //TESTING GRAPHICS SYSTEM!!
     //REMOVE LATER!!
-
     //MAKING THE OPENGL DATA
     injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
     injector->shader_man.add_shader("sprites-v", "../resources/sprites.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("tex", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("sprites", {"sprites-v", "tex"});
+    injector->shader_man.add_shader("array-tex", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
+    injector->shader_man.add_program("sprites", {"sprites-v", "array-tex"});
     injector->shader_man.use("sprites");
 
     int id = injector->shader_man.get_program_id("sprites");
@@ -39,7 +49,8 @@ int main(void) {
     fmt::print("texture_id: {}\n", injector->tex_man.get_id("blank"));
     fmt::print("shader id: {}\n", id);
 
-    glm::mat4 projection = glm::mat4(1.0f);
+    //glm::mat4 projection = glm::mat4(1.0f);
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, static_cast<float>(injector->config.height));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(id, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -47,16 +58,31 @@ int main(void) {
     glUniformMatrix4fv(glGetUniformLocation(id, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     //CREATING THE ENTITY
-
-    struct frame my_static_graphic = gorge::build_frame(injector, 1.0f, 1.0f, 
-            "blank", 2, "sprites");
-    struct frame_node my_animated_graphic = gorge::build_frame_node(injector, 1.0f, 1.0f, 
+   
+    struct frame_node my_animated_graphic = gorge::build_frame_node(injector, 200.0f, 200.0f, 
             "blank", 0, 5, "sprites");
     const auto entity = registry.create();
     //registry.emplace<static_graphic>(entity, my_static_graphic);
     registry.emplace<frame_node>(entity, my_animated_graphic);
-    registry.emplace<position>(entity, glm::vec3(0.0f));
+    registry.emplace<position>(entity, glm::vec3(200.0f, 200.0f, 0.0f));
+    //registry.emplace<position>(entity, glm::vec3(1.0f));
 
+    
+    struct frame my_char_frame = gorge::build_frame_flipped(injector, 1.0f, 1.0f, "blank", 0, "fonts");
+    my_char_frame.tex_array_id  = my_char_data.tex_array_id;
+    //my_char_frame.tex_array_id = 70;
+    fmt::print("char texid {}\n", my_char_frame.tex_array_id);
+    const auto entity1 = registry.create();
+    registry.emplace<frame>(entity1, my_char_frame);
+    registry.emplace<position>(entity1, glm::vec3(400.0f, 400.0f, 0.0f));
+    //registry.emplace<position>(entity1, glm::vec3(1.0f, 1.0f, 0.0f));
+    
+    //entt test?
+    struct struct_string {
+        std::vector<std::string> my_vec_string;
+    };
+    std::vector<std::string> my_vec {"hello world"};
+    registry.emplace<struct_string>(entity, my_vec);
     //Timing clocks
     auto prev_clock = high_resolution_clock::now();
     auto next_clock = high_resolution_clock::now();
@@ -82,6 +108,10 @@ int main(void) {
                 break;
 
             } else if (event.type == SDL_WINDOWEVENT) {
+                
+                if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    g_system.resize(event.window.data1, event.window.data2);
+                }
             }
         }
         
@@ -95,5 +125,8 @@ int main(void) {
         }
         prev_clock = next_clock;
     }
+
+    g_system.free_frame_lists(registry);
+
     return 0;
 }

@@ -30,6 +30,15 @@ class VertexArrayManager {
          * @param height Height of rect
          */
         void add_rect(std::string name, float width, float height);
+
+        /**
+         * @brief Create a vertex array of a rect of the given width and height.
+         *  The rect should be drawn with GL primitive type of GL_TRIANGLE_FAN.
+         *  Tex coords are such that (0,0) is the top left corner
+         * @param width Width of rect
+         * @param height Height of rect
+         */
+        void add_rect_flipped(std::string name, float width, float height);
         
         /**
          * @brief Get the id of a VAO mapped to the given name

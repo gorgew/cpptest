@@ -22,7 +22,7 @@ class FrameBufferObject{
 
         void addTexture2D(int width, int height);
 
-        void addDepthStencilRenderBuffer();
+        void addDepthStencilRenderBuffer(int width, int height);
 
         void activate();
 

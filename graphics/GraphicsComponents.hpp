@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glad/glad.h>
 #include <glm/vec3.hpp>
 #include <Injector.hpp>
@@ -31,6 +33,12 @@ namespace gorge {
      * Factory functioh for static_graphic component for a sprite
     */
     struct frame build_frame(std::shared_ptr<Injector> injector, float width, float height, 
+            std::string tex_array_name, unsigned int layer, std::string program_name);
+
+    /**
+     * Factory functioh for static_graphic component for a sprite
+    */
+    struct frame build_frame_flipped(std::shared_ptr<Injector> injector, float width, float height, 
             std::string tex_array_name, unsigned int layer, std::string program_name);
 
     struct frame_node build_frame_node(std::shared_ptr<Injector> injector, float width, float height, 
