@@ -23,6 +23,7 @@ class MouseEventSystem {
 
     void check_rect_handlers(entt::registry& registry, Uint8 type, float gl_x, float gl_y);
     public:
+        MouseEventSystem() = default;
         MouseEventSystem(std::shared_ptr<Injector> injector);
         void handle_event(entt::registry& registry, SDL_Event e);
         void add_rect_button(Uint8 type, int min_x, int min_y, int max_x, int max_y);

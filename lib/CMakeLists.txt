@@ -11,7 +11,10 @@ add_library(
     MouseEventSystem.cpp
     Injector.hpp
     Injector.cpp
+
     State.hpp
+    StartState.hpp
+    StartState.cpp
 
     GameObjectComponents.hpp
     WorldCacheSystem.hpp
