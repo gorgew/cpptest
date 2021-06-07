@@ -14,9 +14,3 @@ struct char_frame_data : frame {
     int bearing_y;
     unsigned int advance;
 };
-
-struct string_component {
-
-    std::string text;
-    glm::fvec3 position;
-};

@@ -4,6 +4,7 @@
 #include <TextureManager.hpp>
 #include <ShaderManager.hpp>
 #include <VertexArrayManager.hpp>
+#include <KeyEventSystem.hpp>
 #include <memory>
 
 /**
@@ -21,4 +22,6 @@ class Injector {
         VertexArrayManager vert_man;
         TextureManager tex_man;
         ShaderManager shader_man;
+
+        KeyEventSystem key_event_system;
 };

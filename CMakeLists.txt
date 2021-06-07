@@ -24,6 +24,8 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 message(STATUS "SDL found in ${SDL2_INCLUDE_DIRS}")
 
+find_package(sdl2-mixer REQUIRED)
+
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 # message(STATUS "OpenGL found in ${OPENGL_LIBRARIES}")
 
@@ -49,7 +51,7 @@ add_subdirectory(tests)
 add_executable(Testbench testbench.cpp)
 add_executable(Functional functional.cpp)
 #add_executable(Main main.cpp)
-add_executable(3d-cubes 3d-cubes.cpp)
+#add_executable(3d-cubes 3d-cubes.cpp)
 
 target_link_libraries(lib PRIVATE SDL2::SDL2)
 
@@ -60,13 +62,13 @@ target_link_libraries(lib PRIVATE SDL2::SDL2)
 #set_target_properties(Main PROPERTIES LINKER_LANGUAGE CXX)
 
 
-target_link_libraries(3d-cubes PRIVATE SDL2::SDL2
-                                    ${OPENGL_LIBRARIES}
-                                    glad::glad
-                                    lib
-                                    glm::glm
-                                    fmt::fmt
-                                    graphics)
+# target_link_libraries(3d-cubes PRIVATE SDL2::SDL2
+#                                     ${OPENGL_LIBRARIES}
+#                                     glad::glad
+#                                     lib
+#                                     glm::glm
+#                                     fmt::fmt
+#                                     graphics)
 # set_target_properties(3d-cubes PROPERTIES LINKER_LANGUAGE CXX)
 
 add_executable(entt-test entt-test.cpp)

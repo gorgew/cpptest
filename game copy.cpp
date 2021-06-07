@@ -18,8 +18,14 @@
 
 using namespace std::chrono;
 
+struct empty_struct {
+
+};
+
 int main(void) {
 
+    //entt::entity entity_test = entt::null;
+    //fmt::print("null {}\n", static_cast<std::underlying_type_t<entt::entity>>(entity_test));
     auto injector = std::make_shared<Injector>();
 
     fmt::print("Game initializing\n");
@@ -44,10 +50,11 @@ int main(void) {
 
     int id = injector->shader_man.get_program_id("sprites");
     glUniform1i(glGetUniformLocation(id, "iTexture"), 0);
+    fmt::print("texture_id: {}\n", injector->tex_man.get_id("blank"));
+    fmt::print("shader id: {}\n", id);
 
     //glm::mat4 projection = glm::mat4(1.0f);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 
-            0.0f, static_cast<float>(injector->config.height));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, static_cast<float>(injector->config.height));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(id, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -59,16 +66,29 @@ int main(void) {
     struct array_frame_node my_animated_graphic = gorge::build_array_frame_node(injector, 200.0f, 200.0f, 
             "blank", 0, 5, "sprites");
     const auto entity = registry.create();
+    //registry.emplace<static_graphic>(entity, my_static_graphic);
     registry.emplace<array_frame_node>(entity, my_animated_graphic);
     registry.emplace<position>(entity, glm::vec3(200.0f, 200.0f, 0.0f));
+    //registry.emplace<position>(entity, glm::vec3(1.0f));
 
+    struct frame my_char_frame = gorge::build_frame_flipped(injector, 1.0f, 1.0f, "blank", "fonts");
+    my_char_frame.tex_id  = my_char_data.tex_id;
+    //my_char_frame.tex_array_id = 70;
+    fmt::print("char texid {}\n", my_char_frame.tex_id);
+    const auto entity1 = registry.create();
+    registry.emplace<frame>(entity1, my_char_frame);
+    registry.emplace<position>(entity1, glm::vec3(400.0f, 400.0f, 0.0f));
+    //registry.emplace<position>(entity1, glm::vec3(1.0f, 1.0f, 0.0f));
     
-    injector->tex_man.add_2d_array_texture("tiles", "../resources/iso-h-v1.png", 16, 16, 4);
-    struct array_frame my_tile = gorge::build_array_frame(injector, 100.0f, 100.0f, "tiles", 1, "sprites");
-    const auto tile = registry.create();
-    registry.emplace<array_frame>(tile, my_tile);
-    registry.emplace<position>(tile, glm::vec3(400.0f, 200.0f, 0.0f));
-    
+    std::function<void(entt::registry&)> check_a = [](entt::registry& registry){
+        fmt::print("HELLO WORLD\n");
+        auto view = registry.view<position>();
+        for (auto [entity, pos] : view.each()) {
+            pos.pos = pos.pos + glm::vec3(0.0f, 2.0f, 0.0f);
+        }
+    };
+    injector->key_event_system.add_keydown_handler(SDLK_a, check_a);
+
     MouseEventSystem mouse_sys = {injector};
     //Timing clocks
     auto prev_clock = high_resolution_clock::now();
@@ -115,7 +135,7 @@ int main(void) {
 
         //Sleep until next frame
         frame_clock = high_resolution_clock::now();
-        sleep_secs = 1.0 / 12 - (frame_clock - next_clock).count() / 1e9;
+        sleep_secs = 1.0 / 24 - (frame_clock - next_clock).count() / 1e9;
         if (sleep_secs > 0) {
             std::this_thread::sleep_for(nanoseconds((int64_t)(sleep_secs * 1e9)));
         }

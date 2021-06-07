@@ -29,15 +29,20 @@ class GraphicsSystem {
 
     void open(GLADloadproc g);
 
-    void draw_component(struct frame f, struct position pos);
+    void draw_frame_component(struct frame f, struct position pos);
+
+    void draw_array_frame_component(struct array_frame f, struct position pos);
 
     void draw_char_component(struct char_frame_data f, struct position pos);
 
     /**
      * Finds
     */
-    void free_frame_list(struct frame_node);
+    void free_frame_list(struct array_frame_node);
 
+    void set_program(struct frame f);
+    void draw_frame(struct frame f);
+    void draw_array_frame(struct frame f);
     public:
 
         /**

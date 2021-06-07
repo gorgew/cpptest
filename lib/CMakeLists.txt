@@ -2,14 +2,25 @@ add_library(
     lib
     Config.cpp
     Config.hpp
-    KeyEventHandler.cpp
-    KeyEventHandler.hpp
-    MouseEventHandler.cpp
-    MouseEventHandler.hpp
+    AudioComponent.hpp
+    AudioSystem.hpp
+    AudioSystem.cpp
+    KeyEventSystem.cpp
+    KeyEventSystem.hpp
+    MouseEventSystem.hpp
+    MouseEventSystem.cpp
     Injector.hpp
     Injector.cpp
+    State.hpp
+
+    GameObjectComponents.hpp
+    WorldCacheSystem.hpp
+    WorldCacheSystem.cpp
 )
 
 target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(lib PRIVATE graphics)
+target_link_libraries(lib PRIVATE 
+    graphics
+    SDL2::SDL2_mixer
+    fmt::fmt)

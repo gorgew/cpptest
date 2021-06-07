@@ -6,4 +6,5 @@ Injector::Injector() {
     vert_man = {};
     tex_man = {};
     shader_man = {};
+    key_event_system = {};
 }

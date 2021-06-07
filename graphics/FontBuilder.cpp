@@ -77,7 +77,6 @@ void FontBuilder::add_font(std::string font_name, const char* file_path, unsigne
                 20,
                 GL_TRIANGLE_FAN,
                 injector->tex_man.get_id(tex_name),
-                0,
                 program_id
             },
             c,
@@ -134,7 +133,6 @@ void FontBuilder::add_string(entt::registry& registry, std::string str, std::str
         float y = pos.y - c_data.height / 2 + c_data.bearing_y - max_height;
         glm::vec3 transformed_pos = glm::vec3(x, y, 0);
         registry.emplace<position>(entity, transformed_pos);
-        fmt::print("{}\n", c);
         advance += c_data.advance;
     }
 }

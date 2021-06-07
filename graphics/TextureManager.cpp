@@ -12,16 +12,15 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
     if (!value) {
 
         GLenum format = GL_RGBA;
-        GLuint index;
 
         int img_height, img_width, img_channels;
-        value = index;
 
         stbi_set_flip_vertically_on_load(true);
 
-        glGenTextures(1, &index);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, index);
-
+        glGenTextures(1, &value);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, value);
+        
+        fmt::print("tex_id: {}\n", value);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
@@ -100,6 +99,8 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
         if (img_width != width) {
             free(strip);
         }
+
+        
     }
 }
 
@@ -108,15 +109,13 @@ void TextureManager::add_texture(const std::string name, const char* filepath) {
     auto &value = name_to_tex_id_map[name];
     if (!value) {
         GLenum format = GL_RGBA;
-        GLuint index;
-        value = index;
 
         int img_height, img_width, img_channels;
 
         stbi_set_flip_vertically_on_load(true);
 
-        glGenTextures(1, &index);
-        glBindTexture(GL_TEXTURE_2D, index);
+        glGenTextures(1, &value);
+        glBindTexture(GL_TEXTURE_2D, value);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
