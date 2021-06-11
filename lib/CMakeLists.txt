@@ -15,10 +15,14 @@ add_library(
     State.hpp
     StartState.hpp
     StartState.cpp
+    CreditsState.hpp
+    CreditsState.cpp
 
     GameObjectComponents.hpp
     WorldCacheSystem.hpp
     WorldCacheSystem.cpp
+
+    WidgetComponent.hpp
 )
 
 target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -26,4 +30,5 @@ target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(lib PRIVATE 
     graphics
     SDL2::SDL2_mixer
-    fmt::fmt)
+    fmt::fmt
+    ecs)

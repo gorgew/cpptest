@@ -24,8 +24,6 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     offscreenBuffer.reset(new FrameBufferObject());
     offscreenBuffer->addTexture2D(fbo_width, fbo_height);
@@ -92,7 +90,6 @@ void GraphicsSystem::draw_char_component(struct char_frame_data f, struct positi
 void GraphicsSystem::draw_array_frame_component(struct array_frame f, struct position pos) {
 
         set_program(f);
-        fmt::print("tex_id: {}\n", f.tex_id);
         model = glm::translate(glm::mat4(1.0f), pos.pos);
         glUniformMatrix4fv(glGetUniformLocation(active_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniform1f(glGetUniformLocation(active_program, "layer"), f.tex_layer);  
@@ -108,6 +105,10 @@ void GraphicsSystem::draw(entt::registry& registry) {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnablei(GL_BLEND, offscreenBuffer->fboID);
+    glEnablei(GL_BLEND, 0);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     auto frame_view = registry.view<frame, position>();
     for (auto [entity, f, pos] : frame_view.each()) {
@@ -132,6 +133,7 @@ void GraphicsSystem::draw(entt::registry& registry) {
     //Draw to the main buffer
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisablei(GL_BLEND, 0);
     glViewport(0, 0, default_width, default_height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);

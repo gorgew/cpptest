@@ -5,7 +5,7 @@ project(SdlTest VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Wextra -Wno-unused-parameter")
     message(STATUS "Compiler: GNU/CLANG")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /sdl-")
@@ -40,6 +40,8 @@ find_package(glm REQUIRED)
 
 find_package(freetype CONFIG REQUIRED)
 
+find_package(cereal CONFIG REQUIRED)
+
 add_subdirectory(3rdparty)
 
 add_subdirectory(lib)
@@ -70,6 +72,9 @@ target_link_libraries(lib PRIVATE SDL2::SDL2)
 #                                     fmt::fmt
 #                                     graphics)
 # set_target_properties(3d-cubes PROPERTIES LINKER_LANGUAGE CXX)
+
+add_executable(cereal-test cereal-test.cpp)
+target_link_libraries(cereal-test PRIVATE cereal glm::glm)
 
 add_executable(entt-test entt-test.cpp)
 target_link_libraries(entt-test PRIVATE EnTT::EnTT)

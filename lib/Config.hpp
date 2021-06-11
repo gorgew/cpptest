@@ -12,4 +12,5 @@ class Config {
          * @brief Window height
          */
         int height;
+        static const bool debug = true;
 };

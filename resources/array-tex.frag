@@ -9,4 +9,7 @@ uniform float layer;
 void main()
 {
     FragColor = texture(iTexture, vec3(TexCoord, layer));
+    if (FragColor.a <= 0.1) {
+        discard;
+    }
 }

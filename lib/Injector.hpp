@@ -4,7 +4,7 @@
 #include <TextureManager.hpp>
 #include <ShaderManager.hpp>
 #include <VertexArrayManager.hpp>
-#include <KeyEventSystem.hpp>
+#include <AudioSystem.hpp>
 #include <memory>
 
 /**
@@ -23,5 +23,5 @@ class Injector {
         TextureManager tex_man;
         ShaderManager shader_man;
 
-        KeyEventSystem key_event_system;
+        AudioSystem audio;
 };

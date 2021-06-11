@@ -73,7 +73,7 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
         }
 
         //Load the vertical strip as a 2d array texture
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB, width, height, layers, 0, format,
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, layers, 0, format,
                 GL_UNSIGNED_BYTE, NULL);
                 
         int ptr_count = layers - 1;
@@ -99,8 +99,6 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
         if (img_width != width) {
             free(strip);
         }
-
-        
     }
 }
 

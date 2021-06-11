@@ -7,6 +7,9 @@
 #include <FontBuilder.hpp>
 #include <fmt/core.h>
 
+#include <State.hpp>
+#include <StartState.hpp>
+
 #include <MouseEventSystem.hpp>
 
 #include <glm/glm.hpp>
@@ -28,48 +31,11 @@ int main(void) {
     FontBuilder f_builder{injector};
     f_builder.add_font("arial", "../resources/FantasqueSansMono-Regular.ttf", 96);
 
-    auto my_char_data = f_builder.get_char("arial", 96, 'm');
-    fmt::print("my_char_data info:\n tex_id: {}, bearing_x {}\n", my_char_data.tex_id, my_char_data.bearing_x);
-
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
-    //TESTING GRAPHICS SYSTEM!!
-    //REMOVE LATER!!
-    //MAKING THE OPENGL DATA
-    injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("sprites-v", "../resources/sprites.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("array-tex", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("sprites", {"sprites-v", "array-tex"});
-    injector->shader_man.use("sprites");
 
-    int id = injector->shader_man.get_program_id("sprites");
-    glUniform1i(glGetUniformLocation(id, "iTexture"), 0);
-
-    //glm::mat4 projection = glm::mat4(1.0f);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 
-            0.0f, static_cast<float>(injector->config.height));
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 model = glm::mat4(1.0f);
-    glUniformMatrix4fv(glGetUniformLocation(id, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(glGetUniformLocation(id, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(id, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-    //CREATING THE ENTITY
-   
-    struct array_frame_node my_animated_graphic = gorge::build_array_frame_node(injector, 200.0f, 200.0f, 
-            "blank", 0, 5, "sprites");
-    const auto entity = registry.create();
-    registry.emplace<array_frame_node>(entity, my_animated_graphic);
-    registry.emplace<position>(entity, glm::vec3(200.0f, 200.0f, 0.0f));
-
+    std::shared_ptr<State> game_state = std::make_shared<StartState>(injector, registry);
     
-    injector->tex_man.add_2d_array_texture("tiles", "../resources/iso-h-v1.png", 16, 16, 4);
-    struct array_frame my_tile = gorge::build_array_frame(injector, 100.0f, 100.0f, "tiles", 1, "sprites");
-    const auto tile = registry.create();
-    registry.emplace<array_frame>(tile, my_tile);
-    registry.emplace<position>(tile, glm::vec3(400.0f, 200.0f, 0.0f));
-    
-    MouseEventSystem mouse_sys = {injector};
     //Timing clocks
     auto prev_clock = high_resolution_clock::now();
     auto next_clock = high_resolution_clock::now();
@@ -86,22 +52,18 @@ int main(void) {
         fmt::print("Frame time: {} ms\n", delta_time * 1e3);
 
         if (SDL_PollEvent(&event)) {
-
+            game_state->handle_event(registry, event);
+            
             if (event.type == SDL_QUIT) {
                 break;
-
-            } else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+            } else if (event.type == SDL_KEYDOWN) {
                 
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     break;
                 } else if (event.key.repeat != 0) {
                     SDL_FlushEvent(SDL_KEYDOWN);
                 }
-                injector->key_event_system.handle_event(registry, event);
-            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-
-                mouse_sys.handle_event(registry, event);
-    
+                
             } else if (event.type == SDL_WINDOWEVENT) {
                 
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
@@ -109,10 +71,15 @@ int main(void) {
                 }
             }
         }
-        injector->key_event_system.execute_holds(registry);
+        game_state->process_systems(registry);
         g_system.draw(registry);
         SDL_GL_SwapWindow(window.windowPtr);
+        injector->audio.handle_request(registry);
+        //Check if going to next state
+        if (game_state->ready_next()) {
 
+            game_state = game_state->next(registry);
+        }
         //Sleep until next frame
         frame_clock = high_resolution_clock::now();
         sleep_secs = 1.0 / 12 - (frame_clock - next_clock).count() / 1e9;

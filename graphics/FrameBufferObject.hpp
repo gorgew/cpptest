@@ -8,12 +8,13 @@ extern "C" {
 
 class FrameBufferObject{
 
-    GLuint fboID;
+    
     GLuint rboID;
     std::vector<GLuint> texIDs;
     
 
     public:
+        GLuint fboID;
         GLuint texID;
         
         FrameBufferObject();

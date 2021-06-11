@@ -14,23 +14,31 @@ class State {
     //physics, whatever
 
     protected:
-    //Specific handlers and what not
+        //Specific handlers and what not
         KeyEventSystem key_system;
         MouseEventSystem mouse_system;
         std::shared_ptr<Injector> injector;
+        bool go_next = false;
+
     public:
         //Initailize the base stuff
         State(){};
 
-        void handle_event(entt::registry& registry, SDL_Event e) {
+        virtual void handle_event(entt::registry& registry, SDL_Event e) {
             key_system.handle_event(registry, e);
             mouse_system.handle_event(registry, e);
         };
         //Go through all the systems
         virtual void process_systems(entt::registry& registry) = 0;
 
+        /**
+         * @brief Yikes!
+        */
+        bool ready_next() {
+            return go_next;
+        };
         //Go to the next state
-        virtual std::shared_ptr<State> next() = 0;
+        virtual std::shared_ptr<State> next(entt::registry& registry) = 0;
 
         virtual ~State() {}
 };
