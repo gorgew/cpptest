@@ -44,7 +44,8 @@ class GraphicsSystem {
     void draw_frame(struct frame f);
     void draw_array_frame(struct frame f);
     public:
-
+        int frame_count = 0;
+        int frame_delay;
         /**
          * @brief Graphics system that draws entities with graphics components.
          *        Also initializes OpenGL.

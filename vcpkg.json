@@ -10,6 +10,10 @@
         "glm",
         "stb",
         "sdl2",
-        "sdl2-mixer"
+        "sdl2-mixer",
+        {
+            "name": "imgui",
+            "features": ["opengl3-glad-binding", "sdl2-binding"]
+        }
     ]
 }

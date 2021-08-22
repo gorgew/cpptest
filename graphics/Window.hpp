@@ -13,9 +13,8 @@ class Window {
     
     std::string name;
     
-    SDL_GLContext glContext;
-
     public:
+        SDL_GLContext glContext;
         SDL_Window* windowPtr; 
         Window(std::string name, int height, int width);
 

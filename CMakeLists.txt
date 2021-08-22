@@ -41,7 +41,7 @@ find_package(glm REQUIRED)
 find_package(freetype CONFIG REQUIRED)
 
 find_package(cereal CONFIG REQUIRED)
-
+find_package(imgui CONFIG REQUIRED)
 add_subdirectory(3rdparty)
 
 add_subdirectory(lib)
@@ -91,7 +91,9 @@ target_link_libraries(game PRIVATE
         glad::glad
         fmt::fmt
         freetype
+        imgui::imgui
         ecs
+        color-vec
         lib
         graphics
         )

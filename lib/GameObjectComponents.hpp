@@ -22,4 +22,5 @@ struct environment {
 
 struct character {
     bool is_character = 1;
+    int type_id;
 };

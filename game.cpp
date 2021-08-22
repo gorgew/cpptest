@@ -19,6 +19,10 @@
 #include <chrono>
 #include <memory>
 
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+
 using namespace std::chrono;
 
 int main(void) {
@@ -28,6 +32,7 @@ int main(void) {
     fmt::print("Game initializing\n");
     Window window {"Game", injector->config.height, injector->config.width};
     GraphicsSystem g_system{injector};
+    g_system.frame_delay = 5;
     FontBuilder f_builder{injector};
     f_builder.add_font("arial", "../resources/FantasqueSansMono-Regular.ttf", 96);
 
@@ -36,6 +41,14 @@ int main(void) {
 
     std::shared_ptr<State> game_state = std::make_shared<StartState>(injector, registry);
     
+    //IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    auto& imgui_io = ImGui::GetIO(); (void) imgui_io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL2_InitForOpenGL(window.windowPtr, window.glContext);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
     //Timing clocks
     auto prev_clock = high_resolution_clock::now();
     auto next_clock = high_resolution_clock::now();
@@ -43,17 +56,18 @@ int main(void) {
     float delta_time = 0.0f;
     float sleep_secs = 0.0f;
 
+    bool show_demo = true;
     SDL_Event event;
     while (true) {
         
         next_clock = high_resolution_clock::now();
         delta_time = (next_clock - prev_clock).count() / 1e9;
 
-        fmt::print("Frame time: {} ms\n", delta_time * 1e3);
+        //fmt::print("Frame time: {} ms\n", delta_time * 1e3);
 
         if (SDL_PollEvent(&event)) {
             game_state->handle_event(registry, event);
-            
+            ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT) {
                 break;
             } else if (event.type == SDL_KEYDOWN) {
@@ -72,7 +86,20 @@ int main(void) {
             }
         }
         game_state->process_systems(registry);
+
+        
+        
         g_system.draw(registry);
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window.windowPtr);
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow(&show_demo);
+        
+        ImGui::Render();
+        glViewport(0, 0, (int)imgui_io.DisplaySize.x, (int)imgui_io.DisplaySize.y);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
         SDL_GL_SwapWindow(window.windowPtr);
         injector->audio.handle_request(registry);
         //Check if going to next state
@@ -82,14 +109,17 @@ int main(void) {
         }
         //Sleep until next frame
         frame_clock = high_resolution_clock::now();
-        sleep_secs = 1.0 / 12 - (frame_clock - next_clock).count() / 1e9;
+        sleep_secs = 1.0 / 60 - (frame_clock - next_clock).count() / 1e9;
         if (sleep_secs > 0) {
             std::this_thread::sleep_for(nanoseconds((int64_t)(sleep_secs * 1e9)));
         }
         prev_clock = next_clock;
+
+        
     }
-
+    
     g_system.free_frame_lists(registry);
-
+    
+    
     return 0;
 }

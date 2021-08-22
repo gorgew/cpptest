@@ -22,6 +22,7 @@ class WorldCacheSystem {
         std::vector<std::vector<std::vector<entt::entity>>> character_map; //map of character entities
         std::vector<std::vector<std::vector<entt::entity>>> terrain_map; //map of terrain entities
         //Dimensions of world
+        
         WorldCacheSystem(entt::registry& registry, unsigned int x, unsigned int y, unsigned int z);
         entt::entity get(unsigned int x, unsigned int y, unsigned z);
         void load(entt::registry& registry);

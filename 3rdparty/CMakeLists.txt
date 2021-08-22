@@ -5,6 +5,5 @@ add_library(
 )
 
 target_include_directories(robin_hood INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
-
-message(STATUS "IN 3rdparty")
 add_subdirectory(dragonbox)
+add_subdirectory(color-vec)

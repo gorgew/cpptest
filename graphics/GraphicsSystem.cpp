@@ -1,6 +1,7 @@
 #include "GraphicsSystem.hpp"
 #include "GraphicsComponents.hpp"
 #include "FontComponents.hpp"
+#include <GameObjectComponents.hpp>
 #include <PhysicsComponents.hpp>
 
 #include <glm/glm.hpp>
@@ -23,7 +24,7 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
         exit(1);
     }
 
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     
     offscreenBuffer.reset(new FrameBufferObject());
     offscreenBuffer->addTexture2D(fbo_width, fbo_height);
@@ -43,6 +44,8 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     glViewport(0, 0, injector->config.width, injector->config.height);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void GraphicsSystem::set_program(struct frame f) {
@@ -103,30 +106,64 @@ void GraphicsSystem::draw(entt::registry& registry) {
     offscreenBuffer->activate();
     glViewport(0, 0, fbo_width, fbo_height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnablei(GL_BLEND, offscreenBuffer->fboID);
     glEnablei(GL_BLEND, 0);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto frame_view = registry.view<frame, position>();
+    //Get world depth right
+
+    frame_count++;
+    if (frame_count == frame_delay) {
+        frame_count = 0;
+    }
+
+    auto t_view = registry.view<array_frame, position, terrain>(
+        entt::exclude<environment, character>);
+    for (auto [entity, f, pos, t] : t_view.each()) {
+        draw_array_frame_component(f, pos);
+    }
+
+    auto e_view = registry.view<array_frame, position, environment>(
+        entt::exclude<terrain, character>);
+    for (auto [entity, f, pos, e] : e_view.each()) {
+        draw_array_frame_component(f, pos);
+    }
+
+    auto c_view = registry.view<array_frame_node, position, character>(
+        entt::exclude<environment, terrain>);
+    for (auto [entity, f_node, pos, c] : c_view.each()) {
+        draw_array_frame_component(f_node, pos);
+        if (frame_count == 0) {
+            f_node = *(f_node.next);
+        }
+    }
+
+    auto frame_view = registry.view<frame, position>(
+        entt::exclude<terrain, environment, character>);
     for (auto [entity, f, pos] : frame_view.each()) {
         draw_frame_component(f, pos);
     }
 
-    auto array_frame_view = registry.view<array_frame, position>();
+    auto array_frame_view = registry.view<array_frame, position>(
+        entt::exclude<terrain, environment, character>);
     for (auto [entity, f, pos] : array_frame_view.each()) {
         draw_array_frame_component(f, pos);
     }
 
-    auto frame_list_view = registry.view<array_frame_node, position>();
+    auto frame_list_view = registry.view<array_frame_node, position>(
+        entt::exclude<terrain, environment, character>);
     for (auto [entity, f_node, pos] : frame_list_view.each()) {
         draw_array_frame_component(f_node, pos);
-        f_node = *(f_node.next);
+        if (frame_count == 0) {
+            f_node = *(f_node.next);
+        }
+        
     }
 
-    auto char_frame_view = registry.view<char_frame_data, position>();
+    auto char_frame_view = registry.view<char_frame_data, position>(
+        entt::exclude<terrain, environment, character>);
     for (auto [entity, char_f, pos] : char_frame_view.each()) {
         draw_char_component(char_f, pos);
     }
@@ -137,7 +174,6 @@ void GraphicsSystem::draw(entt::registry& registry) {
     glViewport(0, 0, default_width, default_height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
     glBindVertexArray(buffer_vertices);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, offscreenBuffer->texID);

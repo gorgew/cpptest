@@ -21,6 +21,10 @@ add_library(
     GameObjectComponents.hpp
     WorldCacheSystem.hpp
     WorldCacheSystem.cpp
+    TileMap.hpp
+    TileMap.cpp
+    Camera.hpp
+    Camera.cpp
 
     WidgetComponent.hpp
 )
@@ -31,4 +35,5 @@ target_link_libraries(lib PRIVATE
     graphics
     SDL2::SDL2_mixer
     fmt::fmt
-    ecs)
+    ecs
+    color-vec)

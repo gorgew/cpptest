@@ -19,6 +19,7 @@ class State {
         MouseEventSystem mouse_system;
         std::shared_ptr<Injector> injector;
         bool go_next = false;
+        bool systems_enabled = true;
 
     public:
         //Initailize the base stuff
