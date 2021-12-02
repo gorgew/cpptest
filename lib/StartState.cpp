@@ -1,7 +1,7 @@
 #include "StartState.hpp"
 
 #include <fmt/format.h>
-#include <glm/glm.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GraphicsComponents.hpp>
@@ -13,12 +13,8 @@
 
 #include "CreditsState.hpp"
 
-StartState::StartState(std::shared_ptr<Injector> injector, entt::registry& registry) {
-    this->injector = injector;
-
-    //Key handlers
-    key_system = {};
-
+void StartState::build_key_handlers() {
+    fmt::print("Building key handlers\n");
     /*
     std::function<void(entt::registry&)> move_right= [=, this](entt::registry& registry) {
         move(registry, 1, 0);
@@ -45,9 +41,50 @@ StartState::StartState(std::shared_ptr<Injector> injector, entt::registry& regis
     //key_system.add_keydown_handler(SDLK_n, next_n);
     */
 
-    //Mouse handlers
-    mouse_system = {injector};
+   std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
+        pan<-1, -1>();
+    };
 
+    std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
+        pan<1, 1>();
+    };
+    std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
+        pan<1, -1>();
+    };
+    std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
+        pan<-1, 1>();
+    };
+    std::function<void(entt::registry&)> placeholder = [](entt::registry&){
+
+    };
+    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
+    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
+    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
+    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);
+    
+}
+
+void StartState::build_mouse_handlers() {
+    fmt::print("Building mouse handlers");
+}
+
+void StartState::build_music() {
+    fmt::print("Building music\n");
+    injector->audio.add_music("dd-town", "../resources/dd-town.wav");
+    //const auto music_command = registry.create();
+    //registry.emplace<audio_request>(music_command, "dd-town");
+
+    injector->audio.add_effect("slow-killer", "../resources/slow_killer.wav");
+    
+    std::function<void(entt::registry&)> play_on_y= [=, this](entt::registry& registry) {
+        const auto sound = registry.create();
+        registry.emplace<audio_request>(sound, "slow-killer");
+    };
+    key_system.add_keydown_handler(SDLK_y, play_on_y);
+}
+
+void StartState::build_gfx() {
+    fmt::print("Building gfx\n");
     //Other systems
     injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
     injector->shader_man.add_shader("sprites-v", "../resources/sprites.vert", GL_VERTEX_SHADER);
@@ -74,30 +111,14 @@ StartState::StartState(std::shared_ptr<Injector> injector, entt::registry& regis
     auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
     glUniform3fv(glGetUniformLocation(id, "light_color"), 1, light_color);
 
-    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        pan<-1, -1>();
-    };
-
-    std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        pan<1, 1>();
-    };
-    std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        pan<1, -1>();
-    };
-    std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        pan<-1, 1>();
-    };
-    std::function<void(entt::registry&)> placeholder = [](entt::registry&){
-
-    };
-    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
-    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
-    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
-    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);
-    
     /*
     injector->tex_man.add_2d_array_texture("dummy-menu", "../resources/dummy-menu.png", 128, 128, 2);
-    
+    injector->tex_man.add_2d_array_texture("tiles", "../resources/iso-h-v1.png", 16, 16, 4);
+    */
+};
+void StartState::build_scene(entt::registry& registry) {
+    fmt::print("Building Scene...\n");
+    /*
     struct array_frame mf = gorge::build_array_frame(injector, 400.0f, 400.0f, "dummy-menu", 0, "sprites");
     const auto menu = registry.create();
     registry.emplace<array_frame>(menu, mf);
@@ -117,7 +138,7 @@ StartState::StartState(std::shared_ptr<Injector> injector, entt::registry& regis
     */
 
     /*
-    injector->tex_man.add_2d_array_texture("tiles", "../resources/iso-h-v1.png", 16, 16, 4);
+    
     struct array_frame my_tile = gorge::build_array_frame(injector, 100.0f, 100.0f, "tiles", 1, "sprites");
     const auto tile = registry.create();
     registry.emplace<array_frame>(tile, my_tile);
@@ -153,19 +174,7 @@ StartState::StartState(std::shared_ptr<Injector> injector, entt::registry& regis
     const auto button = registry.create();
     registry.emplace<position>(button, glm::vec3(400.0f, 400.0f, 0.0f));
     registry.emplace<rect_button>(button, 800.0f, 800.0f, shift_down);
-    
-    injector->audio.add_music("dd-town", "../resources/dd-town.wav");
-    const auto music_command = registry.create();
-    registry.emplace<audio_request>(music_command, "dd-town");
-
-    injector->audio.add_effect("slow-killer", "../resources/slow_killer.wav");
-    
-    std::function<void(entt::registry&)> play_on_y= [=, this](entt::registry& registry) {
-        const auto sound = registry.create();
-        registry.emplace<audio_request>(sound, "slow-killer");
-    };
-    key_system.add_keydown_handler(SDLK_y, play_on_y);
-}
+};
 
 void StartState::process_systems(entt::registry& registry) {
     if (systems_enabled) {

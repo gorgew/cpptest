@@ -28,3 +28,19 @@ std::shared_ptr<State> CreditsState::next(entt::registry& registry) {
     registry.clear();
     return 0;
 }
+
+void CreditsState::build_handlers() {
+    
+}
+
+void CreditsState::load_music() {
+    
+}
+
+void CreditsState::load_graphics() {
+    
+}
+
+void CreditsState::initialize_scene() {
+    
+}

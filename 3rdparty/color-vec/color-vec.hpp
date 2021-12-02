@@ -537,11 +537,6 @@ namespace color_vec {
         
     };
 
-    inline std::ostream &operator<<(std::ostream &os, const color &vec) {
-        os << "(" << vec[0] << ", " << vec[1] << ", " << vec[2] << ", " << vec[3] << ")";
-        return os;
-    }
-
     /**
      * @brief Make color from rgb
      * @param r Red from 0-255.0f

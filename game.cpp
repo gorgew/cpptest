@@ -39,8 +39,11 @@ int main(void) {
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
 
-    std::shared_ptr<State> game_state = std::make_shared<StartState>(injector, registry);
+    fmt::print("Font\n");
+    std::shared_ptr<State> game_state; 
+    game_state = std::make_shared<StartState>(injector, registry);
     
+    fmt::print("Scene constructed\n");
     //IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -86,8 +89,6 @@ int main(void) {
             }
         }
         game_state->process_systems(registry);
-
-        
         
         g_system.draw(registry);
 

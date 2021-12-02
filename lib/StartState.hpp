@@ -14,10 +14,6 @@ class StartState : public State {
     static constexpr int grid_height = 3;
     static constexpr int player_id = 12;
 
-    glm::mat4 view, model, projection;
-    GLuint program_id;
-    GLint view_uni_loc;
-
     enum class next_state {
         game_state,
         credits_state
@@ -36,9 +32,27 @@ class StartState : public State {
 
     template <int x, int y>
     void pan();
+
+    void build_key_handlers();
+    void build_mouse_handlers();
+    void build_music();
+    void build_gfx();
+    void build_scene(entt::registry& registry);
     
     public:
-        StartState(std::shared_ptr<Injector> injector, entt::registry& registry);
+        using State::State;
+        StartState(std::shared_ptr<Injector> injector, entt::registry& registry){
+            this->injector = injector;
+            key_system = {};
+            mouse_system = {injector};
+
+            build_gfx();
+            build_key_handlers();
+            build_mouse_handlers();
+            build_music();
+            
+            build_scene(registry);
+        };
         void process_systems(entt::registry& registry);
         std::shared_ptr<State> next(entt::registry& registry);
 };
