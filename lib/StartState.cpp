@@ -6,7 +6,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GraphicsComponents.hpp>
 #include <PhysicsComponents.hpp>
-#include "AudioComponent.hpp"
 #include "TileMap.hpp"
 #include "WorldCacheSystem.hpp"
 #include <color-vec.hpp>
@@ -71,14 +70,13 @@ void StartState::build_mouse_handlers() {
 void StartState::build_music() {
     fmt::print("Building music\n");
     injector->audio.add_music("dd-town", "../resources/dd-town.wav");
-    //const auto music_command = registry.create();
+    injector->audio.enqueue_music("dd-town");
     //registry.emplace<audio_request>(music_command, "dd-town");
 
     injector->audio.add_effect("slow-killer", "../resources/slow_killer.wav");
     
     std::function<void(entt::registry&)> play_on_y= [=, this](entt::registry& registry) {
-        const auto sound = registry.create();
-        registry.emplace<audio_request>(sound, "slow-killer");
+        injector->audio.enqueue_effect("slow-killer");
     };
     key_system.add_keydown_handler(SDLK_y, play_on_y);
 }

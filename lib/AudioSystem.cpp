@@ -1,4 +1,3 @@
-#include "AudioComponent.hpp"
 #include "AudioSystem.hpp"
 #include <fmt/format.h>
 #include <cstdlib>
@@ -6,6 +5,7 @@ AudioSystem::AudioSystem() {
 
     SDL_Init(SDL_INIT_AUDIO);
     Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+    queued_music.reset();
 }
 
 AudioSystem::~AudioSystem() {
@@ -41,19 +41,23 @@ void AudioSystem::add_effect(std::string name, const char* filepath) {
     
 }
 
-void AudioSystem::handle_request(entt::registry& registry) {
+void AudioSystem::enqueue_music(std::string name) {
+    queued_music = name;
+}
 
-    auto view = registry.view<audio_request>();
-    for (auto [entity, request] : view.each()) {
+void AudioSystem::enqueue_effect(std::string name) {
+    queued_effects.push(name);
+}
 
-        auto& effect_value = name_to_effect_map[request.name];
-        if (effect_value) {
-            Mix_PlayChannel(-1, effect_value, 0);
-        }
-        auto& music_value = name_to_music_map[request.name];
-        if (music_value) {
-            Mix_PlayMusic(music_value, -1);
-        }
-        registry.destroy(entity);
+void AudioSystem::handle_request() {
+
+    while (!queued_effects.empty()) {
+        Mix_PlayChannel(-1, name_to_effect_map[queued_effects.front()], 0);
+        queued_effects.pop();
     }
+    if (queued_music.has_value()) {
+        Mix_PlayMusic(name_to_music_map[*queued_music], -1);
+        queued_music.reset();
+    }
+    
 }

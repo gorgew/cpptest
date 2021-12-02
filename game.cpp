@@ -102,7 +102,7 @@ int main(void) {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         SDL_GL_SwapWindow(window.windowPtr);
-        injector->audio.handle_request(registry);
+        injector->audio.handle_request();
         //Check if going to next state
         if (game_state->ready_next()) {
 
