@@ -3,4 +3,9 @@ reorganize state class
 add 3d object creator
 reorganize - make class with general functions like pan()
 
-fix music system. it is ridiculous right now
+mouse in grid
+transparent overlay for distance
+distance calculation on grid
+
+fix camera?
+add camera to gui

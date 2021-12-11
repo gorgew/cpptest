@@ -41,17 +41,17 @@ void StartState::build_key_handlers() {
     */
 
    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        pan<-1, -1>();
+        camera.pan(-1, -1);
     };
 
     std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        pan<1, 1>();
+        camera.pan(1, 1);
     };
     std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        pan<1, -1>();
+        camera.pan(1, -1);
     };
     std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        pan<-1, 1>();
+        camera.pan(-1, 1);
     };
     std::function<void(entt::registry&)> placeholder = [](entt::registry&){
 
@@ -65,6 +65,16 @@ void StartState::build_key_handlers() {
 
 void StartState::build_mouse_handlers() {
     fmt::print("Building mouse handlers");
+
+    std::function<void(entt::registry&)> zoom_in = [=, this](entt::registry& registry) {
+        camera.zoom(1);
+    };
+    std::function<void(entt::registry&)> zoom_out = [=, this](entt::registry& registry) {
+        camera.zoom(-1);
+    };
+    
+    mouse_system.add_wheel_handler(true, zoom_in);
+    mouse_system.add_wheel_handler(false, zoom_out);
 }
 
 void StartState::build_music() {
@@ -89,25 +99,23 @@ void StartState::build_gfx() {
     injector->shader_man.add_shader("sprite-f", "../resources/sprite.frag", GL_FRAGMENT_SHADER);
     injector->shader_man.add_program("sprites", {"sprites-v", "sprite-f"});
     injector->shader_man.use("sprites");
-    int id = injector->shader_man.get_program_id("sprites");
-    program_id = id;
-    glUniform1i(glGetUniformLocation(id, "iTexture"), 0);
-    projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 
-            0.0f, static_cast<float>(injector->config.height), -30000.0f, 30000.0f);
-    view = glm::mat4(1.0f);
-    model = glm::mat4(1.0f);
+    program_id  = injector->shader_man.get_program_id("sprites");
+
+    glUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
+    
+    camera = {static_cast<float>(injector->config.width), 
+        static_cast<float>(injector->config.height),
+        1.0f, 
+        0.1f,
+        program_id};
     /*
     view = glm::rotate(view, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     view = glm::rotate(view, glm::radians(-35.264f), glm::vec3(0.0f, 0.0f, 1.0f));
     view = glm::translate(view, glm::vec3(100.0f, 500.0f, 0.0f));
     */
-    view_uni_loc = glGetUniformLocation(id, "view");
-    glUniformMatrix4fv(glGetUniformLocation(id, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(view_uni_loc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(id, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
-    glUniform3fv(glGetUniformLocation(id, "light_color"), 1, light_color);
+    glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
 
     /*
     injector->tex_man.add_2d_array_texture("dummy-menu", "../resources/dummy-menu.png", 128, 128, 2);
@@ -116,17 +124,6 @@ void StartState::build_gfx() {
 };
 void StartState::build_scene(entt::registry& registry) {
     fmt::print("Building Scene...\n");
-    /*
-    struct array_frame mf = gorge::build_array_frame(injector, 400.0f, 400.0f, "dummy-menu", 0, "sprites");
-    const auto menu = registry.create();
-    registry.emplace<array_frame>(menu, mf);
-    registry.emplace<position>(menu, glm::vec3(400.0f, 400.0f, 0.0f));
-    
-    struct array_frame my_tile = gorge::build_array_frame(injector, 400.0f, 400.0f, "dummy-menu", 1, "sprites");
-    const auto tile = registry.create();
-    registry.emplace<array_frame>(tile, my_tile);
-    registry.emplace<position>(tile, glm::vec3(400.0f, 400.0f, 0.0f));
-    */
    /*
     struct array_frame_node my_animated_graphic = gorge::build_array_frame_node(injector, 200.0f, 200.0f, 
             "blank", 0, 5, "sprites");
@@ -204,12 +201,6 @@ glm::vec3 StartState::move_vec(int x, int y) {
     return glm::vec3(injector->config.tile_width * x, injector->config.tile_height * y, 0.0f);
 }
 
-template <int x, int y>
-void StartState::pan() {
-
-    view = glm::translate(view, glm::vec3(injector->config.camera_speed * x, injector->config.camera_speed * y, 0.0f));
-    fmt::print("view: {}\n", view[0][0]);
-    glUseProgram(program_id);
-    glUniformMatrix4fv(view_uni_loc, 1, GL_FALSE, glm::value_ptr(view));
-    //move(registry, 1, 0);
+void StartState::resize(int x, int y) {
+    camera.resize(x, y);
 }

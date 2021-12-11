@@ -1,7 +1,6 @@
 #include "TextureManager.hpp"
 
 #include <fmt/format.h>
-
 #include <stdexcept>
 #include <cstdlib>
 

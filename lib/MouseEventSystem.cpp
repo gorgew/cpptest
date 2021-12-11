@@ -25,6 +25,15 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
 
         check_rect_buttons(registry, gl_x, gl_y);
     }
+    else if (e.type == SDL_MOUSEWHEEL) {
+        fmt::print("MOUSE_WHEEL\n");
+        if (e.wheel.y > 0) {
+            wheel_up_handler(registry);
+        }
+        else {
+            wheel_down_handler(registry);
+        }
+    }
 };
 
 void MouseEventSystem::check_rect_buttons(entt::registry& registry, float gl_x, float gl_y) {
@@ -84,4 +93,13 @@ void MouseEventSystem::add_rect_button(std::function<void(entt::registry&)> hand
         Uint8 type, float min_x, float min_y, float max_x, float max_y) {
     
     
+}
+
+void MouseEventSystem::add_wheel_handler(bool is_up, std::function<void(entt::registry&)> handler) {
+    if (is_up) {
+        wheel_up_handler = handler;
+    }
+    else {
+        wheel_down_handler = handler;
+    }
 }

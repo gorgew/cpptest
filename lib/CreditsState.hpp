@@ -15,4 +15,5 @@ class CreditsState : public State {
         void load_music();
         void load_graphics();
         void initialize_scene();
+        void resize(int width, int height);
 };

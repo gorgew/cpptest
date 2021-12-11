@@ -19,6 +19,8 @@ add_library(
     CreditsState.cpp
 
     GameObjectComponents.hpp
+    Actor.cpp
+    Actor.hpp
     WorldCacheSystem.hpp
     WorldCacheSystem.cpp
     TileMap.hpp
@@ -32,6 +34,8 @@ add_library(
 target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_link_libraries(lib PRIVATE 
+    EnTT::EnTT
+    robin_hood
     graphics
     SDL2::SDL2_mixer
     fmt::fmt

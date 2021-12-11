@@ -15,9 +15,7 @@ class State {
     //physics, whatever
 
     protected:
-        glm::mat4 view, model, projection;
         GLuint program_id;
-        GLint view_uni_loc;
 
         //Specific handlers and what not
         KeyEventSystem key_system;
@@ -56,6 +54,6 @@ class State {
         //Go to the next state
         virtual std::shared_ptr<State> next(entt::registry& registry) = 0;
         
-
+        virtual void resize(int width, int height) = 0;
         virtual ~State() {}
 };

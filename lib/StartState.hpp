@@ -7,6 +7,7 @@
 #include "TileMap.hpp"
 #include "WorldCacheSystem.hpp"
 #include "glm/glm.hpp"
+#include "Camera.hpp"
 
 class StartState : public State {
 
@@ -18,6 +19,9 @@ class StartState : public State {
         game_state,
         credits_state
     };
+
+    Camera camera;
+
     TileMap2D tmap;
     std::unique_ptr<WorldCacheSystem> world;
     /**
@@ -29,9 +33,6 @@ class StartState : public State {
      * @brief move in screen and cache
     */
     void move(entt::registry& registry, int x, int y);
-
-    template <int x, int y>
-    void pan();
 
     void build_key_handlers();
     void build_mouse_handlers();
@@ -55,4 +56,6 @@ class StartState : public State {
         };
         void process_systems(entt::registry& registry);
         std::shared_ptr<State> next(entt::registry& registry);
+
+        void resize(int width, int height);
 };

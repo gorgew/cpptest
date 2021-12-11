@@ -24,11 +24,12 @@
 #include <imgui_impl_opengl3.h>
 
 using namespace std::chrono;
+using namespace entt::literals;
 
 int main(void) {
 
     auto injector = std::make_shared<Injector>();
-
+    
     fmt::print("Game initializing\n");
     Window window {"Game", injector->config.height, injector->config.width};
     GraphicsSystem g_system{injector};
@@ -39,11 +40,11 @@ int main(void) {
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
 
-    fmt::print("Font\n");
     std::shared_ptr<State> game_state; 
     game_state = std::make_shared<StartState>(injector, registry);
     
     fmt::print("Scene constructed\n");
+    
     //IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -85,6 +86,7 @@ int main(void) {
                 
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     g_system.resize(event.window.data1, event.window.data2);
+                    game_state->resize(event.window.data1, event.window.data2);
                 }
             }
         }

@@ -44,3 +44,7 @@ void CreditsState::load_graphics() {
 void CreditsState::initialize_scene() {
     
 }
+
+void CreditsState::resize(int x, int y) {
+    
+}

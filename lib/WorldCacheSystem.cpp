@@ -1,9 +1,5 @@
 #include "WorldCacheSystem.hpp"
 
-#include <ranges>
-
-namespace ranges = std::ranges;
-
 WorldCacheSystem::WorldCacheSystem(entt::registry& registry, unsigned int x, unsigned int y, unsigned int z) {
     this->x = x;
     this->y = y;
