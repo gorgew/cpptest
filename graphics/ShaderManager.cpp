@@ -124,3 +124,17 @@ ShaderManager::~ShaderManager() {
     delete_shaders();
     delete_programs();
 }
+
+void ShaderManager::add_ubo(std::string name, size_t size, unsigned int binding) {
+
+    auto& ubo_id = name_to_ubo[name];
+    if (ubo_id) {
+        glGenBuffers(1, &ubo_id);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
+        glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+    else {
+        
+    }
+}

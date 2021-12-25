@@ -15,6 +15,8 @@ class StartState : public State {
     static constexpr int grid_height = 3;
     static constexpr int player_id = 12;
 
+    
+
     enum class next_state {
         game_state,
         credits_state
@@ -41,6 +43,8 @@ class StartState : public State {
     void build_scene(entt::registry& registry);
     
     public:
+        
+
         using State::State;
         StartState(std::shared_ptr<Injector> injector, entt::registry& registry){
             this->injector = injector;

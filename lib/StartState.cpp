@@ -41,17 +41,17 @@ void StartState::build_key_handlers() {
     */
 
    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        camera.pan(-1, -1);
+        camera.pan(-1, 0, 0, delta_time);
     };
 
     std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        camera.pan(1, 1);
+        camera.pan(1, 0, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        camera.pan(1, -1);
+        camera.pan(0, -1, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        camera.pan(-1, 1);
+        camera.pan(0, 1, 0, delta_time);
     };
     std::function<void(entt::registry&)> placeholder = [](entt::registry&){
 
@@ -105,7 +105,7 @@ void StartState::build_gfx() {
     
     camera = {static_cast<float>(injector->config.width), 
         static_cast<float>(injector->config.height),
-        1.0f, 
+        100.0f, 
         0.1f,
         program_id};
     /*
@@ -162,7 +162,6 @@ void StartState::build_scene(entt::registry& registry) {
     world = std::make_unique<WorldCacheSystem>(registry, grid_width, grid_height, 1);
 
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
-        auto view = registry.view<position>();
     
         fmt::print("surprise\n");
     };

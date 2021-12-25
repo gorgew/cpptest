@@ -3,9 +3,10 @@
 #include <vector>
 #include <unordered_map>
 /** 
- * @brief Compiles and manages shaders. Also creates and manages shader programs.
+ * @brief Compiles and manages shaders, shader programs
  */
 class ShaderManager {
+    std::unordered_map<std::string, GLuint> name_to_ubo;
     std::unordered_map<std::string, GLuint> name_to_shader_map;
     std::unordered_map<std::string, GLuint> name_to_program_map;
 
@@ -25,6 +26,8 @@ class ShaderManager {
         void delete_programs();
 
         void use(std::string name); 
+
+        void add_ubo(std::string name, size_t size, unsigned int binding);
 
         GLuint get_program_id(std::string name);
 };

@@ -40,8 +40,14 @@ find_package(glm REQUIRED)
 
 find_package(freetype CONFIG REQUIRED)
 
-find_package(cereal CONFIG REQUIRED)
+find_package(cereal CONFIG REQUIRED)    
 find_package(imgui CONFIG REQUIRED)
+
+include(FindLua)
+find_package(Lua REQUIRED)
+message(STATUS "Lua found at ${LUA_INCLUDE_DIR}")
+
+find_package(sol2 CONFIG REQUIRED)
 add_subdirectory(3rdparty)
 
 add_subdirectory(lib)
@@ -97,3 +103,4 @@ target_link_libraries(game PRIVATE
         lib
         graphics
         )
+target_include_directories(game PRIVATE ${LUA_INCLUDE_DIR})

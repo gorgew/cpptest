@@ -24,7 +24,8 @@ FontBuilder::FontBuilder(std::shared_ptr<Injector> injector) {
     glUseProgram(program_id);
     fmt::print("Font programid: {}\n", program_id);
     //glm::mat4 projection = glm::mat4(1.0f);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, static_cast<float>(injector->config.height));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, 
+        static_cast<float>(injector->config.height));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
     fmt::print("uniform location: {}\n", glGetUniformLocation(program_id, "model"));
@@ -81,11 +82,11 @@ void FontBuilder::add_font(std::string font_name, const char* file_path, unsigne
             },
             c,
             glm::ivec3(1.0),
-            face->glyph->bitmap.width, 
-            glyph_height,
+            static_cast<int>(face->glyph->bitmap.width), 
+            static_cast<int>(glyph_height),
             face->glyph->bitmap_left,
             face->glyph->bitmap_top,
-            (face->glyph->advance.x / 64)
+            static_cast<unsigned int>(face->glyph->advance.x / 64)
         };
         auto key_tuple = std::make_tuple(font_name, height, c);
         font_char_to_data_map[key_tuple] = data;
@@ -117,7 +118,8 @@ font_data FontBuilder::get_font_data(std::string font_name, unsigned int height)
     }
 }
 
-void FontBuilder::add_string(entt::registry& registry, std::string str, std::string font, unsigned int height, glm::vec3 pos, glm::vec3 color) {
+void FontBuilder::add_string(entt::registry& registry, std::string str, std::string font, 
+    unsigned int height, glm::vec3 pos, glm::vec3 color) {
 
     auto max_height = get_font_data(font, height).max_height;
 

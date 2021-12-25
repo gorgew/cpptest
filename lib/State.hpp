@@ -33,6 +33,9 @@ class State {
         virtual void build_scene(entt::registry& registry){};
 
     public:
+
+        float delta_time;
+        
         //Initailize the base stuff
         State(){};
         

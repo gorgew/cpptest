@@ -66,7 +66,7 @@ int main(void) {
         
         next_clock = high_resolution_clock::now();
         delta_time = (next_clock - prev_clock).count() / 1e9;
-
+        game_state->delta_time = delta_time;
         //fmt::print("Frame time: {} ms\n", delta_time * 1e3);
 
         if (SDL_PollEvent(&event)) {

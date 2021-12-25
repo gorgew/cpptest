@@ -27,6 +27,7 @@ add_library(
     TileMap.cpp
     Camera.hpp
     Camera.cpp
+    UboStructs.hpp
 
     WidgetComponent.hpp
 )
@@ -40,4 +41,6 @@ target_link_libraries(lib PRIVATE
     SDL2::SDL2_mixer
     fmt::fmt
     ecs
-    color-vec)
+    color-vec
+    sol2::sol2
+    ${LUA_LIBRARIES})

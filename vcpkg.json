@@ -8,6 +8,7 @@
         "freetype",
         "glad",
         "glm",
+        "sol2",
         "stb",
         "sdl2",
         "sdl2-mixer",
