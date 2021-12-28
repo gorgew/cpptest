@@ -22,13 +22,15 @@ class TileMap2D {
     std::vector<std::vector<int>> character_array;
 
     std::string tex_name;
-    std::string shader_name;
+    std::string terrain_shader;
+    std::string character_shader;
     float tile_width;
     float tile_height;
 
     public:
         TileMap2D() = default;
-        TileMap2D(std::shared_ptr<Injector>, std::string, std::string);
+        TileMap2D(std::shared_ptr<Injector>, std::string tex_name, std::string terrain_shader, 
+                std::string character_shader);
         void add_tiles(entt::registry&, std::vector<std::vector<int>>,
                 std::vector<std::vector<int>>, std::vector<std::vector<int>>);
         /**

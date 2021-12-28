@@ -4,12 +4,13 @@
 #include "GameObjectComponents.hpp"
 
 TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,
-        std::string tex_name, std::string shader_name) {    
+        std::string tex_name, std::string terrain_shader, std::string character_shader) {    
     this->injector = injector;
     tile_width = injector->config.tile_width;
     tile_height = injector->config.tile_height;
     this->tex_name = tex_name;
-    this->shader_name = shader_name;
+    this->terrain_shader = terrain_shader;
+    this->character_shader = character_shader;
 }
 
 void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>> terrain_arr,
@@ -25,7 +26,7 @@ void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>
             if (terrain_arr[i][j] >= 0) {
                 auto entity = registry.create();
                 struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
-                        tex_name, terrain_arr[i][j], shader_name);
+                        tex_name, terrain_arr[i][j], terrain_shader);
                 registry.emplace<array_frame>(entity, arr_f);
                 registry.emplace<position>(entity, glm::vec3(tile_width / 2.0f + j * tile_width, 
                         tile_height / 2.0f + i * tile_height, 0.0f));
@@ -40,7 +41,7 @@ void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>
             if (env_arr[i][j] >= 0) {
                 auto entity = registry.create();
                 struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
-                        tex_name, env_arr[i][j], shader_name);
+                        tex_name, env_arr[i][j], terrain_shader);
                 registry.emplace<array_frame>(entity, arr_f);
                 registry.emplace<position>(entity, glm::vec3(tile_width / 2.0f + j * tile_width, 
                         tile_height / 2.0f + i * tile_height, 0.0f));
@@ -56,7 +57,7 @@ void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>
             if (layer >= 0) {
                 auto entity = registry.create();
                 struct array_frame_node arr_f = gorge::build_array_frame_node(injector, tile_width, tile_height,
-                        tex_name, layer, layer, shader_name);
+                        tex_name, layer, layer, character_shader);
                 registry.emplace<array_frame_node>(entity, arr_f);
                 registry.emplace<position>(entity, glm::vec3(tile_width / 2.0f + j * tile_width, 
                         tile_height / 2.0f + i * tile_height, 0.0f));

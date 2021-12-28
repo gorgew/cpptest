@@ -9,49 +9,23 @@
 #include "TileMap.hpp"
 #include "WorldCacheSystem.hpp"
 #include <color-vec.hpp>
-
+#include "UboStructs.hpp"
 #include "CreditsState.hpp"
 
 void StartState::build_key_handlers() {
-    fmt::print("Building key handlers\n");
-    /*
-    std::function<void(entt::registry&)> move_right= [=, this](entt::registry& registry) {
-        move(registry, 1, 0);
-    };
-
-    std::function<void(entt::registry&)> move_left= [=, this](entt::registry& registry) {
-        move(registry, -1, 0);
-    };
-    std::function<void(entt::registry&)> move_up= [=, this](entt::registry& registry) {
-        move(registry, 0, 1);
-    };
-    std::function<void(entt::registry&)> move_down = [=, this](entt::registry& registry) {
-        move(registry, 0, -1);
-    };
-
-    std::function<void(entt::registry&)> next_n = [=, this](entt::registry& registry) {
-        go_next = true;
-    };
-
-    key_system.add_keydown_handler(SDLK_d, move_right);
-    key_system.add_keydown_handler(SDLK_a, move_left);
-    key_system.add_keydown_handler(SDLK_w, move_up);
-    key_system.add_keydown_handler(SDLK_s, move_down);
-    //key_system.add_keydown_handler(SDLK_n, next_n);
-    */
 
    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        camera.pan(-1, 0, 0, delta_time);
+        camera.pan(1, 0, 0, delta_time);
     };
 
     std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        camera.pan(1, 0, 0, delta_time);
+        camera.pan(-1, 0, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        camera.pan(0, -1, 0, delta_time);
+        camera.pan(0, 1, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        camera.pan(0, 1, 0, delta_time);
+        camera.pan(0, -1, 0, delta_time);
     };
     std::function<void(entt::registry&)> placeholder = [](entt::registry&){
 
@@ -61,16 +35,32 @@ void StartState::build_key_handlers() {
     key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
     key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);
     
+    std::function<void(entt::registry&)> pitch_left = [=, this](entt::registry& registry) {
+        camera.update_pitch(-1.0f);
+    };
+    std::function<void(entt::registry&)> pitch_right = [=, this](entt::registry& registry) {
+        camera.update_pitch(1.0f);
+    };
+    std::function<void(entt::registry&)> yaw_down = [=, this](entt::registry& registry) {
+        camera.update_yaw(1.0f);
+    };
+    std::function<void(entt::registry&)> yaw_up = [=, this](entt::registry& registry) {
+        camera.update_yaw(-1.0f);
+    };
+    key_system.add_held_key_handler(SDLK_q, pitch_left, placeholder);
+    key_system.add_held_key_handler(SDLK_e, pitch_right, placeholder);
+    key_system.add_held_key_handler(SDLK_z, yaw_up, placeholder);
+    key_system.add_held_key_handler(SDLK_x, yaw_down, placeholder);
 }
 
 void StartState::build_mouse_handlers() {
     fmt::print("Building mouse handlers");
 
     std::function<void(entt::registry&)> zoom_in = [=, this](entt::registry& registry) {
-        camera.zoom(1);
+        camera.zoom(1, delta_time);
     };
     std::function<void(entt::registry&)> zoom_out = [=, this](entt::registry& registry) {
-        camera.zoom(-1);
+        camera.zoom(-1, delta_time);
     };
     
     mouse_system.add_wheel_handler(true, zoom_in);
@@ -78,7 +68,7 @@ void StartState::build_mouse_handlers() {
 }
 
 void StartState::build_music() {
-    fmt::print("Building music\n");
+    /*
     injector->audio.add_music("dd-town", "../resources/dd-town.wav");
     injector->audio.enqueue_music("dd-town");
     //registry.emplace<audio_request>(music_command, "dd-town");
@@ -89,33 +79,39 @@ void StartState::build_music() {
         injector->audio.enqueue_effect("slow-killer");
     };
     key_system.add_keydown_handler(SDLK_y, play_on_y);
+    */
 }
 
 void StartState::build_gfx() {
     fmt::print("Building gfx\n");
     //Other systems
     injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("sprites-v", "../resources/sprites.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("sprite-f", "../resources/sprite.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("sprites", {"sprites-v", "sprite-f"});
-    injector->shader_man.use("sprites");
-    program_id  = injector->shader_man.get_program_id("sprites");
+    injector->shader_man.add_shader("world.vert", "../resources/world.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("world.frag", "../resources/world.frag", GL_FRAGMENT_SHADER);
+    injector->shader_man.add_program("world", {"world.vert", "world.frag"});
+    injector->shader_man.use("world");
+    program_id  = injector->shader_man.get_program_id("world");
 
-    glUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
+    //sglUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
     
+
+    injector->shader_man.add_shader("billboard.vert", "../resources/billboard.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_program("billboard", {"billboard.vert", "world.frag"});
+
+    //glUniform1i(glGetUniformLocation(injector->shader_man.get_program_id("billboard"), "iTexture"), 0);
+
+    injector->shader_man.add_ubo("camera_ubo", sizeof(camera_data), 0);
+    injector->shader_man.bind_ubo("world", "camera_ubo", 0);
+
     camera = {static_cast<float>(injector->config.width), 
         static_cast<float>(injector->config.height),
         100.0f, 
-        0.1f,
-        program_id};
-    /*
-    view = glm::rotate(view, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = glm::rotate(view, glm::radians(-35.264f), glm::vec3(0.0f, 0.0f, 1.0f));
-    view = glm::translate(view, glm::vec3(100.0f, 500.0f, 0.0f));
-    */
+        1.0f,
+        injector->shader_man.get_ubo("camera_ubo")
+        };
 
-    auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
-    glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
+    //auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
+    //glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
 
     /*
     injector->tex_man.add_2d_array_texture("dummy-menu", "../resources/dummy-menu.png", 128, 128, 2);
@@ -156,7 +152,7 @@ void StartState::build_scene(entt::registry& registry) {
         {-1, -1, -1}
     };
 
-    tmap = {injector, "art", "sprites"};
+    tmap = {injector, "art", "world", "billboard"};
     tmap.add_tiles(registry, terrain_arr, env_arr, char_arr);
 
     world = std::make_unique<WorldCacheSystem>(registry, grid_width, grid_height, 1);

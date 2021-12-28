@@ -28,6 +28,7 @@ class ShaderManager {
         void use(std::string name); 
 
         void add_ubo(std::string name, size_t size, unsigned int binding);
-
+        void bind_ubo(std::string program, std::string block_name, unsigned int binding);
         GLuint get_program_id(std::string name);
+        GLuint get_ubo(std::string name);
 };

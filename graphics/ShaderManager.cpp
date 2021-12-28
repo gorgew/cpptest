@@ -128,13 +128,27 @@ ShaderManager::~ShaderManager() {
 void ShaderManager::add_ubo(std::string name, size_t size, unsigned int binding) {
 
     auto& ubo_id = name_to_ubo[name];
-    if (ubo_id) {
+    if (!ubo_id) {
         glGenBuffers(1, &ubo_id);
         glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
         glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STATIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo_id);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
-    else {
-        
+}
+
+void ShaderManager::bind_ubo(std::string program, std::string block_name, unsigned int binding) {
+    auto id = name_to_program_map[program];
+    auto block_index = glGetUniformBlockIndex(id, block_name.c_str());
+    glUniformBlockBinding(id, block_index, binding);
+}
+
+GLuint ShaderManager::get_ubo(std::string name) {
+    auto& ubo_id = name_to_ubo[name];
+    if (ubo_id) {
+        return ubo_id;
+    } else {
+        fmt::print("Ubo not found {}\n", name);
+        std::exit(1);
     }
 }

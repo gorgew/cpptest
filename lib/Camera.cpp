@@ -1,33 +1,35 @@
 //Credit to learnopengl.com Camera class
 
 #include "Camera.hpp"
+#include "UboStructs.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 Camera::Camera(){};
 
-Camera::Camera(float win_width, float win_height, float pan_speed, float zoom_speed, GLuint program_id) {
-    this->program_id = program_id;
+Camera::Camera(float win_width, float win_height, float pan_speed, float zoom_speed, GLuint camera_ubo) {
+
     this->pan_speed = pan_speed;
     this->zoom_speed = zoom_speed;
+    this->camera_ubo = camera_ubo;
 
-    pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    pos = glm::vec3(-100.0f, -100.0f, 0.0f);
     world_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
-    yaw = -90.0f;
-    pitch = 0.0f;
+    //front = glm::vec3(0.0f, 0.0f, -1.0f);
+    yaw = -45.0f;
+    pitch = 35.0f;
+    roll = -45.0f;
 
-    view_loc = glGetUniformLocation(program_id, "view");
-    project_loc = glGetUniformLocation(program_id, "projection");
+    view_offset = offsetof(camera_data, view);
+    project_offset = offsetof(camera_data, projection);
 
     update_vectors();
 
     camera_width = win_width;
     camera_height = win_height;
 
-    projection = glm::ortho(0.0f, win_width, 0.0f, win_height, -500.0f, 500.0f);
-
-    glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(project_loc, 1, GL_FALSE, glm::value_ptr(projection));
+    projection = glm::ortho(-win_width, win_width, -win_height, win_height, ortho_near, ortho_far);
+    update_project();
 }
 
 void Camera::pan(int x, int y, int z, float delta_time) {
@@ -48,42 +50,69 @@ void Camera::pan(int x, int y, int z, float delta_time) {
             update_vectors();
         }
 
-void Camera::zoom(float zoom_val) {
-    /*
-    scale += zoom_speed * zoom_val;
-    projection = glm::ortho(0.0f, camera_width * scale, 0.0f, camera_width * scale);
+void Camera::zoom(float zoom_val, float delta_time) {
 
-    glUseProgram(program_id);
-    glUniformMatrix4fv(project_loc, 1, GL_FALSE, glm::value_ptr(projection));
-    */
+    scale += zoom_val * delta_time * zoom_speed;
+    projection = glm::ortho(0.0f, camera_width * scale, 0.0f, camera_height * scale, ortho_near, ortho_far);
+    update_project();
 }
 
 void Camera::resize(int width, int height) {
-    /*
+    
     camera_width = width;
     camera_height = height;
-
-    projection = glm::ortho(0.0f, camera_width * scale, 0.0f, camera_width * scale);
-
-    glUseProgram(program_id);
-    glUniformMatrix4fv(project_loc, 1, GL_FALSE, glm::value_ptr(projection));
-    */
 }
 
 void Camera::update_view() {
     view = glm::lookAt(pos, pos + front, up);
-    glUseProgram(program_id);
-    glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(view));
+
+    glBindBuffer(GL_UNIFORM_BUFFER, camera_ubo);
+    glBufferSubData(GL_UNIFORM_BUFFER, view_offset, sizeof(glm::mat4), glm::value_ptr(view));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Camera::update_project() {
+    glBindBuffer(GL_UNIFORM_BUFFER, camera_ubo);
+    glBufferSubData(GL_UNIFORM_BUFFER, project_offset, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Camera::update_vectors() {
     glm::vec3 temp_front;
-    temp_front.x = cos(glm::radians(yaw) * cos(glm::radians(pitch)));
+    temp_front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     temp_front.y = sin(glm::radians(pitch));
-    temp_front.z = sin(glm::radians(yaw) * cos(glm::radians(pitch)));
+    temp_front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
     front = glm::normalize(temp_front);
+
+    world_up = glm::rotate(world_up, glm::radians(roll), glm::vec3(0.0f, 0.0f, 1.0f));
+    roll = 0.0f;
     right = glm::normalize(glm::cross(front, world_up));
-    up = glm::normalize(world_up);
+    up = glm::normalize(glm::cross(right, front));
 
     update_view();
+}
+
+void Camera::update_pitch(float value) {
+    pitch += value;
+    
+    if (pitch > 89.9f) {
+        pitch = 89.9f;
+    }
+    else if (pitch < -89.9f) {
+        pitch = -89.9f;
+    }
+    update_vectors();
+}
+
+void Camera::update_yaw(float value) {
+    yaw += value;
+    /*
+    if (yaw > 89.9f) {
+        yaw = 89.9f;
+    }
+    else if (yaw < -89.9f) {
+        yaw = -89.9f;
+    }*/
+    update_vectors();
 }

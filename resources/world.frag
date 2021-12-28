@@ -13,5 +13,7 @@ void main()
 {   
 
     vec4 result = vec4(ambient * light_color, 1.0f);
-    FragColor = result * texture(iTexture, vec3(TexCoord, layer));
+
+    //FragColor = result * texture(iTexture, vec3(TexCoord, layer));
+    FragColor = texture(iTexture, vec3(TexCoord, layer));
 }
