@@ -13,7 +13,7 @@ class Config {
          */
         int height;
         static const bool debug = true;
-        static const int tile_width = 100;
-        static const int tile_height = 100;
+        static const unsigned int tile_width = 100;
+        static const unsigned int tile_height = 100;
         static constexpr float camera_speed = 5.0f;
 };

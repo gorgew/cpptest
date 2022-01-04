@@ -38,7 +38,6 @@ void KeyEventSystem::add_held_key_handler(SDL_Keycode key_code,
 
     held_keydown_handlers.insert({key_code, keydown_handler});
     keyup_handlers.insert({key_code, keyup_handler});
-    std::cout<<"added hold down";
 }
 
 void KeyEventSystem::handle_event(entt::registry& registry, SDL_Event e) {

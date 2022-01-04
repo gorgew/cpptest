@@ -66,7 +66,7 @@ void GraphicsSystem::draw_array_frame(struct frame f) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, f.tex_id);
     glBindVertexArray(f.vert_arr_id);
-    glDrawArrays(f.primitive_type, 0, f.vert_count);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, f.vert_count);
 }
 
 void GraphicsSystem::draw_frame_component(struct frame f, struct position pos) {
@@ -161,7 +161,6 @@ void GraphicsSystem::draw(entt::registry& registry) {
         }
         
     }
-
     auto char_frame_view = registry.view<char_frame_data, position>(
         entt::exclude<terrain, environment, character>);
     for (auto [entity, char_f, pos] : char_frame_view.each()) {
@@ -208,6 +207,10 @@ void GraphicsSystem::free_frame_lists(entt::registry& registry) {
 void GraphicsSystem::resize(int width, int height) {
     default_width = width;
     default_height = height;
+}
+
+void GraphicsSystem::viewport() {
+    glViewport(0, 0, injector->config.width, injector->config.height);
 }
 
 GraphicsSystem::~GraphicsSystem() {

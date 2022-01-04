@@ -23,7 +23,7 @@ struct frame gorge::build_frame(std::shared_ptr<Injector> injector, float width,
 
     return {
         injector->vert_man.get_array_id(va_name), 
-        20,
+        4,
         GL_TRIANGLE_FAN,
         injector->tex_man.get_id(tex_name),
         //layer,
@@ -52,7 +52,7 @@ struct frame gorge::build_frame_flipped(std::shared_ptr<Injector> injector, floa
 
     return {
         injector->vert_man.get_array_id(va_name), 
-        20,
+        4,
         GL_TRIANGLE_FAN,
         injector->tex_man.get_id(tex_name),
         injector->shader_man.get_program_id(program_name)

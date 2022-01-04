@@ -25,7 +25,7 @@ Window::Window(std::string name, int height, int width) {
 
 void Window::viewport(){
 
-    //glViewport(0, 0, width, height);
+    glViewport(0, 0, width, height);
 }
 
 void Window::swap() {

@@ -2,8 +2,9 @@
 #include <fmt/format.h>
 #include <PhysicsComponents.hpp>
 
-MouseEventSystem::MouseEventSystem(std::shared_ptr<Injector> injector) {
+MouseEventSystem::MouseEventSystem(std::shared_ptr<Injector> injector, std::shared_ptr<Camera> camera) {
     this->injector = injector;
+    this->camera = camera;
 }
 
 float MouseEventSystem::world_x_to_ndc(float x) {
@@ -19,14 +20,49 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
         float gl_x = world_x_to_ndc(e.button.x);
         float gl_y = world_y_to_ndc(e.button.y);
         
+        glm::vec4 ndc = glm::vec4(gl_x, gl_y, -1.0f, 1.0f);
+
+        glm::vec4 ray_proj = glm::inverse(camera->get_projection()) * ndc;
+        ray_proj.z = -1.0f;
+        ray_proj.w = 1.0f;
+        glm::vec3 ray_view = glm::vec3((glm::inverse(camera->get_view()) * ray_proj));
+        glm::vec3 ray_norm = glm::normalize(ray_view);
+        //ray_view = glm::normalize(ray_view);
+        //ray_view *= -1;
+        glm::vec3 pt_vec = glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), ray_norm);
+        //solving for intersection between line from camera to plane z = 0
+        
+        float t = -1 * ray_view.z / camera->front.z;
+        float intersect_x = camera->front.x * t + ray_view.x;
+        float intersect_y = camera->front.y * t + ray_view.y;
+
+        world_x = static_cast<unsigned int>(intersect_x);
+        world_y = static_cast<unsigned int>(intersect_y);
+        
+       /*
+       float t = -1 * ray_view.z / ray_norm.z;
+       float intersect_x = ray_norm.x * t + ray_view.x;
+       float intersect_y = ray_norm.y * t + ray_view.y;
+       */
         if (injector->config.debug) {
+            /*
             fmt::print("Mouse: sdl coords: ({}, {}), gl coords: ({}, {})\n", e.button.x, e.button.y, gl_x, gl_y);
+            fmt::print("Mouse ray cast: ({}, {}, {})\n", ray_view.x, ray_view.y, ray_view.z);
+            fmt::print("Intersect at ({}, {})\n", intersect_x, intersect_y);
+            */
+        }
+
+        if (e.button.button == SDL_BUTTON_LEFT) {
+            leftmouse_down(registry);
+        }
+        else if (e.button.button == SDL_BUTTON_RIGHT) {
+            rightmouse_down(registry);
         }
 
         check_rect_buttons(registry, gl_x, gl_y);
     }
     else if (e.type == SDL_MOUSEWHEEL) {
-        fmt::print("MOUSE_WHEEL\n");
+
         if (e.wheel.y > 0) {
             wheel_up_handler(registry);
         }
@@ -39,7 +75,7 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
 void MouseEventSystem::check_rect_buttons(entt::registry& registry, float gl_x, float gl_y) {
 
     if (injector->config.debug) {
-        fmt::print("Checking rect buttons\n");
+        //fmt::print("Checking rect buttons\n");
     }
 
     auto view = registry.view<position, rect_button>();
@@ -101,5 +137,14 @@ void MouseEventSystem::add_wheel_handler(bool is_up, std::function<void(entt::re
     }
     else {
         wheel_down_handler = handler;
+    }
+}
+
+void MouseEventSystem::add_mousedown_handler(std::function<void(entt::registry&)> handler, char button) {
+    if (button == SDL_BUTTON_LEFT) {
+        leftmouse_down = handler;
+    }
+    else if (button == SDL_BUTTON_RIGHT) {
+        rightmouse_down = handler;
     }
 }

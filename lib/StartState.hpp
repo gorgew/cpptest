@@ -21,8 +21,7 @@ class StartState : public State {
         game_state,
         credits_state
     };
-
-    Camera camera;
+    std::shared_ptr<Camera> camera;
 
     TileMap2D tmap;
     std::unique_ptr<WorldCacheSystem> world;
@@ -43,20 +42,21 @@ class StartState : public State {
     void build_scene(entt::registry& registry);
     
     public:
-        
 
         using State::State;
         StartState(std::shared_ptr<Injector> injector, entt::registry& registry){
             this->injector = injector;
-            key_system = {};
-            mouse_system = {injector};
-
             build_gfx();
-            build_key_handlers();
-            build_mouse_handlers();
+            
             build_music();
             
             build_scene(registry);
+
+            key_system = {};
+            mouse_system = {injector, camera};
+
+            build_key_handlers();
+            build_mouse_handlers();
         };
         void process_systems(entt::registry& registry);
         std::shared_ptr<State> next(entt::registry& registry);

@@ -15,11 +15,19 @@ Camera::Camera(float win_width, float win_height, float pan_speed, float zoom_sp
 
     pos = glm::vec3(-100.0f, -100.0f, 0.0f);
     world_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    //front = glm::vec3(0.0f, 0.0f, -1.0f);
+    front = glm::vec3(0.0f, 0.0f, -1.0f);
+    
+    
     yaw = -45.0f;
     pitch = 35.0f;
     roll = -45.0f;
-
+    
+    /*
+   yaw = -90.0f;
+   pitch = 0.0f;
+   roll = 0.0f;
+    */
+   
     view_offset = offsetof(camera_data, view);
     project_offset = offsetof(camera_data, projection);
 
@@ -33,7 +41,7 @@ Camera::Camera(float win_width, float win_height, float pan_speed, float zoom_sp
 }
 
 void Camera::pan(int x, int y, int z, float delta_time) {
-
+            
             float velocity = pan_speed * delta_time;
             if (x != 0) {
                 velocity *= x;
@@ -47,13 +55,16 @@ void Camera::pan(int x, int y, int z, float delta_time) {
                 velocity *= z;
                 pos += front * velocity;
             }
-            update_vectors();
+            update_view();
+
         }
 
 void Camera::zoom(float zoom_val, float delta_time) {
 
     scale += zoom_val * delta_time * zoom_speed;
-    projection = glm::ortho(0.0f, camera_width * scale, 0.0f, camera_height * scale, ortho_near, ortho_far);
+    float scaled_width = camera_width * scale;
+    float scaled_height = camera_height * scale;
+    projection = glm::ortho(-scaled_width, scaled_height, -scaled_height, scaled_height, ortho_near, ortho_far);
     update_project();
 }
 
@@ -61,6 +72,7 @@ void Camera::resize(int width, int height) {
     
     camera_width = width;
     camera_height = height;
+    update_project();
 }
 
 void Camera::update_view() {
@@ -86,6 +98,7 @@ void Camera::update_vectors() {
     front = glm::normalize(temp_front);
 
     world_up = glm::rotate(world_up, glm::radians(roll), glm::vec3(0.0f, 0.0f, 1.0f));
+    
     roll = 0.0f;
     right = glm::normalize(glm::cross(front, world_up));
     up = glm::normalize(glm::cross(right, front));
@@ -115,4 +128,16 @@ void Camera::update_yaw(float value) {
         yaw = -89.9f;
     }*/
     update_vectors();
+}
+
+glm::vec3 Camera::get_position() {
+    return pos + up;
+}
+
+glm::mat4 Camera::get_projection() {
+    return projection;
+}
+
+glm::mat4 Camera::get_view() {
+    return view;
 }

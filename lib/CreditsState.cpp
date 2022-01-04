@@ -13,7 +13,7 @@ CreditsState::CreditsState(std::shared_ptr<Injector> injector, entt::registry& r
     key_system = {};
 
     //Mouse handlers
-    mouse_system = {injector};
+    //mouse_system = {injector, C};
 
     //Other systems
 }

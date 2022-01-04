@@ -3,8 +3,9 @@
 #include "PhysicsComponents.hpp"
 #include "GameObjectComponents.hpp"
 
-TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,
-        std::string tex_name, std::string terrain_shader, std::string character_shader) {    
+TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,std::string tex_name, std::string terrain_shader, 
+    std::string character_shader) {    
+
     this->injector = injector;
     tile_width = injector->config.tile_width;
     tile_height = injector->config.tile_height;
@@ -16,6 +17,14 @@ TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,
 void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>> terrain_arr,
                 std::vector<std::vector<int>> env_arr, std::vector<std::vector<int>> char_arr) {
     
+
+    cursor = registry.create();
+    auto cursor_frame = gorge::build_array_frame(injector, tile_width, tile_height,
+                        tex_name, cursor_id, terrain_shader);
+    registry.emplace<array_frame>(cursor, cursor_frame);
+    registry.emplace<ui>(cursor);
+    registry.emplace<position>(cursor, glm::vec3(0.0f, 0.0f, 0.0f));
+
     terrain_array = terrain_arr;
     environment_array = env_arr;
     character_array = char_arr;
@@ -65,5 +74,14 @@ void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>
                 registry.emplace<world_pos>(entity, j, i, 0);
             }
         }
+    }
+}
+
+void TileMap2D::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+    if (mouse_x / tile_width != cursor_x || mouse_y / tile_height != cursor_y) {
+        cursor_x = mouse_x / tile_width;
+        cursor_y = mouse_y / tile_height;
+        registry.replace<position>(cursor, glm::vec3(tile_width / 2.0f + cursor_x * tile_width, 
+            tile_height / 2.0f + cursor_y * tile_height, 0.0f));
     }
 }

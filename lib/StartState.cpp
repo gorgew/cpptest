@@ -15,17 +15,17 @@
 void StartState::build_key_handlers() {
 
    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        camera.pan(1, 0, 0, delta_time);
+        camera->pan(1, 0, 0, delta_time);
     };
 
     std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        camera.pan(-1, 0, 0, delta_time);
+        camera->pan(-1, 0, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        camera.pan(0, 1, 0, delta_time);
+        camera->pan(0, 1, 0, delta_time);
     };
     std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        camera.pan(0, -1, 0, delta_time);
+        camera->pan(0, -1, 0, delta_time);
     };
     std::function<void(entt::registry&)> placeholder = [](entt::registry&){
 
@@ -36,16 +36,16 @@ void StartState::build_key_handlers() {
     key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);
     
     std::function<void(entt::registry&)> pitch_left = [=, this](entt::registry& registry) {
-        camera.update_pitch(-1.0f);
+        camera->update_pitch(-1.0f);
     };
     std::function<void(entt::registry&)> pitch_right = [=, this](entt::registry& registry) {
-        camera.update_pitch(1.0f);
+        camera->update_pitch(1.0f);
     };
     std::function<void(entt::registry&)> yaw_down = [=, this](entt::registry& registry) {
-        camera.update_yaw(1.0f);
+        camera->update_yaw(1.0f);
     };
     std::function<void(entt::registry&)> yaw_up = [=, this](entt::registry& registry) {
-        camera.update_yaw(-1.0f);
+        camera->update_yaw(-1.0f);
     };
     key_system.add_held_key_handler(SDLK_q, pitch_left, placeholder);
     key_system.add_held_key_handler(SDLK_e, pitch_right, placeholder);
@@ -57,14 +57,20 @@ void StartState::build_mouse_handlers() {
     fmt::print("Building mouse handlers");
 
     std::function<void(entt::registry&)> zoom_in = [=, this](entt::registry& registry) {
-        camera.zoom(1, delta_time);
+        camera->zoom(1, delta_time);
     };
     std::function<void(entt::registry&)> zoom_out = [=, this](entt::registry& registry) {
-        camera.zoom(-1, delta_time);
+        camera->zoom(-1, delta_time);
     };
     
     mouse_system.add_wheel_handler(true, zoom_in);
     mouse_system.add_wheel_handler(false, zoom_out);
+
+    std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
+        tmap.move_cusor(registry, mouse_system.world_x, mouse_system.world_y);
+    };
+
+    mouse_system.add_mousedown_handler(move_cursor, SDL_BUTTON_LEFT);
 }
 
 void StartState::build_music() {
@@ -103,12 +109,12 @@ void StartState::build_gfx() {
     injector->shader_man.add_ubo("camera_ubo", sizeof(camera_data), 0);
     injector->shader_man.bind_ubo("world", "camera_ubo", 0);
 
-    camera = {static_cast<float>(injector->config.width), 
+    camera.reset( new Camera(static_cast<float>(injector->config.width), 
         static_cast<float>(injector->config.height),
         100.0f, 
         1.0f,
-        injector->shader_man.get_ubo("camera_ubo")
-        };
+        injector->shader_man.get_ubo("camera_ubo")));
+
 
     //auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
     //glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
@@ -137,18 +143,18 @@ void StartState::build_scene(entt::registry& registry) {
     */ 
     injector->tex_man.add_2d_array_texture("art", "../resources/programmer-art.png", 16, 16, 12);
     std::vector<std::vector<int>> terrain_arr = {
-        {1, 2, 3}, 
-        {2, 3, 3},
-        {0, 3, 3}
+        {2, 2, 3}, 
+        {0, 1, 3},
+        {0, 1, 3}
     };
     std::vector<std::vector<int>> env_arr = {
-        {4, 4, -1}, 
+        {-1, -1, -1}, 
         {-1, -1, -1},
-        {7, -1, -1}
+        {-1, -1, -1}
     };
     std::vector<std::vector<int>> char_arr = {
         {-1, -1, -1}, 
-        {-1, -1, 12},
+        {-1, -1, -1},
         {-1, -1, -1}
     };
 
@@ -161,9 +167,11 @@ void StartState::build_scene(entt::registry& registry) {
     
         fmt::print("surprise\n");
     };
+    /*
     const auto button = registry.create();
     registry.emplace<position>(button, glm::vec3(400.0f, 400.0f, 0.0f));
     registry.emplace<rect_button>(button, 800.0f, 800.0f, shift_down);
+    */
 };
 
 void StartState::process_systems(entt::registry& registry) {
@@ -197,5 +205,5 @@ glm::vec3 StartState::move_vec(int x, int y) {
 }
 
 void StartState::resize(int x, int y) {
-    camera.resize(x, y);
+    camera->resize(x, y);
 }

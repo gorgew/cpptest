@@ -6,10 +6,11 @@
 class Camera {
 
     glm::mat4 view, projection;
+
     size_t view_offset, project_offset;
     GLuint camera_ubo;
     glm::vec3 pos;
-    glm::vec3 front;
+    
     glm::vec3 up;
     glm::vec3 right;
     glm::vec3 world_up;
@@ -30,8 +31,9 @@ class Camera {
     void update_vectors();
     void update_view();
     void update_project();
-
+    
     public:
+        
         Camera();
         Camera(float win_width, float win_height, float pan_speed, float zoom_speed, GLuint camera_ubo);
 
@@ -40,4 +42,9 @@ class Camera {
         void update_pitch(float value);
         void zoom(float zoom_val, float delta_time); 
         void resize(int width, int height);
+        glm::vec3 get_position();
+        glm::mat4 get_view();
+        glm::mat4 get_projection();
+
+        glm::vec3 front;
 };

@@ -5,7 +5,7 @@ project(SdlTest VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Wextra -Wno-unused-parameter")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Wextra -Wno-unused-parameter -O1")
     message(STATUS "Compiler: GNU/CLANG")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /sdl-")
@@ -102,5 +102,6 @@ target_link_libraries(game PRIVATE
         color-vec
         lib
         graphics
+        nuklear
         )
 target_include_directories(game PRIVATE ${LUA_INCLUDE_DIR})

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <entt/entity/registry.hpp>
 #include "Injector.hpp"
 #include <unordered_map>
@@ -24,8 +25,18 @@ class TileMap2D {
     std::string tex_name;
     std::string terrain_shader;
     std::string character_shader;
-    float tile_width;
-    float tile_height;
+    unsigned int tile_width;
+    unsigned int tile_height;
+    
+    int selected_tex;
+    glm::vec2 selected;
+
+    int range_tex;
+
+    entt::entity cursor;
+    int cursor_id = 4;
+
+    unsigned int cursor_x = 0, cursor_y = 0; //cursor location in tilemap
 
     public:
         TileMap2D() = default;
@@ -34,12 +45,7 @@ class TileMap2D {
         void add_tiles(entt::registry&, std::vector<std::vector<int>>,
                 std::vector<std::vector<int>>, std::vector<std::vector<int>>);
         /**
-         * for moving in grid
-         * Add to position vector
-        */
-
-        //For now top plane only?
-
-        //Flat tile = perpindiclar ground, not tilted / wall
-        
-};
+         * Moves cursor to mouse coords in world space
+         */
+        void move_cusor(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+};      

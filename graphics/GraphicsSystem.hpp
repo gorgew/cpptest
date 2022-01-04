@@ -64,4 +64,6 @@ class GraphicsSystem {
         void free_frame_lists(entt::registry& registry);
 
         void resize(int width, int height);
+
+        void viewport();
 };
