@@ -5,12 +5,11 @@
 #include <GraphicsComponents.hpp>
 #include <GraphicsSystem.hpp>
 #include <FontBuilder.hpp>
+#include <ScriptEngine.hpp>
 #include <fmt/core.h>
 
 #include <State.hpp>
 #include <StartState.hpp>
-
-#include <MouseEventSystem.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -56,9 +55,11 @@ int main(void) {
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
 
+    std::shared_ptr<ScriptEngine> scripts = std::make_shared<ScriptEngine>();
+
     std::shared_ptr<State> game_state; 
-    game_state = std::make_shared<StartState>(injector, registry);
-    
+    game_state = std::make_shared<StartState>(injector, registry, scripts);
+
     fmt::print("Scene constructed\n");
     
     //IMGUI
@@ -94,22 +95,20 @@ int main(void) {
         delta_time = (next_clock - prev_clock).count() / 1e9;
         game_state->delta_time = delta_time;
         //fmt::print("Frame time: {} ms\n", delta_time * 1e3);
-
         nk_input_begin(ctx);
-        
 
-        if (SDL_PollEvent(&event)) {
+        while (SDL_PollEvent(&event)) {
 
             game_state->handle_event(registry, event);
             ImGui_ImplSDL2_ProcessEvent(&event);
             nk_sdl_handle_event(&event);
 
             if (event.type == SDL_QUIT) {
-                break;
+                goto EXIT;
             } else if (event.type == SDL_KEYDOWN) {
                 
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    break;
+                    goto EXIT;
                 } else if (event.key.repeat != 0) {
                     SDL_FlushEvent(SDL_KEYDOWN);
                 }
@@ -147,7 +146,7 @@ int main(void) {
             nk_layout_row_dynamic(ctx, 30, 2);
             if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
             if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
-            nk_layout_row_dynamic(ctx, 22, 1);
+            nk_layout_row_dynamic(ctx, 22, 1); 
             nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
 
             nk_layout_row_dynamic(ctx, 20, 1);
@@ -175,7 +174,8 @@ int main(void) {
 
         
     }
-    
+
+EXIT:
     g_system.free_frame_lists(registry);
     
     nk_sdl_shutdown();

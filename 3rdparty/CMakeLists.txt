@@ -15,4 +15,4 @@ add_library(
 )
 
 target_include_directories(nuklear INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(nuklear INTERFACE SDL2::SDL2)
+# target_link_libraries(nuklear INTERFACE SDL2::SDL2)

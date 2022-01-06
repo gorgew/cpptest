@@ -30,12 +30,13 @@ class MouseEventSystem {
     void check_rect_handlers(entt::registry& registry, Uint8 type, float gl_x, float gl_y);
 
     void check_rect_buttons(entt::registry& registry, float gl_x, float gl_y);
-
+    void set_world_coords(int x, int y);
     std::function<void(entt::registry&)> wheel_up_handler;
     std::function<void(entt::registry&)> wheel_down_handler;
 
     std::function<void(entt::registry&)> leftmouse_down;
     std::function<void(entt::registry&)> rightmouse_down;
+    std::function<void(entt::registry&)> motion_handler;
 
     public:
         MouseEventSystem() = default;
@@ -48,6 +49,8 @@ class MouseEventSystem {
         void add_wheel_handler(bool is_up, std::function<void(entt::registry&)> handler);
 
         void add_mousedown_handler(std::function<void(entt::registry&)> handler, char button);
+        
+        void set_motion_handler(std::function<void(entt::registry&)> handler);
 
         unsigned int world_x;
         unsigned int world_y;

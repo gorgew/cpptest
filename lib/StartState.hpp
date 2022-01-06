@@ -8,6 +8,7 @@
 #include "WorldCacheSystem.hpp"
 #include "glm/glm.hpp"
 #include "Camera.hpp"
+#include "ScriptEngine.hpp"
 
 class StartState : public State {
 
@@ -15,13 +16,12 @@ class StartState : public State {
     static constexpr int grid_height = 3;
     static constexpr int player_id = 12;
 
-    
-
     enum class next_state {
         game_state,
         credits_state
     };
     std::shared_ptr<Camera> camera;
+    std::shared_ptr<ScriptEngine> scripts;
 
     TileMap2D tmap;
     std::unique_ptr<WorldCacheSystem> world;
@@ -40,12 +40,13 @@ class StartState : public State {
     void build_music();
     void build_gfx();
     void build_scene(entt::registry& registry);
+    void link_scripts();
     
     public:
 
-        using State::State;
-        StartState(std::shared_ptr<Injector> injector, entt::registry& registry){
+        StartState(std::shared_ptr<Injector> injector, entt::registry& registry, std::shared_ptr<ScriptEngine> scripts){
             this->injector = injector;
+            this->scripts = scripts;
             build_gfx();
             
             build_music();
@@ -57,6 +58,8 @@ class StartState : public State {
 
             build_key_handlers();
             build_mouse_handlers();
+
+            link_scripts();
         };
         void process_systems(entt::registry& registry);
         std::shared_ptr<State> next(entt::registry& registry);

@@ -71,6 +71,7 @@ void StartState::build_mouse_handlers() {
     };
 
     mouse_system.add_mousedown_handler(move_cursor, SDL_BUTTON_LEFT);
+    mouse_system.set_motion_handler(move_cursor);
 }
 
 void StartState::build_music() {
@@ -132,10 +133,7 @@ void StartState::build_scene(entt::registry& registry) {
     const auto entity = registry.create();
     registry.emplace<array_frame_node>(entity, my_animated_graphic);
     registry.emplace<position>(entity, glm::vec3(200.0f, 200.0f, 0.0f));
-    */
 
-    /*
-    
     struct array_frame my_tile = gorge::build_array_frame(injector, 100.0f, 100.0f, "tiles", 1, "sprites");
     const auto tile = registry.create();
     registry.emplace<array_frame>(tile, my_tile);
@@ -154,7 +152,7 @@ void StartState::build_scene(entt::registry& registry) {
     };
     std::vector<std::vector<int>> char_arr = {
         {-1, -1, -1}, 
-        {-1, -1, -1},
+        {-1, 8, -1},
         {-1, -1, -1}
     };
 
@@ -206,4 +204,10 @@ glm::vec3 StartState::move_vec(int x, int y) {
 
 void StartState::resize(int x, int y) {
     camera->resize(x, y);
+    injector->config.width = x;
+    injector->config.height = y;
+}
+
+void StartState::link_scripts() {
+    
 }

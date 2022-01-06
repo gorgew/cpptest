@@ -17,6 +17,7 @@ else()
 endif()
 
 file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(fmt CONFIG REQUIRED)
 
@@ -48,6 +49,7 @@ find_package(Lua REQUIRED)
 message(STATUS "Lua found at ${LUA_INCLUDE_DIR}")
 
 find_package(sol2 CONFIG REQUIRED)
+target_link_libraries(sol2::sol2 INTERFACE ${LUA_INCLUDE_DIR})
 add_subdirectory(3rdparty)
 
 add_subdirectory(lib)

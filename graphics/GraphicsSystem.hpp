@@ -45,7 +45,7 @@ class GraphicsSystem {
     void draw_array_frame(struct frame f);
     public:
         int frame_count = 0;
-        int frame_delay;
+        int frame_delay; // Frames skipped for animations
         /**
          * @brief Graphics system that draws entities with graphics components.
          *        Also initializes OpenGL.

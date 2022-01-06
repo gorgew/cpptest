@@ -33,9 +33,9 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     
     injector->shader_man.add_shader("v_tex", "../resources/vert_tex.vert", GL_VERTEX_SHADER);
     injector->shader_man.add_shader("tex", "../resources/tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("v_tex/tex", {"v_tex", "tex"});
+    injector->shader_man.add_program("double_buffer", {"v_tex", "tex"});
     
-    double_buffer_program = injector->shader_man.get_program_id("v_tex/tex");
+    double_buffer_program = injector->shader_man.get_program_id("double_buffer");
     
     injector->vert_man.add_rect("buffer_rect", 2.0f, 2.0f);
 

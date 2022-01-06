@@ -68,8 +68,8 @@ void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>
                 struct array_frame_node arr_f = gorge::build_array_frame_node(injector, tile_width, tile_height,
                         tex_name, layer, layer, character_shader);
                 registry.emplace<array_frame_node>(entity, arr_f);
-                registry.emplace<position>(entity, glm::vec3(tile_width / 2.0f + j * tile_width, 
-                        tile_height / 2.0f + i * tile_height, 0.0f));
+                registry.emplace<position>(entity, glm::vec3(tile_width + j * tile_width, 
+                        tile_height + i * tile_height, 0.0f));
                 registry.emplace<character>(entity, true, layer);
                 registry.emplace<world_pos>(entity, j, i, 0);
             }

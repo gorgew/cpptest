@@ -11,6 +11,8 @@ add_library(
     MouseEventSystem.cpp
     Injector.hpp
     Injector.cpp
+    ScriptEngine.hpp
+    ScriptEngine.cpp
 
     State.hpp
     StartState.hpp
@@ -21,6 +23,8 @@ add_library(
     GameObjectComponents.hpp
     Actor.cpp
     Actor.hpp
+    WorldCharacters.hpp
+    WorldCharacters.cpp
     WorldCacheSystem.hpp
     WorldCacheSystem.cpp
     TileMap.hpp
@@ -42,5 +46,6 @@ target_link_libraries(lib PRIVATE
     fmt::fmt
     ecs
     color-vec
+    ${LUA_LIBRARIES}
     sol2::sol2
-    ${LUA_LIBRARIES})
+    )

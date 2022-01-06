@@ -62,14 +62,11 @@ void Camera::pan(int x, int y, int z, float delta_time) {
 void Camera::zoom(float zoom_val, float delta_time) {
 
     scale += zoom_val * delta_time * zoom_speed;
-    float scaled_width = camera_width * scale;
-    float scaled_height = camera_height * scale;
-    projection = glm::ortho(-scaled_width, scaled_height, -scaled_height, scaled_height, ortho_near, ortho_far);
+    
     update_project();
 }
 
 void Camera::resize(int width, int height) {
-    
     camera_width = width;
     camera_height = height;
     update_project();
@@ -84,6 +81,10 @@ void Camera::update_view() {
 }
 
 void Camera::update_project() {
+    float scaled_width = camera_width * scale;
+    float scaled_height = camera_height * scale;
+    projection = glm::ortho(-scaled_width, scaled_height, -scaled_height, scaled_height, ortho_near, ortho_far);
+
     glBindBuffer(GL_UNIFORM_BUFFER, camera_ubo);
     glBufferSubData(GL_UNIFORM_BUFFER, project_offset, sizeof(glm::mat4), glm::value_ptr(projection));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);

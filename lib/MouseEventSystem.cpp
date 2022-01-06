@@ -17,40 +17,8 @@ float MouseEventSystem::world_y_to_ndc(float y) {
 
 void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
     if (e.type == SDL_MOUSEBUTTONDOWN) {
-        float gl_x = world_x_to_ndc(e.button.x);
-        float gl_y = world_y_to_ndc(e.button.y);
         
-        glm::vec4 ndc = glm::vec4(gl_x, gl_y, -1.0f, 1.0f);
-
-        glm::vec4 ray_proj = glm::inverse(camera->get_projection()) * ndc;
-        ray_proj.z = -1.0f;
-        ray_proj.w = 1.0f;
-        glm::vec3 ray_view = glm::vec3((glm::inverse(camera->get_view()) * ray_proj));
-        glm::vec3 ray_norm = glm::normalize(ray_view);
-        //ray_view = glm::normalize(ray_view);
-        //ray_view *= -1;
-        glm::vec3 pt_vec = glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), ray_norm);
-        //solving for intersection between line from camera to plane z = 0
-        
-        float t = -1 * ray_view.z / camera->front.z;
-        float intersect_x = camera->front.x * t + ray_view.x;
-        float intersect_y = camera->front.y * t + ray_view.y;
-
-        world_x = static_cast<unsigned int>(intersect_x);
-        world_y = static_cast<unsigned int>(intersect_y);
-        
-       /*
-       float t = -1 * ray_view.z / ray_norm.z;
-       float intersect_x = ray_norm.x * t + ray_view.x;
-       float intersect_y = ray_norm.y * t + ray_view.y;
-       */
-        if (injector->config.debug) {
-            /*
-            fmt::print("Mouse: sdl coords: ({}, {}), gl coords: ({}, {})\n", e.button.x, e.button.y, gl_x, gl_y);
-            fmt::print("Mouse ray cast: ({}, {}, {})\n", ray_view.x, ray_view.y, ray_view.z);
-            fmt::print("Intersect at ({}, {})\n", intersect_x, intersect_y);
-            */
-        }
+        set_world_coords(e.button.x, e.button.y);
 
         if (e.button.button == SDL_BUTTON_LEFT) {
             leftmouse_down(registry);
@@ -59,7 +27,7 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
             rightmouse_down(registry);
         }
 
-        check_rect_buttons(registry, gl_x, gl_y);
+        //check_rect_buttons(registry, gl_x, gl_y);
     }
     else if (e.type == SDL_MOUSEWHEEL) {
 
@@ -69,6 +37,10 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
         else {
             wheel_down_handler(registry);
         }
+    }
+    else if (e.type == SDL_MOUSEMOTION) {
+        set_world_coords(e.motion.x, e.motion.y);
+        motion_handler(registry);
     }
 };
 
@@ -147,4 +119,34 @@ void MouseEventSystem::add_mousedown_handler(std::function<void(entt::registry&)
     else if (button == SDL_BUTTON_RIGHT) {
         rightmouse_down = handler;
     }
+}
+
+void MouseEventSystem::set_world_coords(int x, int y) {
+    
+    glm::vec4 ray_proj = glm::inverse(camera->get_projection()) * 
+        glm::vec4(world_x_to_ndc(x), world_y_to_ndc(y), -1.0f, 1.0f);
+    ray_proj.z = -1.0f;
+    ray_proj.w = 1.0f;
+    glm::vec3 ray_view = glm::vec3((glm::inverse(camera->get_view()) * ray_proj));
+
+    //solving for intersection between line from camera to plane z = 0
+    
+    float t = -1 * ray_view.z / camera->front.z;
+    float intersect_x = camera->front.x * t + ray_view.x;
+    float intersect_y = camera->front.y * t + ray_view.y;
+
+    world_x = static_cast<unsigned int>(intersect_x);
+    world_y = static_cast<unsigned int>(intersect_y);
+    
+    if (injector->config.debug) {
+        /*
+        fmt::print("Mouse: sdl coords: ({}, {}), gl coords: ({}, {})\n", e.button.x, e.button.y, gl_x, gl_y);
+        fmt::print("Mouse ray cast: ({}, {}, {})\n", ray_view.x, ray_view.y, ray_view.z);
+        fmt::print("Intersect at ({}, {})\n", intersect_x, intersect_y);
+        */
+    }
+}
+
+void MouseEventSystem::set_motion_handler(std::function<void(entt::registry&)> handler) {
+    motion_handler = handler;
 }
