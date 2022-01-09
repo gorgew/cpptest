@@ -5,10 +5,17 @@
 #include <AudioSystem.hpp>
 #include "Injector.hpp"
 #include "TileMap.hpp"
-#include "WorldCacheSystem.hpp"
 #include "glm/glm.hpp"
 #include "Camera.hpp"
 #include "ScriptEngine.hpp"
+#include "ResourceManager.hpp"
+
+struct ui_character_data {
+    unsigned int id;
+    std::string char_name;
+    std::string label_name;
+    struct nk_image profile_pic;
+};
 
 class StartState : public State {
 
@@ -22,9 +29,9 @@ class StartState : public State {
     };
     std::shared_ptr<Camera> camera;
     std::shared_ptr<ScriptEngine> scripts;
+    std::shared_ptr<ResourceManager> resources;
 
     TileMap2D tmap;
-    std::unique_ptr<WorldCacheSystem> world;
     /**
      * @brief add to position vector
     */
@@ -41,12 +48,25 @@ class StartState : public State {
     void build_gfx();
     void build_scene(entt::registry& registry);
     void link_scripts();
+
+    ui_character_data char_hover_data;
+
+    void update_char_hover_data();
+    void show_character_hover_ui(nk_context* ctx);
+    void display_demo(nk_context* ctx);
+
+    bool ui_show_demo = false;
+    bool ui_show_character_hover = false;
     
     public:
 
-        StartState(std::shared_ptr<Injector> injector, entt::registry& registry, std::shared_ptr<ScriptEngine> scripts){
+        StartState(std::shared_ptr<Injector> injector, entt::registry& registry, 
+            std::shared_ptr<ScriptEngine> scripts, std::shared_ptr<ResourceManager> resources){
+
             this->injector = injector;
             this->scripts = scripts;
+            this->resources = resources;
+            
             build_gfx();
             
             build_music();
@@ -65,4 +85,6 @@ class StartState : public State {
         std::shared_ptr<State> next(entt::registry& registry);
 
         void resize(int width, int height);
+
+        void display_ui(nk_context* ctx);
 };

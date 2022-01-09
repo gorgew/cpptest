@@ -20,7 +20,7 @@ Camera::Camera(float win_width, float win_height, float pan_speed, float zoom_sp
     
     yaw = -45.0f;
     pitch = 35.0f;
-    roll = -45.0f;
+    roll = 315.0f;
     
     /*
    yaw = -90.0f;

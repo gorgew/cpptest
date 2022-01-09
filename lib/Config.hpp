@@ -12,8 +12,9 @@ class Config {
          * @brief Window height
          */
         int height;
-        static const bool debug = true;
-        static const unsigned int tile_width = 100;
-        static const unsigned int tile_height = 100;
+        static constexpr bool debug = true;
+        static constexpr unsigned int tile_width = 100;
+        static constexpr unsigned int tile_height = 100;
         static constexpr float camera_speed = 5.0f;
+        float ui_scale;
 };

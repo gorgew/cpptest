@@ -25,13 +25,14 @@ add_library(
     Actor.hpp
     WorldCharacters.hpp
     WorldCharacters.cpp
-    WorldCacheSystem.hpp
-    WorldCacheSystem.cpp
     TileMap.hpp
     TileMap.cpp
     Camera.hpp
     Camera.cpp
     UboStructs.hpp
+
+    ResourceManager.hpp
+    ResourceManager.cpp
 
     WidgetComponent.hpp
 )

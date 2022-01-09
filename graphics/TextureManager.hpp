@@ -29,15 +29,16 @@ class TextureManager {
          * @param height Height in texels
          * @param layers Total number of subtextures
          */
-        void add_2d_array_texture(const std::string name, const char* filepath, 
+        void add_2d_array_texture(const std::string name, std::string filepath, 
                 int width, int height, int layers);
 
         /**
          * @brief Load a single texture and bind a name to it
          * @param filepath filepath to texture
          * @param name name to bind texture to
+         * @param flip_on_load whether to flip the texture vertically 
          */
-        void add_texture(const std::string name, const char* filepath);
+        void add_texture(const std::string name, std::string filepath, bool flip_on_load = true);
 
         /**
          * @brief Load a single texture and bind a name to it

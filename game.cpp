@@ -6,6 +6,7 @@
 #include <GraphicsSystem.hpp>
 #include <FontBuilder.hpp>
 #include <ScriptEngine.hpp>
+#include <ResourceManager.hpp>
 #include <fmt/core.h>
 
 #include <State.hpp>
@@ -57,8 +58,12 @@ int main(void) {
 
     std::shared_ptr<ScriptEngine> scripts = std::make_shared<ScriptEngine>();
 
+    std::shared_ptr<ResourceManager> resources = std::make_shared<ResourceManager>();
+    resources->load_character_resources(scripts->lua, injector);
+    fmt::print("Resources Loaded\n");
+
     std::shared_ptr<State> game_state; 
-    game_state = std::make_shared<StartState>(injector, registry, scripts);
+    game_state = std::make_shared<StartState>(injector, registry, scripts, resources);
 
     fmt::print("Scene constructed\n");
     
@@ -79,6 +84,11 @@ int main(void) {
         nk_sdl_font_stash_begin(&atlas);
         nk_sdl_font_stash_end();
     }
+
+    /*
+    injector->tex_man.add_texture("profile_pic", "../resources/bush.png", false);
+    struct nk_image profile_pic = nk_image_id(static_cast<int>(injector->tex_man.get_id("profile_pic")));
+    */
 
     //Timing clocks
     auto prev_clock = high_resolution_clock::now();
@@ -119,6 +129,8 @@ int main(void) {
                     g_system.resize(event.window.data1, event.window.data2);
                     game_state->resize(event.window.data1, event.window.data2);
                 }
+            } else if (event.type == SDL_JOYBUTTONDOWN) {
+                goto EXIT;
             }
         }
         game_state->process_systems(registry);
@@ -133,27 +145,8 @@ int main(void) {
         glViewport(0, 0, (int)imgui_io.DisplaySize.x, (int)imgui_io.DisplaySize.y);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
-            NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-            NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
-        {
-            enum {EASY, HARD};
-            static int op = EASY;
-            static int property = 20;
-            nk_layout_row_static(ctx, 30, 80, 1);
-            if (nk_button_label(ctx, "button"))
-                printf("button pressed!\n");
-            nk_layout_row_dynamic(ctx, 30, 2);
-            if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
-            if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
-            nk_layout_row_dynamic(ctx, 22, 1); 
-            nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
-
-            nk_layout_row_dynamic(ctx, 20, 1);
-            nk_label(ctx, "background:", NK_TEXT_LEFT);
-        }
-        nk_end(ctx);
-
+        game_state->display_ui(ctx);
+        
         g_system.viewport();
         nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);;
 
@@ -176,6 +169,7 @@ int main(void) {
     }
 
 EXIT:
+    fmt::print("exit\n");
     g_system.free_frame_lists(registry);
     
     nk_sdl_shutdown();

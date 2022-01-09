@@ -75,7 +75,7 @@ void FontBuilder::add_font(std::string font_name, const char* file_path, unsigne
         char_frame_data data = {
             {
                 char_vert_id,
-                20,
+                4,
                 GL_TRIANGLE_FAN,
                 injector->tex_man.get_id(tex_name),
                 program_id

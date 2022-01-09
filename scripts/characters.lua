@@ -1,4 +1,3 @@
-
 characters = {}
 
 Character = {}

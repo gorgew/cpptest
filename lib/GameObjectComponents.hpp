@@ -13,16 +13,15 @@ struct old_world_pos {
 };
 
 struct terrain {
-    bool is_terrain = 1;
+    unsigned int type_id;
 };
 
 struct environment {
-    bool is_environment = 1;
+    unsigned int type_id;
 };
 
 struct character {
-    bool is_character = 1;
-    int type_id;
+    unsigned int type_id;
 };
 
 struct ui {

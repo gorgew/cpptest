@@ -18,9 +18,9 @@ class WorldCacheSystem {
     void destruction_handler(entt::registry&, entt::entity);
     
     public:
-        std::vector<std::vector<std::vector<entt::entity>>> environment_map; //map of environment entities
-        std::vector<std::vector<std::vector<entt::entity>>> character_map; //map of character entities
-        std::vector<std::vector<std::vector<entt::entity>>> terrain_map; //map of terrain entities
+        std::vector<std::vector<entt::entity>> environment_map; //map of environment entities
+        std::vector<std::vector<entt::entity>> character_map; //map of character entities
+        std::vector<std::vector<entt::entity>> terrain_map; //map of terrain entities
         //Dimensions of world
         
         WorldCacheSystem(entt::registry& registry, unsigned int x, unsigned int y, unsigned int z);

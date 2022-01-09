@@ -143,7 +143,8 @@ void StartState::build_scene(entt::registry& registry) {
     std::vector<std::vector<int>> terrain_arr = {
         {2, 2, 3}, 
         {0, 1, 3},
-        {0, 1, 3}
+        {0, 1, 6},
+        {1, 1, 1}
     };
     std::vector<std::vector<int>> env_arr = {
         {-1, -1, -1}, 
@@ -159,8 +160,6 @@ void StartState::build_scene(entt::registry& registry) {
     tmap = {injector, "art", "world", "billboard"};
     tmap.add_tiles(registry, terrain_arr, env_arr, char_arr);
 
-    world = std::make_unique<WorldCacheSystem>(registry, grid_width, grid_height, 1);
-
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
     
         fmt::print("surprise\n");
@@ -175,7 +174,14 @@ void StartState::build_scene(entt::registry& registry) {
 void StartState::process_systems(entt::registry& registry) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
-        world->observe(registry);
+
+        if (tmap.get_char_on_cursor(registry) != entt::null) {
+            fmt::print("char found!\n");
+            ui_show_character_hover = true;
+        }
+        else {
+            ui_show_character_hover = false;
+        }
     }
 }
 
@@ -210,4 +216,70 @@ void StartState::resize(int x, int y) {
 
 void StartState::link_scripts() {
     
+}
+
+void StartState::display_ui(nk_context* ctx) {
+
+    if (ui_show_demo) {
+        display_demo(ctx);
+    }
+
+    if (ui_show_character_hover) {
+        show_character_hover_ui(ctx);
+    }
+
+    
+}
+
+void StartState::display_demo(nk_context* ctx) {
+        
+        if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
+            NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
+            NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
+        {
+            enum {EASY, HARD};
+            static int op = EASY;
+            static int property = 20;
+            nk_layout_row_static(ctx, 30, 80, 1);
+            if (nk_button_label(ctx, "button"))
+                printf("button pressed!\n");
+            nk_layout_row_dynamic(ctx, 30, 2);
+            if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
+            nk_layout_row_dynamic(ctx, 22, 1); 
+            nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
+            
+            nk_layout_row_static(ctx, 50, 50, 1);
+            //nk_image(ctx, profile_pic);
+            
+        }
+}
+
+void StartState::update_char_hover_data() {
+    
+    unsigned int char_id = tmap.last_char_id;
+    if (char_id != char_hover_data.id) {
+
+        char_hover_data.id = char_id;
+
+        sol::table characters = scripts->lua["characters"];
+        char_hover_data.char_name = characters[char_id]["name"];
+        char_hover_data.label_name = "Name: " + char_hover_data.char_name;
+        char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
+    }
+}
+
+void StartState::show_character_hover_ui(nk_context* ctx) {
+
+    update_char_hover_data();
+    if (nk_begin(ctx, "CHARACTER", nk_rect(100, 100, 300, 500), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
+        
+        nk_layout_row_static(ctx, 200, 200, 1);
+        nk_image(ctx, char_hover_data.profile_pic);
+
+        nk_layout_row_static(ctx, 10, 200, 4);
+
+        nk_label(ctx, char_hover_data.label_name.c_str(), NK_TEXT_LEFT);
+    }
+    nk_end(ctx);
 }

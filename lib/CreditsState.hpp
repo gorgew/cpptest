@@ -16,4 +16,5 @@ class CreditsState : public State {
         void load_graphics();
         void initialize_scene();
         void resize(int width, int height);
+        void display_ui(nk_context* ctx);
 };

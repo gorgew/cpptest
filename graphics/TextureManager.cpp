@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cstdlib>
 
-void TextureManager::add_2d_array_texture(const std::string name, const char* filepath, 
+void TextureManager::add_2d_array_texture(const std::string name, std::string filepath, 
         int width, int height, int layers){
     
     auto &value = name_to_tex_id_map[name];
@@ -27,7 +27,7 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-        data = stbi_load(filepath, &img_width, &img_height, &img_channels, 0);
+        data = stbi_load(filepath.c_str(), &img_width, &img_height, &img_channels, 0);
 
         if (!data) {
             throw new std::invalid_argument("TextureManager:: data loading failure");
@@ -91,7 +91,7 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
         }
         
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-        fmt::print("Loaded {} at {}\n", name, filepath);
+        fmt::print("Loaded {} at {}\n", name, filepath.c_str());
 
         stbi_image_free(data);
 
@@ -101,7 +101,7 @@ void TextureManager::add_2d_array_texture(const std::string name, const char* fi
     }
 }
 
-void TextureManager::add_texture(const std::string name, const char* filepath) {
+void TextureManager::add_texture(const std::string name, std::string filepath, bool flip_on_load) {
 
     auto &value = name_to_tex_id_map[name];
     if (!value) {
@@ -109,7 +109,7 @@ void TextureManager::add_texture(const std::string name, const char* filepath) {
 
         int img_height, img_width, img_channels;
 
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(flip_on_load);
 
         glGenTextures(1, &value);
         glBindTexture(GL_TEXTURE_2D, value);
@@ -119,7 +119,7 @@ void TextureManager::add_texture(const std::string name, const char* filepath) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        data = stbi_load(filepath, &img_width, &img_height, &img_channels, 0);
+        data = stbi_load(filepath.c_str(), &img_width, &img_height, &img_channels, 0);
 
         if (data) {
 

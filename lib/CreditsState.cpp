@@ -48,3 +48,7 @@ void CreditsState::initialize_scene() {
 void CreditsState::resize(int x, int y) {
     
 }
+
+void CreditsState::display_ui(nk_context* ctx) {
+    
+}
