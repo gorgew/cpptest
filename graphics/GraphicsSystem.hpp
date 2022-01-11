@@ -35,11 +35,6 @@ class GraphicsSystem {
 
     void draw_char_component(struct char_frame_data f, struct position pos);
 
-    /**
-     * Finds
-    */
-    void free_frame_list(struct array_frame_node);
-
     void set_program(struct frame f);
     void draw_frame(struct frame f);
     void draw_array_frame(struct frame f);
@@ -59,9 +54,7 @@ class GraphicsSystem {
          * @brief Draw the graphics components of entities
          * @param registry EnTT registry
         */
-        void draw(entt::registry& registry);
-
-        void free_frame_lists(entt::registry& registry);
+        void draw(entt::registry& registry, float delta_time);
 
         void resize(int width, int height);
 

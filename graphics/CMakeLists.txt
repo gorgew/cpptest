@@ -17,6 +17,9 @@ add_library(
     VertexArrayManager.cpp
     Window.hpp
     Window.cpp
+
+    AnimationManager.hpp
+    AnimationManager.cpp
 )
 
 target_link_libraries(graphics PRIVATE

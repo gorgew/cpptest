@@ -7,4 +7,5 @@ Injector::Injector() {
     tex_man = {};
     shader_man = {};
     audio = {};
+    //anim = {};
 }

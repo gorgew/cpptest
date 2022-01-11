@@ -2,9 +2,11 @@
 
 #include <glad/glad.h>
 #include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 #include <Injector.hpp>
 #include <memory>
-
+#include <initializer_list>
+#include <vector>
 #include <string>
 
 struct frame {
@@ -23,12 +25,14 @@ struct array_frame : frame{
     GLuint tex_layer;
 };
 
-/**
- * @brief Component for animated graphic
-*/
-struct array_frame_node : array_frame{
-
-    struct array_frame_node* next;
+struct animation{
+    bool loop;
+    glm::vec3 offset;
+    int accumulator = 0; //Time passed in current cycle
+    int curr = 0;
+    std::vector<array_frame> frames;
+    std::vector<int> timings;
+    unsigned char frame_count;
 };
 
 namespace gorge {
@@ -48,6 +52,8 @@ namespace gorge {
     struct array_frame build_array_frame(std::shared_ptr<Injector> injector, float width, float height, 
             std::string tex_array_name, unsigned int layer, std::string program_name);
 
-    struct array_frame_node build_array_frame_node(std::shared_ptr<Injector> injector, float width, float height, 
-            std::string tex_array_name, unsigned int start_layer, unsigned int end_layer, std::string program_name);
+    struct animation build_animation(std::shared_ptr<Injector> injector, float width, float height, 
+            std::string tex_array_name, std::string program_name, 
+            std::vector<int> frames, std::vector<int> timings, bool loop,
+            float offset_x, float offset_y, float offset_z);
 }

@@ -58,8 +58,8 @@ int main(void) {
 
     std::shared_ptr<ScriptEngine> scripts = std::make_shared<ScriptEngine>();
 
-    std::shared_ptr<ResourceManager> resources = std::make_shared<ResourceManager>();
-    resources->load_character_resources(scripts->lua, injector);
+    std::shared_ptr<ResourceManager> resources = std::make_shared<ResourceManager>(injector);
+    resources->load_character_resources(scripts->lua);
     fmt::print("Resources Loaded\n");
 
     std::shared_ptr<State> game_state; 
@@ -134,7 +134,7 @@ int main(void) {
             }
         }
         game_state->process_systems(registry);
-        g_system.draw(registry);
+        g_system.draw(registry, delta_time);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window.windowPtr);
@@ -170,7 +170,6 @@ int main(void) {
 
 EXIT:
     fmt::print("exit\n");
-    g_system.free_frame_lists(registry);
     
     nk_sdl_shutdown();
     

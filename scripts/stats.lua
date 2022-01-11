@@ -1,14 +1,16 @@
 Stats = {
-    hp = 0,
-    aim = 0,
-    movement = 0
+    curr_hp = 1,
+    max_hp = 1,
+    aim = 1,
+    movement = 4
 }
 StatsMeta = { __index = vector }
 
 function Stats:new(arg_table) 
     return setmetatable({
-        hp = arg_table.hp or 0,
-        aim = arg_table.aim or 0,
-        movement = arg_table.movement or 0
+        curr_hp = arg_table.hp,
+        max_hp = arg_table.hp,
+        aim = arg_table.aim,
+        movement = arg_table.movement
     }, StatsMeta)
 end

@@ -31,9 +31,9 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     offscreenBuffer->addDepthStencilRenderBuffer(fbo_width, fbo_height);
     offscreenBuffer->checkCompiled();
     
-    injector->shader_man.add_shader("v_tex", "../resources/vert_tex.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("tex", "../resources/tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("double_buffer", {"v_tex", "tex"});
+    injector->shader_man.add_shader("db_vert", "../resources/vert_tex.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("db_tex", "../resources/tex.frag", GL_FRAGMENT_SHADER);
+    injector->shader_man.add_program("double_buffer", {"db_vert", "db_tex"});
     
     double_buffer_program = injector->shader_man.get_program_id("double_buffer");
     
@@ -99,7 +99,7 @@ void GraphicsSystem::draw_array_frame_component(struct array_frame f, struct pos
         draw_array_frame(f);      
 }
 
-void GraphicsSystem::draw(entt::registry& registry) {
+void GraphicsSystem::draw(entt::registry& registry, float delta_time) {
 
     //draw to the buffer
     
@@ -131,13 +131,32 @@ void GraphicsSystem::draw(entt::registry& registry) {
         draw_array_frame_component(f, pos);
     }
 
-    auto c_view = registry.view<array_frame_node, position, character>(
-        entt::exclude<environment, terrain>);
-    for (auto [entity, f_node, pos, c] : c_view.each()) {
-        draw_array_frame_component(f_node, pos);
-        if (frame_count == 0) {
-            f_node = *(f_node.next);
+    auto c_view = registry.view<array_frame, position, character>(
+        entt::exclude<animation>);
+    for (auto [entity, f, pos, t] : c_view.each()) {
+        draw_array_frame_component(f, pos);
+    }
+
+    //Very branchy
+    auto animation_view = registry.view<animation, position>();
+    for (auto [entity, a, pos] : animation_view.each()) {
+        a.accumulator += static_cast<int>(delta_time * 1000 );
+
+        fmt::print("Accumulated: {}\n", a.accumulator);
+        if (a.accumulator > a.timings[a.curr]) {
+            //fmt::print("asdfasdf {}\n", a.frame_count);
+            a.accumulator -= a.timings[a.curr];
+            a.curr++;
+            
+            if (a.curr == a.frame_count) {
+                if (!a.loop) {
+                    registry.remove<animation>(entity);
+                }
+                a.curr = 0;
+            }
         }
+        struct position temp = {pos.pos + a.offset};
+        draw_array_frame_component(a.frames[a.curr], temp);
     }
 
     auto frame_view = registry.view<frame, position>(
@@ -152,15 +171,7 @@ void GraphicsSystem::draw(entt::registry& registry) {
         draw_array_frame_component(f, pos);
     }
 
-    auto frame_list_view = registry.view<array_frame_node, position>(
-        entt::exclude<terrain, environment, character>);
-    for (auto [entity, f_node, pos] : frame_list_view.each()) {
-        draw_array_frame_component(f_node, pos);
-        if (frame_count == 0) {
-            f_node = *(f_node.next);
-        }
-        
-    }
+    //Fonts
     auto char_frame_view = registry.view<char_frame_data, position>(
         entt::exclude<terrain, environment, character>);
     for (auto [entity, char_f, pos] : char_frame_view.each()) {
@@ -180,28 +191,6 @@ void GraphicsSystem::draw(entt::registry& registry) {
     glUseProgram(double_buffer_program);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-void GraphicsSystem::free_frame_list(array_frame_node f_node) {
-
-    auto min = f_node.tex_layer;
-
-    //Find the min layer in the frame list
-    array_frame_node* it = f_node.next;
-    while (it->tex_layer != min) {
-        if (it->tex_layer < min) {
-            break;
-        }
-        it = it->next;
-    }
-    std::free(it);
-}
-
-void GraphicsSystem::free_frame_lists(entt::registry& registry) {
-    auto view = registry.view<array_frame_node>();
-    for (auto [entity, f_node] : view.each()) {
-        free_frame_list(f_node);
-    }
 }
 
 void GraphicsSystem::resize(int width, int height) {

@@ -51,7 +51,7 @@ class StartState : public State {
 
     ui_character_data char_hover_data;
 
-    void update_char_hover_data();
+    void update_char_hover_data(entt::registry&);
     void show_character_hover_ui(nk_context* ctx);
     void display_demo(nk_context* ctx);
 

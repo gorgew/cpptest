@@ -25,6 +25,5 @@ class Injector {
 
         AudioSystem audio;
 
-        static const int PLANT_ID = 0;
-        unsigned int light_level = 0;
+        //AnimationManager anim;
 };

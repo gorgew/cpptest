@@ -68,18 +68,23 @@ struct array_frame gorge::build_array_frame(std::shared_ptr<Injector> injector, 
     };
 }
 
-struct array_frame_node gorge::build_array_frame_node(std::shared_ptr<Injector> injector, float width, float height, 
-        std::string tex_array_name, unsigned int start_layer, unsigned int end_layer, std::string program_name) {
-    
-    int frame_count = end_layer - start_layer + 1;
-    array_frame_node* frame_array = (array_frame_node*) std::malloc(sizeof(array_frame_node) * frame_count);
-    
-    for (int i = 0; i < frame_count - 1; i ++) {
-        *(frame_array + i) = { build_array_frame(injector, width, height, tex_array_name, 
-                start_layer + i, program_name), frame_array + i + 1};
-    }
-    *(frame_array + frame_count - 1) = { build_array_frame(injector, width, height, tex_array_name, 
-            start_layer + frame_count - 1, program_name), frame_array};
-   
-    return *frame_array;
+struct animation gorge::build_animation(std::shared_ptr<Injector> injector, float width, float height, 
+            std::string tex_array_name, std::string program_name, 
+            std::vector<int> frames, std::vector<int> timings, bool loop,
+            float offset_x, float offset_y, float offset_z) {
+        
+        int n = frames.size();
+
+        animation a;
+        a.loop = loop;
+        a.frames.resize(n);
+        a.timings = timings;
+        a.offset = glm::vec3(offset_x, offset_y, offset_z);
+
+        for (int i = 0; i < n; i++) {
+            a.frames[i] =  build_array_frame(injector, width, height, tex_array_name, 
+            frames[i], program_name);
+        }
+
 }
+   

@@ -8,9 +8,4 @@ uniform sampler2D iTexture;
 void main()
 {
     FragColor = texture(iTexture, TexCoord);
-    /*
-    if (FragColor.a == 0.0) {
-        discard;
-    }
-    */
 }

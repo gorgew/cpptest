@@ -139,6 +139,13 @@ void StartState::build_scene(entt::registry& registry) {
     registry.emplace<array_frame>(tile, my_tile);
     registry.emplace<position>(tile, glm::vec3(400.0f, 200.0f, 0.0f));
     */ 
+   {
+        std::vector<int> frames = {0, 1, 2, 3};
+        std::vector<int> timings = {1000, 1000, 1000, 1000};
+        resources->add_animation("anim", "../resources/anim.png", 16, 16, 4, 100, 100, "billboard",
+            true, frames, timings);
+   }
+  
     injector->tex_man.add_2d_array_texture("art", "../resources/programmer-art.png", 16, 16, 12);
     std::vector<std::vector<int>> terrain_arr = {
         {2, 2, 3}, 
@@ -176,8 +183,8 @@ void StartState::process_systems(entt::registry& registry) {
         key_system.execute_holds(registry);
 
         if (tmap.get_char_on_cursor(registry) != entt::null) {
-            fmt::print("char found!\n");
             ui_show_character_hover = true;
+            update_char_hover_data(registry);
         }
         else {
             ui_show_character_hover = false;
@@ -255,10 +262,12 @@ void StartState::display_demo(nk_context* ctx) {
         }
 }
 
-void StartState::update_char_hover_data() {
+void StartState::update_char_hover_data(entt::registry& registry) {
     
     unsigned int char_id = tmap.last_char_id;
     if (char_id != char_hover_data.id) {
+
+        resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
 
         char_hover_data.id = char_id;
 
@@ -271,7 +280,6 @@ void StartState::update_char_hover_data() {
 
 void StartState::show_character_hover_ui(nk_context* ctx) {
 
-    update_char_hover_data();
     if (nk_begin(ctx, "CHARACTER", nk_rect(100, 100, 300, 500), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
         
         nk_layout_row_static(ctx, 200, 200, 1);

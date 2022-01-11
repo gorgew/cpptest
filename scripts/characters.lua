@@ -1,23 +1,33 @@
 characters = {}
 
-Character = {}
+Character = {
+    name = "DEFAULT_NAME",
+    spritesheet = "DEFAULT_SHEET.png",
+    stats = Stats,
+    equipment = {},
+    skills = {},
+    arts = {},
+    flying = false
+}
 
-function Character:new(arg_table) 
-    table.insert(characters, {
-        name = arg_table.name or "DEFAULT_NAME",
-        spritesheet = arg_table.spritesheet or "DEFAULT_SHEET.png",
+CharacterMeta = { __index = Character }
+
+function Character:new(arg_table)
+    table.insert(characters, setmetatable({
+        name = arg_table.name,
+        spritesheet = arg_table.spritesheet,
         stats = Stats:new(arg_table)
         ,
         {
-            hp_growth = arg_table.hp_growth or 0,
-            aim_growth = arg_table.aim_growth or 0
+            hp_growth = arg_table.hp_growth,
+            aim_growth = arg_table.aim_growth,
         },
-        equipment = arg_table.equipment or {},
-        skills = arg_table.skills or {},
+        equipment = arg_table.equipment,
+        skills = arg_table.skills,
         arts = arg_table.arts
-
-    })
+    }, CharacterMeta))
 end
+
 
 Bernie = Character:new{
     name = "Bernie",
