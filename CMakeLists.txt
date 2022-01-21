@@ -79,13 +79,13 @@ target_link_libraries(lib PRIVATE SDL2::SDL2)
 #                                     glm::glm
 #                                     fmt::fmt
 #                                     graphics)
-# set_target_properties(3d-cubes PROPERTIES LINKER_LANGUAGE CXX)
+# set_target_properties(3d-cubes PROPERTIES LINKER_LANGUAGE CXX
+
+add_executable(simulation simulation.cpp)
+target_link_libraries(simulation PRIVATE fmt::fmt)
 
 add_executable(cereal-test cereal-test.cpp)
 target_link_libraries(cereal-test PRIVATE cereal glm::glm)
-
-add_executable(entt-test entt-test.cpp)
-target_link_libraries(entt-test PRIVATE EnTT::EnTT)
 
 add_executable(time time-test.cpp)
 target_link_libraries(time PRIVATE SDL2::SDL2 fmt::fmt)

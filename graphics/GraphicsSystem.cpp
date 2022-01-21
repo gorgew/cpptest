@@ -99,7 +99,7 @@ void GraphicsSystem::draw_array_frame_component(struct array_frame f, struct pos
         draw_array_frame(f);      
 }
 
-void GraphicsSystem::draw(entt::registry& registry, float delta_time) {
+void GraphicsSystem::draw(entt::registry& registry, const float& delta_time) {
 
     //draw to the buffer
     

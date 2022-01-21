@@ -54,7 +54,7 @@ class GraphicsSystem {
          * @brief Draw the graphics components of entities
          * @param registry EnTT registry
         */
-        void draw(entt::registry& registry, float delta_time);
+        void draw(entt::registry& registry, const float& delta_time);
 
         void resize(int width, int height);
 

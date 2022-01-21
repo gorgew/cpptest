@@ -2,3 +2,4 @@
 **/build
 **/junk
 .DS_Store
+**/TiledPlugin/node_modules

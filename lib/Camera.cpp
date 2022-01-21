@@ -131,6 +131,22 @@ void Camera::update_yaw(float value) {
     update_vectors();
 }
 
+void Camera::center(float x, float y) {
+    pos = glm::vec3(x, y, pos.z);
+}
+
+void Camera::process_events(const float& delta_time) {
+    event_accum += static_cast<int>(delta_time);
+    const auto& top = event_queue.front();
+    if (event_accum > top.delay) {
+        event_accum -= top.delay;
+
+        using enum camera_event_t;
+
+        event_queue.pop();
+    } 
+}
+
 glm::vec3 Camera::get_position() {
     return pos + up;
 }

@@ -2,6 +2,21 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <queue>
+
+enum class camera_event_t {
+    pan,
+    rot_x,
+    rot_y,
+    rot_z
+};
+
+struct camera_event {
+    camera_event_t event_t;
+    float v1;
+    float v2;
+    int delay;
+};
 
 class Camera {
 
@@ -28,6 +43,9 @@ class Camera {
 
     float scale = 1.0f;
 
+    int event_accum = 0;
+    std::queue<camera_event> event_queue;
+
     void update_vectors();
     void update_view();
     void update_project();
@@ -42,9 +60,13 @@ class Camera {
         void update_pitch(float value);
         void zoom(float zoom_val, float delta_time); 
         void resize(int width, int height);
+        void center(float x, float y);
+
+        void process_events(const float& delta_time);
+
         glm::vec3 get_position();
         glm::mat4 get_view();
         glm::mat4 get_projection();
-
         glm::vec3 front;
+
 };
