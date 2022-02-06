@@ -51,9 +51,4 @@ namespace gorge {
     */
     struct array_frame build_array_frame(std::shared_ptr<Injector> injector, float width, float height, 
             std::string tex_array_name, unsigned int layer, std::string program_name);
-
-    struct animation build_animation(std::shared_ptr<Injector> injector, float width, float height, 
-            std::string tex_array_name, std::string program_name, 
-            std::vector<int> frames, std::vector<int> timings, bool loop,
-            float offset_x, float offset_y, float offset_z);
 }

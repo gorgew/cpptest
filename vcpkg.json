@@ -15,7 +15,7 @@
         "sdl2-mixer",
         {
             "name": "imgui",
-            "features": ["opengl3-glad-binding", "sdl2-binding"]
+            "features": ["docking-experimental", "opengl3-binding", "sdl2-binding"]
         }
     ]
 }

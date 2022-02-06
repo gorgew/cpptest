@@ -32,7 +32,7 @@ int main(void) {
     Window window {"Game", injector->config.height, injector->config.width};
     GraphicsSystem g_system{injector};
     FontBuilder f_builder{injector};
-    f_builder.add_font("arial", "../resources/FantasqueSansMono-Regular.ttf", 96);
+    f_builder.add_font("arial", "resources/FantasqueSansMono-Regular.ttf", 96);
 
     auto my_char_data = f_builder.get_char("arial", 96, 'm');
     fmt::print("my_char_data info:\n tex_id: {}, bearing_x {}\n", my_char_data.tex_id, my_char_data.bearing_x);
@@ -42,9 +42,9 @@ int main(void) {
     //TESTING GRAPHICS SYSTEM!!
     //REMOVE LATER!!
     //MAKING THE OPENGL DATA
-    injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("sprites-v", "../resources/sprites.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("array-tex", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
+    injector->tex_man.add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
+    injector->shader_man.add_shader("sprites-v", "resources/sprites.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("array-tex", "resources/array-tex.frag", GL_FRAGMENT_SHADER);
     injector->shader_man.add_program("sprites", {"sprites-v", "array-tex"});
     injector->shader_man.use("sprites");
 

@@ -51,7 +51,7 @@ int main(void) {
     GraphicsSystem g_system{injector};
     g_system.frame_delay = 5;
     FontBuilder f_builder{injector};
-    f_builder.add_font("arial", "../resources/FantasqueSansMono-Regular.ttf", 96);
+    f_builder.add_font("arial", "resources/FantasqueSansMono-Regular.ttf", 96);
 
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
@@ -75,6 +75,8 @@ int main(void) {
     ImGui_ImplSDL2_InitForOpenGL(window.windowPtr, window.glContext);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    
     //nuklear
     struct nk_context *ctx;
 
@@ -86,7 +88,7 @@ int main(void) {
     }
 
     /*
-    injector->tex_man.add_texture("profile_pic", "../resources/bush.png", false);
+    injector->tex_man.add_texture("profile_pic", "resources/bush.png", false);
     struct nk_image profile_pic = nk_image_id(static_cast<int>(injector->tex_man.get_id("profile_pic")));
     */
 
@@ -98,6 +100,8 @@ int main(void) {
     float sleep_secs = 0.0f;
 
     bool show_demo = true;
+    bool test_active = true;
+
     SDL_Event event;
     while (true) {
         
@@ -141,6 +145,15 @@ int main(void) {
         ImGui::NewFrame();
         ImGui::ShowDemoWindow(&show_demo);
 
+        ImGui::Begin("Test", &test_active);
+        // Display contents in a scrolling region
+        ImGui::TextColored(ImVec4(1,1,0,1), "Important Stuff");
+        ImGui::BeginChild("Scrolling");
+        for (int n = 0; n < 50; n++)
+            ImGui::Text("%04d: Some text", n);
+        ImGui::EndChild();
+        ImGui::End();
+
         ImGui::Render();
         glViewport(0, 0, (int)imgui_io.DisplaySize.x, (int)imgui_io.DisplaySize.y);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -169,7 +182,7 @@ int main(void) {
     }
 
 EXIT:
-    fmt::print("exit\n");
+    fmt::print("exit\n"); 
     
     nk_sdl_shutdown();
     

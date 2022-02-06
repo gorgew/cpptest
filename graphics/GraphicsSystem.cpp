@@ -31,8 +31,8 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     offscreenBuffer->addDepthStencilRenderBuffer(fbo_width, fbo_height);
     offscreenBuffer->checkCompiled();
     
-    injector->shader_man.add_shader("db_vert", "../resources/vert_tex.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("db_tex", "../resources/tex.frag", GL_FRAGMENT_SHADER);
+    injector->shader_man.add_shader("db_vert", "resources/vert_tex.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("db_tex", "resources/tex.frag", GL_FRAGMENT_SHADER);
     injector->shader_man.add_program("double_buffer", {"db_vert", "db_tex"});
     
     double_buffer_program = injector->shader_man.get_program_id("double_buffer");
@@ -141,8 +141,7 @@ void GraphicsSystem::draw(entt::registry& registry, const float& delta_time) {
     auto animation_view = registry.view<animation, position>();
     for (auto [entity, a, pos] : animation_view.each()) {
         a.accumulator += static_cast<int>(delta_time * 1000 );
-
-        fmt::print("Accumulated: {}\n", a.accumulator);
+        
         if (a.accumulator > a.timings[a.curr]) {
             //fmt::print("asdfasdf {}\n", a.frame_count);
             a.accumulator -= a.timings[a.curr];

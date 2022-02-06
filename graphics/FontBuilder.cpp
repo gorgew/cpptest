@@ -17,8 +17,8 @@ FontBuilder::FontBuilder(std::shared_ptr<Injector> injector) {
         std::exit(1);
     }
 
-    injector->shader_man.add_shader("fonts-v", "../resources/fonts.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("fonts-f", "../resources/fonts.frag", GL_FRAGMENT_SHADER);
+    injector->shader_man.add_shader("fonts-v", "resources/fonts.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("fonts-f", "resources/fonts.frag", GL_FRAGMENT_SHADER);
     injector->shader_man.add_program("fonts", {"fonts-v", "fonts-f"});
     program_id = injector->shader_man.get_program_id("fonts");
     glUseProgram(program_id);

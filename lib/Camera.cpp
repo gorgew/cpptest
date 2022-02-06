@@ -62,7 +62,7 @@ void Camera::pan(int x, int y, int z, float delta_time) {
 void Camera::zoom(float zoom_val, float delta_time) {
 
     scale += zoom_val * delta_time * zoom_speed;
-    
+    scale = std::abs(scale);
     update_project();
 }
 

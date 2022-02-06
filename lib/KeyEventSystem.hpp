@@ -19,7 +19,7 @@ class KeyAlreadyBoundError : public std::exception {
     public: 
         KeyAlreadyBoundError(SDL_Keycode key_code);
 
-         char* what()  throw();
+        char* what()  throw();
 };
 
 class KeyEventSystem {

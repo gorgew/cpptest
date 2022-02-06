@@ -54,7 +54,6 @@ void StartState::build_key_handlers() {
 }
 
 void StartState::build_mouse_handlers() {
-    fmt::print("Building mouse handlers");
 
     std::function<void(entt::registry&)> zoom_in = [=, this](entt::registry& registry) {
         camera->zoom(1, delta_time);
@@ -76,11 +75,11 @@ void StartState::build_mouse_handlers() {
 
 void StartState::build_music() {
     /*
-    injector->audio.add_music("dd-town", "../resources/dd-town.wav");
+    injector->audio.add_music("dd-town", "resources/dd-town.wav");
     injector->audio.enqueue_music("dd-town");
     //registry.emplace<audio_request>(music_command, "dd-town");
 
-    injector->audio.add_effect("slow-killer", "../resources/slow_killer.wav");
+    injector->audio.add_effect("slow-killer", "resources/slow_killer.wav");
     
     std::function<void(entt::registry&)> play_on_y= [=, this](entt::registry& registry) {
         injector->audio.enqueue_effect("slow-killer");
@@ -92,9 +91,9 @@ void StartState::build_music() {
 void StartState::build_gfx() {
     fmt::print("Building gfx\n");
     //Other systems
-    injector->tex_man.add_2d_array_texture("blank", "../resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("world.vert", "../resources/world.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("world.frag", "../resources/world.frag", GL_FRAGMENT_SHADER);
+    injector->tex_man.add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
+    injector->shader_man.add_shader("world.vert", "resources/world.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("world.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
     injector->shader_man.add_program("world", {"world.vert", "world.frag"});
     injector->shader_man.use("world");
     program_id  = injector->shader_man.get_program_id("world");
@@ -102,7 +101,7 @@ void StartState::build_gfx() {
     //sglUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
     
 
-    injector->shader_man.add_shader("billboard.vert", "../resources/billboard.vert", GL_VERTEX_SHADER);
+    injector->shader_man.add_shader("billboard.vert", "resources/billboard.vert", GL_VERTEX_SHADER);
     injector->shader_man.add_program("billboard", {"billboard.vert", "world.frag"});
 
     //glUniform1i(glGetUniformLocation(injector->shader_man.get_program_id("billboard"), "iTexture"), 0);
@@ -121,8 +120,8 @@ void StartState::build_gfx() {
     //glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
 
     /*
-    injector->tex_man.add_2d_array_texture("dummy-menu", "../resources/dummy-menu.png", 128, 128, 2);
-    injector->tex_man.add_2d_array_texture("tiles", "../resources/iso-h-v1.png", 16, 16, 4);
+    injector->tex_man.add_2d_array_texture("dummy-menu", "resources/dummy-menu.png", 128, 128, 2);
+    injector->tex_man.add_2d_array_texture("tiles", "resources/iso-h-v1.png", 16, 16, 4);
     */
 };
 void StartState::build_scene(entt::registry& registry) {
@@ -142,11 +141,11 @@ void StartState::build_scene(entt::registry& registry) {
    {
         std::vector<int> frames = {0, 1, 2, 3};
         std::vector<int> timings = {1000, 1000, 1000, 1000};
-        resources->add_animation("anim", "../resources/anim.png", 16, 16, 4, 100, 100, "billboard",
+        resources->add_animation("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
             true, frames, timings);
    }
   
-    injector->tex_man.add_2d_array_texture("art", "../resources/programmer-art.png", 16, 16, 12);
+    injector->tex_man.add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 12);
     std::vector<std::vector<int>> terrain_arr = {
         {2, 2, 3}, 
         {0, 1, 3},

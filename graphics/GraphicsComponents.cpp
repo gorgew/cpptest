@@ -67,24 +67,4 @@ struct array_frame gorge::build_array_frame(std::shared_ptr<Injector> injector, 
         layer
     };
 }
-
-struct animation gorge::build_animation(std::shared_ptr<Injector> injector, float width, float height, 
-            std::string tex_array_name, std::string program_name, 
-            std::vector<int> frames, std::vector<int> timings, bool loop,
-            float offset_x, float offset_y, float offset_z) {
-        
-        int n = frames.size();
-
-        animation a;
-        a.loop = loop;
-        a.frames.resize(n);
-        a.timings = timings;
-        a.offset = glm::vec3(offset_x, offset_y, offset_z);
-
-        for (int i = 0; i < n; i++) {
-            a.frames[i] =  build_array_frame(injector, width, height, tex_array_name, 
-            frames[i], program_name);
-        }
-
-}
    

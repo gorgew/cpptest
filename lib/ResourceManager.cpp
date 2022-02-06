@@ -14,12 +14,14 @@ void ResourceManager::load_character_resources(sol::state& lua) {
         std::string pic_name = char_name + "_profile";
 
         injector->tex_man.add_texture(pic_name,
-            "../resources/sprites/" + pic_name + ".png");
+            "resources/sprites/" + pic_name + ".png");
         profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
     }
-
 }
 
+void ResourceManager::load_tiles(sol::state& lua) {
+    
+}
 
 struct nk_image ResourceManager::get_profile_pic(std::string name) {
 

@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-set(VCPKG_FEATURE_FLAGS "versions")
-project(SdlTest VERSION 0.0.1)
+project(Game VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,8 +15,8 @@ else()
     message(STATUS "Compiler: Unsupported")
 endif()
 
-file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(fmt CONFIG REQUIRED)
 
@@ -56,7 +55,7 @@ add_subdirectory(lib)
 add_subdirectory(graphics)
 add_subdirectory(ecs)
 
-add_subdirectory(tests)
+# add_subdirectory(tests)
 
 add_executable(Testbench testbench.cpp)
 add_executable(Functional functional.cpp)
@@ -84,8 +83,10 @@ target_link_libraries(lib PRIVATE SDL2::SDL2)
 add_executable(simulation simulation.cpp)
 target_link_libraries(simulation PRIVATE fmt::fmt)
 
+#[[
 add_executable(cereal-test cereal-test.cpp)
 target_link_libraries(cereal-test PRIVATE cereal glm::glm)
+]]#
 
 add_executable(time time-test.cpp)
 target_link_libraries(time PRIVATE SDL2::SDL2 fmt::fmt)
@@ -107,3 +108,16 @@ target_link_libraries(game PRIVATE
         nuklear
         )
 target_include_directories(game PRIVATE ${LUA_INCLUDE_DIR})
+
+add_custom_target(assets ALL)
+
+add_custom_command(TARGET assets PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/resources/ $<TARGET_FILE_DIR:game>/resources/)
+
+add_custom_command(TARGET assets PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/scripts/ $<TARGET_FILE_DIR:game>/scripts/)
+
+add_dependencies(game assets)
+                       

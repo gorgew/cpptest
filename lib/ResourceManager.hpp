@@ -46,4 +46,6 @@ class ResourceManager {
             std::vector<int> frames, std::vector<int> timings, glm::vec3 offset = glm::vec3(0.0f));
 
         void set_animation(entt::registry& registry, entt::entity entity, std::string name);
+
+        void load_tiles(sol::state& lua);
 };

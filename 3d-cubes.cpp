@@ -124,20 +124,20 @@ int main(void) {
     GLuint VAO = va_manager->get_array_id("cube");
 
     auto tex_man = std::make_unique<TextureManager>();
-    //tex_man->add_texture("../resources/awesomeface.png", "awesome-face");
+    //tex_man->add_texture("resources/awesomeface.png", "awesome-face");
     //std::cout << "TexID: " << tex_man->get_id("awesome-face") << "\n"; 
 
-    tex_man->add_texture("../resources/blank.png", "blank");
-    //tex_man->add_2d_array_texture("array-tex-test", "../resources/array-tex-test.png", 1, 1, 4);
-    //tex_man->add_2d_array_texture("array-tex-test", "../resources/nums-h.png", 32, 32, 6);
-    tex_man->add_2d_array_texture("array-tex-test", "../resources/NumsPacked.png", 32, 32, 6);
-    //tex_man->add_2d_array_texture("array-tex-test", "../resources/single-px-h.png", 1, 1, 8);
-    //tex_man->add_2d_array_texture("array-tex-test", "../resources/2-2-px-pack.png", 2, 2, 9);
-    //tex_man->add_2d_array_texture("array-tex-test", "../resources/px.png", 1, 1, 1);
+    tex_man->add_texture("resources/blank.png", "blank");
+    //tex_man->add_2d_array_texture("array-tex-test", "resources/array-tex-test.png", 1, 1, 4);
+    //tex_man->add_2d_array_texture("array-tex-test", "resources/nums-h.png", 32, 32, 6);
+    tex_man->add_2d_array_texture("array-tex-test", "resources/NumsPacked.png", 32, 32, 6);
+    //tex_man->add_2d_array_texture("array-tex-test", "resources/single-px-h.png", 1, 1, 8);
+    //tex_man->add_2d_array_texture("array-tex-test", "resources/2-2-px-pack.png", 2, 2, 9);
+    //tex_man->add_2d_array_texture("array-tex-test", "resources/px.png", 1, 1, 1);
     auto shader_man = std::make_unique<ShaderManager>();
-    shader_man->add_shader("mvp.vert", "../resources/mvp.vert", GL_VERTEX_SHADER);
+    shader_man->add_shader("mvp.vert", "resources/mvp.vert", GL_VERTEX_SHADER);
 
-    shader_man->add_shader("array-tex.frag", "../resources/array-tex.frag", GL_FRAGMENT_SHADER);
+    shader_man->add_shader("array-tex.frag", "resources/array-tex.frag", GL_FRAGMENT_SHADER);
     shader_man->add_program("array-tex", {"mvp.vert", "array-tex.frag"});
 
     std::cout << "shadere_program: " << shader_man->get_program_id("array-tex") << "\n";

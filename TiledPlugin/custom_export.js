@@ -17,10 +17,10 @@ var customMapFormat = {
         for (var i = 0; i < 3; ++i) {
 
             if (i == 0) {
-                file.write("    EnvMap = {\n");
+                file.write("    TerrainMap = {\n");
             }
             else if (i == 1) {
-                file.write("    TerrainMap = {\n");
+                file.write("    EnvMap = {\n");
             }
             else if (i == 2) {
                 file.write("    CharMap = {\n");
