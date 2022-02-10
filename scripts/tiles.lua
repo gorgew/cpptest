@@ -2,7 +2,7 @@ Tiles = {}
 
 Tile = {
     name = "DEFAULT_TILE",
-    tilemap = "default_map.png",
+    tileset = "DEFAULT_TILESET",
     index = 0,
     movement = 0,
     dodge = 0,
@@ -32,15 +32,30 @@ end
 function Tile:new(arg_table)
     table.insert(Tiles, setmetatable({
         name = arg_table.name,
-        tilemap = arg_table.tilemap,
+        index = arg_table.index,
+        tileset = arg_table.tileset,
         movement = arg_table.movement,
+        dodge = arg_table.dodge,
+        heal = arg_table.dodge,
         walkable = arg_table.walkable,
         flyable = arg_table.flyable
     }, TileMeta))
 end
 
-debug_wall = Tile:new({
-    name = "debug_wall",
+blank_tile = Tile:new({
+    name = "blank_tile",
+    index = 0,
+    movement = 0
+})
+
+v_tile = Tile:new({
+    name = "v_tile",
+    index = 2,
+    movement = 0
+})
+
+x_tile = Tile:new({
+    name = "x_tile",
     index = 1,
-    movement = -99
+    movement = 0
 })

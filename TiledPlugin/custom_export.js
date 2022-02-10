@@ -11,6 +11,7 @@ var customMapFormat = {
         var file = new TextFile(fileName, TextFile.WriteOnly);
 
         file.write(cleanedFileName + " = Map:new {\n");
+        file.write("    name = \"" + map.property("Name") + "\",\n");
         file.write("    width = " + map.width + ",\n");
         file.write("    height = " + map.height + ",\n");
 
@@ -39,14 +40,14 @@ var customMapFormat = {
                             file.write("_");
                         }
                         else {
-                            file.write(currTile.type);
+                            file.write("\"" + currTile.type + "\"");
                         }
                         
                         if (x != maxWidthIndex) {
                             file.write(", ")
                         }
                     }
-                    file.write("\n");
+                    file.write(",\n");
                 }
                 file.write("    }");
                 if (i != 2) {

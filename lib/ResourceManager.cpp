@@ -19,10 +19,6 @@ void ResourceManager::load_character_resources(sol::state& lua) {
     }
 }
 
-void ResourceManager::load_tiles(sol::state& lua) {
-    
-}
-
 struct nk_image ResourceManager::get_profile_pic(std::string name) {
 
     if (profile_pics.contains(name)) {

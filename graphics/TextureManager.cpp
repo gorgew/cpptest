@@ -30,10 +30,12 @@ void TextureManager::add_2d_array_texture(const std::string name, std::string fi
         data = stbi_load(filepath.c_str(), &img_width, &img_height, &img_channels, 0);
 
         if (!data) {
-            throw new std::invalid_argument("TextureManager:: data loading failure");
+            fmt::print("TextureManager:: data loading failure @ {}\n", filepath);
+            throw new std::invalid_argument("");
         }
 
         if (img_width % width != 0 || img_height % height != 0) {
+            fmt::print("TextureManager:: Invalid height/ width");
             throw new std::invalid_argument("TextureManager:: Invalid height/ width");
         }
         

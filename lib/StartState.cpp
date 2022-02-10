@@ -163,8 +163,11 @@ void StartState::build_scene(entt::registry& registry) {
         {-1, -1, -1}
     };
 
-    tmap = {injector, "art", "world", "billboard"};
-    tmap.add_tiles(registry, terrain_arr, env_arr, char_arr);
+    tmap = {injector, "art", "world", "billboard", registry};
+    tmap.load_tileset(scripts->lua);
+    tmap.load_tiles(scripts->lua);
+    tmap.load_map("Test", scripts->lua, registry);
+    //tmap.add_tiles(registry, terrain_arr, env_arr, char_arr);
 
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
     
@@ -181,6 +184,7 @@ void StartState::process_systems(entt::registry& registry) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
 
+        /*
         if (tmap.get_char_on_cursor(registry) != entt::null) {
             ui_show_character_hover = true;
             update_char_hover_data(registry);
@@ -188,6 +192,7 @@ void StartState::process_systems(entt::registry& registry) {
         else {
             ui_show_character_hover = false;
         }
+        */
     }
 }
 

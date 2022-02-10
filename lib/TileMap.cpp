@@ -5,7 +5,7 @@
 #include <fmt/printf.h>
 
 TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,std::string tex_name, std::string terrain_shader, 
-    std::string character_shader) {    
+    std::string character_shader, entt::registry& registry) {    
 
     this->injector = injector;
     tile_width = injector->config.tile_width;
@@ -13,17 +13,17 @@ TileMap2D::TileMap2D(std::shared_ptr<Injector> injector,std::string tex_name, st
     this->tex_name = tex_name;
     this->terrain_shader = terrain_shader;
     this->character_shader = character_shader;
-}
 
-void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>> terrain_arr,
-                std::vector<std::vector<int>> env_arr, std::vector<std::vector<int>> char_arr) {
-    
     cursor = registry.create();
     auto cursor_frame = gorge::build_array_frame(injector, tile_width, tile_height,
                         tex_name, cursor_id, terrain_shader);
     registry.emplace<array_frame>(cursor, cursor_frame);
     registry.emplace<ui>(cursor);
     registry.emplace<position>(cursor, glm::vec3(0.0f, 0.0f, 0.0f));
+}
+
+void TileMap2D::add_tiles(entt::registry& registry, std::vector<std::vector<int>> terrain_arr,
+                std::vector<std::vector<int>> env_arr, std::vector<std::vector<int>> char_arr) {
 
     {
         int y = terrain_arr.size();
@@ -173,4 +173,102 @@ entt::entity TileMap2D::get_terrain_on_cursor(entt::registry& registry) {
     else {
         return entt::null;
     }
+}
+
+void TileMap2D::load_tileset(sol::state& lua) {
+    sol::table tilesets = lua["Tilesets"];
+
+    for (int i = 1; i <= tilesets.size(); i++) {
+        std::string name = tilesets[i]["name"];
+        std::string fpath = tilesets[i]["tileset"];
+        int width = tilesets[i]["width"];
+        int height = tilesets[i]["height"];
+        int count = tilesets[i]["count"];
+
+        injector->tex_man.add_2d_array_texture(name, fpath, width, height, count);
+
+        this->tilesets.insert(name);
+        fmt::print("Loaded tileset {} @ \n", name, fpath);
+    }
+}
+
+void TileMap2D::load_tiles(sol::state& lua) {
+    sol::table tiles = lua["Tiles"];
+
+    for (int i = 1; i <= tiles.size(); i++) {
+        std::string name = tiles[i]["name"];
+        std::string l_tileset = tiles[i]["tileset"];
+        if (!tilesets.contains(l_tileset)) {
+            fmt::print("Loading tile {}, tileset {} not found\n", name, l_tileset);
+        }
+        auto& value = tile_data[name];
+
+        value = {
+            .tileset = l_tileset,
+            .index = tiles[i]["index"],
+            .movement = tiles[i]["movement"],
+            .dodge = tiles[i]["dodge"],
+            .heal = tiles[i]["heal"],
+            .walkable = tiles[i]['walkable'],
+            .flyable = tiles[i]['flyable']
+        };
+
+        fmt::print("Loaded tile {} index {}\n", name, (int) tiles[i]["index"]);
+    }
+}
+
+void TileMap2D::reset_map() {
+    last_env_id = entt::null;
+    last_terrain_id = entt::null;
+    last_char_id = entt::null;
+
+    env_cache.clear();
+    terrain_cache.clear();
+    char_cache.clear();
+
+    terrain_tile_data.clear();
+}
+
+void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& registry) {
+    reset_map();
+
+    sol::table map = lua["Maps"][name];
+    int width = map["width"];
+    int height = map["height"];
+    sol::table terrain_map = map["TerrainMap"];
+
+    terrain_cache.resize(height);
+    for (int i = 0; i < height; i++) {
+        terrain_cache.resize(width);
+    }
+        
+    terrain_tile_data.resize(height);
+    for (int i = 0; i < height; i++) {
+        terrain_tile_data.resize(width);
+    }
+    
+    for (int y = height - 1; y >= 0; y--) {
+        for (int x = width; x > 0; x--) {
+            int index = y * width + x;
+            std::string tile_name = terrain_map[index];
+            fmt::print("TILE {} @ INDEX {}\n", tile_name, index);
+            
+            auto entity = registry.create();
+            
+            struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
+                    tile_data[tile_name].tileset, tile_data[tile_name].index, terrain_shader);
+            
+            registry.emplace<array_frame>(entity, arr_f);
+            
+            registry.emplace<position>(entity, glm::vec3(
+                    tile_height / 2.0f + x * tile_height, 
+                    tile_width / 2.0f + (height - y) * tile_width, 0.0f));
+            /*
+            //CHANGE LATER
+            registry.emplace<terrain>(entity, 1);
+            terrain_cache[y][x] = entity;
+            */
+        }
+    }
+    
 }

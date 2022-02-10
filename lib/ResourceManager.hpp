@@ -12,23 +12,24 @@
 #define MAX_VERTEX_MEMORY 512 * 1024
 #define MAX_ELEMENT_MEMORY 128 * 1024
 #include <nuklear/nuklear.h>
-
+#include <robin_hood/robin_hood.h>
 #include <ScriptEngine.hpp>
 #include <Injector.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <GraphicsComponents.hpp>
+#include <GameObjectComponents.hpp>
 #include <glm/glm.hpp>
 
 class ResourceManager {
 
-    std::unordered_map<std::string, struct nk_image> profile_pics;
+    robin_hood::unordered_map<std::string, struct nk_image> profile_pics;
 
-    std::unordered_map<std::string, std::vector<array_frame>> frame_vectors;
-    std::unordered_map<std::string, std::vector<int>> timing_vectors;
-    std::unordered_map<std::string, glm::vec3> offsets;
-    std::unordered_map<std::string, bool> loops;
+    robin_hood::unordered_map<std::string, std::vector<array_frame>> frame_vectors;
+    robin_hood::unordered_map<std::string, std::vector<int>> timing_vectors;
+    robin_hood::unordered_map<std::string, glm::vec3> offsets;
+    robin_hood::unordered_map<std::string, bool> loops;
 
     std::shared_ptr<Injector> injector;
 
@@ -46,6 +47,4 @@ class ResourceManager {
             std::vector<int> frames, std::vector<int> timings, glm::vec3 offset = glm::vec3(0.0f));
 
         void set_animation(entt::registry& registry, entt::entity entity, std::string name);
-
-        void load_tiles(sol::state& lua);
 };
