@@ -1,0 +1,3 @@
+Roster = {}
+
+table.insert(Roster, "")

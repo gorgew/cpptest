@@ -209,12 +209,67 @@ void TileMap2D::load_tiles(sol::state& lua) {
             .movement = tiles[i]["movement"],
             .dodge = tiles[i]["dodge"],
             .heal = tiles[i]["heal"],
-            .walkable = tiles[i]['walkable'],
-            .flyable = tiles[i]['flyable']
+            .walkable = tiles[i]["walkable"],
+            .flyable = tiles[i]["flyable"]
         };
 
         fmt::print("Loaded tile {} index {}\n", name, (int) tiles[i]["index"]);
     }
+}
+
+void TileMap2D::place_characters(std::string name, sol::state& lua, entt::registry& registry) {
+    
+    sol::table map = lua["Maps"][name];
+    sol::table char_map = map["CharMap"];
+    sol::table characters = lua["Characters"];
+    sol::table roster = lua["Roster"];
+    
+    int roster_size = roster.size();
+    int roster_index = 1;
+    // Gather spawn points
+    std::vector<std::pair<int, int>> spawn_points;
+    int width = map["width"];
+    int height = map["height"];
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = width - 1; x >= 0; x--) {
+            int index = y * width + x;
+            std::string char_map_entry = char_map[index];
+            if (char_map_entry != "_") {
+                
+                int x_index = x - 1;
+                int y_index = height - y - 1;
+                spawn_points.emplace_back(std::make_pair(x_index, y_index)); //Use later
+
+                std::string char_name = roster[roster_index];
+                
+                auto entity = registry.create();
+                
+                struct array_frame arr_f = gorge::build_array_frame(injector, 
+                    tile_width, tile_height,
+                    "asdf",
+                    0,
+                    character_shader);
+                registry.emplace<array_frame>(entity, arr_f);
+                
+                registry.emplace<position>(entity, glm::vec3(
+                    tile_height + x_index * tile_height, 
+                    tile_width + y_index * tile_width, 0.0f));
+
+                registry.emplace<character>(entity, 1);
+                //char_cache[x_index][y_index] = entity;
+
+                if (roster_index <= roster_size) {
+                    roster_index++;
+                }
+                else {
+                    goto LOOP_EXIT;
+                }
+                
+            }
+        }
+    } 
+    LOOP_EXIT:;
 }
 
 void TileMap2D::reset_map() {
@@ -237,14 +292,11 @@ void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& regi
     int height = map["height"];
     sol::table terrain_map = map["TerrainMap"];
 
-    terrain_cache.resize(height);
-    for (int i = 0; i < height; i++) {
-        terrain_cache.resize(width);
-    }
-        
-    terrain_tile_data.resize(height);
-    for (int i = 0; i < height; i++) {
-        terrain_tile_data.resize(width);
+    terrain_cache.resize(width);
+    terrain_tile_data.resize(width);
+    for (int i = 0; i < width; i++) {
+        terrain_cache[i].resize(height);
+        terrain_tile_data[i].resize(height);
     }
     
     for (int y = height - 1; y >= 0; y--) {
@@ -259,16 +311,19 @@ void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& regi
                     tile_data[tile_name].tileset, tile_data[tile_name].index, terrain_shader);
             
             registry.emplace<array_frame>(entity, arr_f);
-            
+            int x_index = x - 1;
+            int y_index = height - y - 1;
             registry.emplace<position>(entity, glm::vec3(
-                    tile_height / 2.0f + x * tile_height, 
-                    tile_width / 2.0f + (height - y) * tile_width, 0.0f));
-            /*
-            //CHANGE LATER
+                    tile_height / 2.0f + x_index * tile_height, 
+                    tile_width / 2.0f + y_index * tile_width, 0.0f));
+            
             registry.emplace<terrain>(entity, 1);
-            terrain_cache[y][x] = entity;
-            */
+            fmt::print("X {} Y {}\n", x_index, y_index);
+            terrain_cache[x_index][y_index] = entity;
+            terrain_tile_data[x_index][y_index] = tile_name;
         }
     }
+
+    place_characters(name, lua, registry);
     
 }

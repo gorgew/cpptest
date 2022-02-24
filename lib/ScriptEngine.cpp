@@ -25,11 +25,4 @@ ScriptEngine::ScriptEngine() {
         lua.script_file(f.path());
     }
     
-    sol::table characters = lua["characters"];
-    
-    //std::string s = characters[1]["name"];
-    for (int i = 1; i <= characters.size(); i++) {
-        fmt::print("i: {} Name: {}\n", i, (std::string) characters[i]["name"]);
-    }
-    
 }

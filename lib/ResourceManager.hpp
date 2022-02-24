@@ -33,6 +33,9 @@ class ResourceManager {
 
     std::shared_ptr<Injector> injector;
 
+    int char_sprite_dim = 32;
+    int char_sheet_count = 2;
+
     public:
 
         ResourceManager(std::shared_ptr<Injector> injector);

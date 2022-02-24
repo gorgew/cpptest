@@ -1,8 +1,9 @@
-characters = {}
+Characters = {}
+
+Roster = {"Bernie"}
 
 Character = {
-    name = "DEFAULT_NAME",
-    spritesheet = "DEFAULT_SHEET.png",
+    spritesheet = "resources/DEFAULT_CHARACTER.png",
     stats = Stats,
     equipment = {},
     skills = {},
@@ -13,8 +14,7 @@ Character = {
 CharacterMeta = { __index = Character }
 
 function Character:new(arg_table)
-    table.insert(characters, setmetatable({
-        name = arg_table.name,
+    Characters[arg_table.name] = setmetatable({
         spritesheet = arg_table.spritesheet,
         stats = Stats:new(arg_table)
         ,
@@ -25,7 +25,7 @@ function Character:new(arg_table)
         equipment = arg_table.equipment,
         skills = arg_table.skills,
         arts = arg_table.arts
-    }, CharacterMeta))
+    }, CharacterMeta)
 end
 
 

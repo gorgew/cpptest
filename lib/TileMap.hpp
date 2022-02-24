@@ -43,6 +43,8 @@ class TileMap2D {
     robin_hood::unordered_map<std::string, tile_data_t> tile_data;
     robin_hood::unordered_set<std::string> tilesets;
 
+    void place_characters(std::string name, sol::state& lua, entt::registry& registry);
+
     public:
         unsigned int last_env_id;
         unsigned int last_char_id;

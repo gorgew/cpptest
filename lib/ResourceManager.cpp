@@ -7,16 +7,22 @@ ResourceManager::ResourceManager(std::shared_ptr<Injector> injector) {
 
 void ResourceManager::load_character_resources(sol::state& lua) {
 
-    sol::table characters = lua["characters"];
+    sol::table characters = lua["Characters"];
     
-    for (int i = 1; i <= characters.size(); i++) {
-        std::string char_name = characters[i]["name"];
+    for (const auto& pair : characters) {
+        std::string char_name = (pair.first).as<std::string>();
         std::string pic_name = char_name + "_profile";
 
         injector->tex_man.add_texture(pic_name,
             "resources/sprites/" + pic_name + ".png");
         profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
+        
+        std::string fpath = characters[char_name]["spritesheet"];
+        injector->tex_man.add_2d_array_texture("asdf", fpath, char_sprite_dim, 
+            char_sprite_dim, 
+            char_sheet_count);
     }
+    
 }
 
 struct nk_image ResourceManager::get_profile_pic(std::string name) {

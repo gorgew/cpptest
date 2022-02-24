@@ -269,17 +269,19 @@ void StartState::display_demo(nk_context* ctx) {
 void StartState::update_char_hover_data(entt::registry& registry) {
     
     unsigned int char_id = tmap.last_char_id;
+    /*
     if (char_id != char_hover_data.id) {
 
         resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
 
         char_hover_data.id = char_id;
 
-        sol::table characters = scripts->lua["characters"];
-        char_hover_data.char_name = characters[char_id]["name"];
-        char_hover_data.label_name = "Name: " + char_hover_data.char_name;
-        char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
+        sol::table characters = scripts->lua["Characters"];
+        //char_hover_data.char_name = characters[char_id]["name"];
+        //char_hover_data.label_name = "Name: " + char_hover_data.char_name;
+        //char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
     }
+    */
 }
 
 void StartState::show_character_hover_ui(nk_context* ctx) {
