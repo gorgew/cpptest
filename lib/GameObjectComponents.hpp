@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 struct world_pos {
     unsigned int x;
     unsigned int y;
@@ -13,15 +15,18 @@ struct old_world_pos {
 };
 
 struct terrain {
-    unsigned int type_id;
+    unsigned int id;
+    std::string name;
 };
 
 struct environment {
-    unsigned int type_id;
+    unsigned int id;
+    std::string name;
 };
 
 struct character {
-    unsigned int type_id;
+    unsigned int id;
+    std::string name;
 };
 
 struct ui {

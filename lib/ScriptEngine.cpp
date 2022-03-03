@@ -18,6 +18,7 @@ ScriptEngine::ScriptEngine() {
     lua.script_file("scripts/tileset.lua");
     lua.script_file("scripts/tiles.lua");
     lua.script_file("scripts/map.lua");
+    lua.script_file("scripts/environment.lua");
 
     namespace fs = std::filesystem;
     std::string path = "scripts/maps";

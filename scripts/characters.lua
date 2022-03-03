@@ -1,6 +1,6 @@
 Characters = {}
 
-Roster = {"Bernie"}
+Roster = {"Bob"}
 
 Character = {
     spritesheet = "resources/DEFAULT_CHARACTER.png",
@@ -29,8 +29,8 @@ function Character:new(arg_table)
 end
 
 
-Bernie = Character:new{
-    name = "Bernie",
+Bob = Character:new{
+    name = "Bob",
     hp = 69,
     aim = 69,
     movement = 1,

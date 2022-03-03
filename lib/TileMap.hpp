@@ -24,11 +24,6 @@ class TileMap2D {
     std::string character_shader;
     unsigned int tile_width;
     unsigned int tile_height;
-    
-    int selected_tex;
-    glm::vec2 selected;
-
-    int range_tex;
 
     entt::entity cursor;
     int cursor_id = 4;
@@ -42,19 +37,20 @@ class TileMap2D {
     std::vector<std::vector<std::string>> terrain_tile_data;
     robin_hood::unordered_map<std::string, tile_data_t> tile_data;
     robin_hood::unordered_set<std::string> tilesets;
-
+    
+    void place_tiles(std::string name, sol::state& lua, entt::registry& registry);
+    void place_environment(std::string name, sol::state& lua, entt::registry& registry);
     void place_characters(std::string name, sol::state& lua, entt::registry& registry);
 
     public:
-        unsigned int last_env_id;
-        unsigned int last_char_id;
-        unsigned int last_terrain_id;
+        std::string last_env;
+        std::string last_char;
+        std::string last_terrain;
 
         TileMap2D() = default;
         TileMap2D(std::shared_ptr<Injector>, std::string tex_name, std::string terrain_shader, 
                 std::string character_shader, entt::registry& registry);
-        void add_tiles(entt::registry&, std::vector<std::vector<int>>,
-                std::vector<std::vector<int>>, std::vector<std::vector<int>>);
+
         /**
          * Moves cursor to mouse coords in world space
          */
@@ -70,4 +66,26 @@ class TileMap2D {
         void load_tileset(sol::state& lua);
 
         void load_tiles(sol::state& lua);
+
+        struct range {
+            glm::vec2 center;
+            std::vector<std::vector<char>> in_range;
+
+            bool is_in_range(int x, int y);
+        };
+
+        //Set an anchor at current location
+        void enable_anchor_mode();
+
+        //Draw a path from anchor to cursor location
+        void enable_draw_path_to_cursor();
+
+        void enable_show_range();
+
+        //Get coordinates in range from entity at (x, y) with magnitude 
+        range get_range_no_collision(int x, int y, int magnitude);
+
+        //Get coordinates in range from entity at (x, y) with magnitude with colliding against 
+        range get_range_collision(int x, int y, int magnitude);
+
 };      

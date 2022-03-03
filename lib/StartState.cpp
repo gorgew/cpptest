@@ -109,7 +109,7 @@ void StartState::build_gfx() {
     injector->shader_man.add_ubo("camera_ubo", sizeof(camera_data), 0);
     injector->shader_man.bind_ubo("world", "camera_ubo", 0);
 
-    camera.reset( new Camera(static_cast<float>(injector->config.width), 
+    camera.reset(new Camera(static_cast<float>(injector->config.width), 
         static_cast<float>(injector->config.height),
         100.0f, 
         1.0f,
@@ -146,28 +146,11 @@ void StartState::build_scene(entt::registry& registry) {
    }
   
     injector->tex_man.add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 12);
-    std::vector<std::vector<int>> terrain_arr = {
-        {2, 2, 3}, 
-        {0, 1, 3},
-        {0, 1, 6},
-        {1, 1, 1}
-    };
-    std::vector<std::vector<int>> env_arr = {
-        {-1, -1, -1}, 
-        {-1, -1, -1},
-        {-1, -1, -1}
-    };
-    std::vector<std::vector<int>> char_arr = {
-        {-1, -1, -1}, 
-        {-1, 8, -1},
-        {-1, -1, -1}
-    };
-
+    
     tmap = {injector, "art", "world", "billboard", registry};
     tmap.load_tileset(scripts->lua);
     tmap.load_tiles(scripts->lua);
     tmap.load_map("Test", scripts->lua, registry);
-    //tmap.add_tiles(registry, terrain_arr, env_arr, char_arr);
 
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
     
@@ -184,7 +167,7 @@ void StartState::process_systems(entt::registry& registry) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
 
-        /*
+        
         if (tmap.get_char_on_cursor(registry) != entt::null) {
             ui_show_character_hover = true;
             update_char_hover_data(registry);
@@ -192,7 +175,8 @@ void StartState::process_systems(entt::registry& registry) {
         else {
             ui_show_character_hover = false;
         }
-        */
+        
+        
     }
 }
 
@@ -200,23 +184,6 @@ std::shared_ptr<State> StartState::next(entt::registry& registry) {
 
     registry.clear();
     return std::make_shared<CreditsState>(injector, registry);
-}
-
-void StartState::move(entt::registry& registry, int x, int y) {
-
-    auto view = registry.view<position, character, world_pos>();
-    for (auto [e, pos, character, w_pos] : view.each()) {
-        if (character.type_id == player_id) {
-            registry.emplace_or_replace<old_world_pos>(e, w_pos.x, w_pos.y, w_pos.z);
-            w_pos.x += x;
-            w_pos.y += y;
-            pos.pos += move_vec(x, y);
-        }
-    }
-}
-
-glm::vec3 StartState::move_vec(int x, int y) {
-    return glm::vec3(injector->config.tile_width * x, injector->config.tile_height * y, 0.0f);
 }
 
 void StartState::resize(int x, int y) {
@@ -246,8 +213,8 @@ void StartState::display_demo(nk_context* ctx) {
         
         if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
             NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-            NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
-        {
+            NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+                
             enum {EASY, HARD};
             static int op = EASY;
             static int property = 20;
@@ -268,20 +235,18 @@ void StartState::display_demo(nk_context* ctx) {
 
 void StartState::update_char_hover_data(entt::registry& registry) {
     
-    unsigned int char_id = tmap.last_char_id;
-    /*
-    if (char_id != char_hover_data.id) {
+    std::string char_name = tmap.last_char;
+    
+    if (char_name != char_hover_data.char_name) {
 
         resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
-
-        char_hover_data.id = char_id;
-
+        
         sol::table characters = scripts->lua["Characters"];
-        //char_hover_data.char_name = characters[char_id]["name"];
-        //char_hover_data.label_name = "Name: " + char_hover_data.char_name;
-        //char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
+        char_hover_data.char_name = char_name;
+        char_hover_data.label_name = "Name: " + char_hover_data.char_name;
+        char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
     }
-    */
+    
 }
 
 void StartState::show_character_hover_ui(nk_context* ctx) {

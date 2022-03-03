@@ -11,17 +11,12 @@
 #include "ResourceManager.hpp"
 
 struct ui_character_data {
-    unsigned int id;
     std::string char_name;
     std::string label_name;
     struct nk_image profile_pic;
 };
 
 class StartState : public State {
-
-    static constexpr int grid_width = 3;
-    static constexpr int grid_height = 3;
-    static constexpr int player_id = 12;
 
     enum class next_state {
         game_state,
@@ -32,15 +27,6 @@ class StartState : public State {
     std::shared_ptr<ResourceManager> resources;
 
     TileMap2D tmap;
-    /**
-     * @brief add to position vector
-    */
-    glm::vec3 move_vec(int x, int y);
-
-    /**
-     * @brief move in screen and cache
-    */
-    void move(entt::registry& registry, int x, int y);
 
     void build_key_handlers();
     void build_mouse_handlers();

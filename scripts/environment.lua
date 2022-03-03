@@ -13,11 +13,10 @@ function EnvObj:interact()
 end
 
 function EnvObj:new(arg_table)
-    table.insert(EnvObjs, setmetatable({
-        name = arg_table.name,
+    EnvObjs[arg_table.name] = setmetatable({
         flammable = arg_table.flammable,
         on_fire = arg_table.on_fire,
         hp = arg_table.hp,
         can_interact = arg_table.can_interact
-    }, EnvMeta))
+    }, EnvMeta)
 end

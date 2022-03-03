@@ -18,7 +18,7 @@ void ResourceManager::load_character_resources(sol::state& lua) {
         profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
         
         std::string fpath = characters[char_name]["spritesheet"];
-        injector->tex_man.add_2d_array_texture("asdf", fpath, char_sprite_dim, 
+        injector->tex_man.add_2d_array_texture(fpath, fpath, char_sprite_dim, 
             char_sprite_dim, 
             char_sheet_count);
     }
