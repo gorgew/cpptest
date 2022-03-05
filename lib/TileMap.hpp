@@ -67,11 +67,17 @@ class TileMap2D {
 
         void load_tiles(sol::state& lua);
 
+        typedef std::optional<glm::ivec2> coord_option;
         struct range {
-            glm::vec2 center;
-            std::vector<std::vector<char>> in_range;
+            int length;
+            glm::ivec2 center;
+            std::vector<std::vector<coord_option>> in_range; //Holds parent node, coords are relative to center
 
-            bool is_in_range(int x, int y);
+            bool in_bounds(glm::ivec2 coord);
+            std::vector<glm::ivec2> get_path_from_center(int x, int y);
+            glm::ivec2 local_to_array_coords(glm::ivec2 coord);
+
+            void print();
         };
 
         //Set an anchor at current location

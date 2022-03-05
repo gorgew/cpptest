@@ -3,6 +3,7 @@
 #include "PhysicsComponents.hpp"
 #include "GameObjectComponents.hpp"
 #include <fmt/printf.h>
+#include <stack>
 
 TileMap2D::TileMap2D(std::shared_ptr<Injector> injector, std::string tex_name, 
     std::string terrain_shader, std::string character_shader, entt::registry& registry) {    
@@ -19,6 +20,9 @@ TileMap2D::TileMap2D(std::shared_ptr<Injector> injector, std::string tex_name,
     registry.emplace<array_frame>(cursor, cursor_frame);
     registry.emplace<ui>(cursor);
     registry.emplace<position>(cursor, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    auto x = get_range_no_collision(1, 1, 2);
+    x.print(); 
 }
 
 void TileMap2D::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
@@ -290,42 +294,92 @@ void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& regi
     }
 
     place_characters(name, lua, registry);
-    
+}
+
+bool TileMap2D::range::in_bounds(glm::ivec2 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.x < length && coord.y < length;
+}
+
+glm::ivec2 TileMap2D::range::local_to_array_coords(glm::ivec2 coord) {
+    int center = length / 2;
+    fmt::print("length:  {}", length);
+    return glm::ivec2(center + coord.x, center + coord.y);
+}
+
+void TileMap2D::range::print() {
+    for (int i = 0; i < length; i++) {
+        for (int j = 0; j < length; j++) {
+            if (in_range[i][j].has_value()) {
+                fmt::print("({}, {}), ", in_range[i][j].value().x, in_range[i][j].value().y);
+            }
+            else {
+                fmt::print("      , ");
+            }
+        }
+        fmt::print("\n");
+    }
 }
 
 TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) {
+    typedef std::pair<glm::ivec2, int> coord_mag_pair;
+
+    coord_mag_pair center = std::make_pair(glm::ivec2(magnitude, magnitude), magnitude + 1);
+    std::stack<coord_mag_pair> dfs_stack;
 
     int len = 2 * magnitude + 1;
-
-    range res = {.center = glm::vec2(x, y)};
-
-    std::vector<std::vector<char>> in_range;
-    in_range.resize(len);
+    fmt::print("Length {}\n", len);
+    range res = {.length = len, .center = glm::ivec2(x, y)};
+    res.in_range.resize(len);
     for (int i = 0; i < len; i++) {
-        in_range[i].resize(len);
+        res.in_range[i].resize(len);
     }
 
-    // Top half
-    for (int i = 0; i < magnitude; i++) {
-        int l = magnitude - i;
-        int r = magnitude + i;
-        do {
-            in_range[i][l] = 1;
-        } while (++l < r);
-    }
-
+    std::vector<std::vector<int>> mag_array;
+    mag_array.resize(len);
     for (int i = 0; i < len; i++) {
-        in_range[magnitude][i] = 1;
+        mag_array[i].resize(len);
     }
 
-    //bottom half
-    for (int i = magnitude + 1; i < len; i++) {
-        int l = 2 * magnitude - i; // magnitude - (i - magnitude)
-        int r = i; // magnitude + (i - magnitude)
-        do {
-            in_range[i][l] = 1;
-        } while (++l < r);
-    }
 
+    std::initializer_list<glm::ivec2> adj_check = {glm::ivec2(1, 0),
+        glm::ivec2(-1, 0),
+        glm::ivec2(0, 1),
+        glm::ivec2(0, -1)};
+
+    dfs_stack.push(center);
+    res.in_range[magnitude][magnitude] = glm::ivec2(-1, -1);
+    while (!dfs_stack.empty()) {
+        auto& curr = dfs_stack.top();
+        dfs_stack.pop();
+        
+        if (curr.second != 1) {
+            int next_mag = curr.second - 1;
+
+            for (auto offset : adj_check) {
+                auto child_coord = curr.first + offset;
+                if (res.in_bounds(child_coord)) {
+                    auto child_mag = mag_array[child_coord.x][child_coord.y];
+                    fmt::print("Curr: ({}, {}) Offset: ({}, {}) ({}, {}) Mag: {} Child_mag: {}\n", 
+                        curr.first.x,
+                        curr.first.y,
+                        offset.x,
+                        offset.y,
+                        child_coord.x, 
+                        child_coord.y,
+                        curr.second, 
+                        child_mag);
+                    
+                    if (!res.in_range[child_coord.x][child_coord.y].has_value()) {
+                        
+                        mag_array[child_coord.x][child_coord.y] = next_mag;
+                        res.in_range[child_coord.x][child_coord.y] = curr.first;
+                        //dfs_stack.push(std::make_pair(child_coord, next_mag));
+                    }
+                }
+                
+                
+            }
+        }
+    }
     return res;
 }
