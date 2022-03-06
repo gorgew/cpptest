@@ -3,9 +3,10 @@
 #include "PhysicsComponents.hpp"
 #include "GameObjectComponents.hpp"
 #include <fmt/printf.h>
+#include <cstdlib>
 #include <stack>
 
-TileMap2D::TileMap2D(std::shared_ptr<Injector> injector, std::string tex_name, 
+TileMap::TileMap(std::shared_ptr<Injector> injector, std::string tex_name, 
     std::string terrain_shader, std::string character_shader, entt::registry& registry) {    
 
     this->injector = injector;
@@ -13,29 +14,50 @@ TileMap2D::TileMap2D(std::shared_ptr<Injector> injector, std::string tex_name,
     tile_height = injector->config.tile_height;
     this->terrain_shader = terrain_shader;
     this->character_shader = character_shader;
+    this->tex_name = tex_name;
 
-    cursor = registry.create();
-    auto cursor_frame = gorge::build_array_frame(injector, tile_width, tile_height,
-                        tex_name, cursor_id, terrain_shader);
-    registry.emplace<array_frame>(cursor, cursor_frame);
+    cursor = create_tile(registry, 0, 0, tex_name, cursor_id);
     registry.emplace<ui>(cursor);
-    registry.emplace<position>(cursor, glm::vec3(0.0f, 0.0f, 0.0f));
 
-    auto x = get_range_no_collision(1, 1, 2);
+    auto x = get_range_no_collision(1, 1, 1);
     x.print(); 
+    add_player_range(registry, 1, 1, 3);
 }
 
-void TileMap2D::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
-    if (mouse_x > 0 && mouse_y > 0 && 
-        (mouse_x / tile_width != cursor_x || mouse_y / tile_height != cursor_y)) {
-        cursor_x = mouse_x / tile_width;
-        cursor_y = mouse_y / tile_height;
+bool TileMap::in_bounds(int x, int y) {
+    return x >= 0 && y >= 0 && x < width && y < height;
+}
+
+entt::entity TileMap::create_tile(entt::registry& registry, int x, int y, 
+    std::string tileset, int tile_index) {
+
+    auto entity = registry.create();
+    struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
+            tileset, tile_index, terrain_shader);
+    
+    registry.emplace<array_frame>(entity, arr_f);
+
+    registry.emplace<position>(entity, glm::vec3(
+            tile_height / 2.0f + x * tile_height, 
+            tile_width / 2.0f + y * tile_width, 0.0f));
+    
+    return entity;
+}
+
+void TileMap::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+
+    auto next_cursor_x = mouse_x / tile_width;
+    auto next_cursor_y = mouse_y / tile_height;
+    if ((next_cursor_x != cursor_x || next_cursor_y != cursor_y)
+        && in_bounds(next_cursor_x, next_cursor_y)) {
+        cursor_x = next_cursor_x;
+        cursor_y = next_cursor_y;
         registry.replace<position>(cursor, glm::vec3(tile_width / 2.0f + cursor_x * tile_width, 
             tile_height / 2.0f + cursor_y * tile_height, 0.0f));
     }
 }
 
-entt::entity TileMap2D::get_char_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 
     if (cursor_x > 0 && char_cache[0].size() > cursor_x && 
         cursor_y > 0 && char_cache.size() > cursor_y) {
@@ -53,7 +75,7 @@ entt::entity TileMap2D::get_char_on_cursor(entt::registry& registry) {
     }
 }
 
-entt::entity TileMap2D::get_env_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_env_on_cursor(entt::registry& registry) {
     if (cursor_x > 0 && env_cache[0].size() > cursor_x && 
         cursor_y > 0 && env_cache.size() > cursor_y) {
 
@@ -70,7 +92,7 @@ entt::entity TileMap2D::get_env_on_cursor(entt::registry& registry) {
     }
 }
 
-entt::entity TileMap2D::get_terrain_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_terrain_on_cursor(entt::registry& registry) {
     if (cursor_x > 0 && terrain_cache[0].size() > cursor_x && 
         cursor_y > 0 && terrain_cache.size() > cursor_y) {
         
@@ -87,7 +109,7 @@ entt::entity TileMap2D::get_terrain_on_cursor(entt::registry& registry) {
     }
 }
 
-void TileMap2D::load_tileset(sol::state& lua) {
+void TileMap::load_tileset(sol::state& lua) {
     sol::table tilesets = lua["Tilesets"];
 
     for (unsigned int i = 1; i <= tilesets.size(); i++) {
@@ -104,7 +126,7 @@ void TileMap2D::load_tileset(sol::state& lua) {
     }
 }
 
-void TileMap2D::load_tiles(sol::state& lua) {
+void TileMap::load_tiles(sol::state& lua) {
     sol::table tiles = lua["Tiles"];
 
     for (unsigned int i = 1; i <= tiles.size(); i++) {
@@ -129,7 +151,7 @@ void TileMap2D::load_tiles(sol::state& lua) {
     }
 }
 
-void TileMap2D::place_characters(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::place_characters(std::string name, sol::state& lua, entt::registry& registry) {
     
     sol::table map = lua["Maps"][name];
     sol::table char_map = map["CharMap"];
@@ -193,7 +215,7 @@ void TileMap2D::place_characters(std::string name, sol::state& lua, entt::regist
     LOOP_EXIT:;
 }
 /*
-void TileMap2D::place_environment(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::place_environment(std::string name, sol::state& lua, entt::registry& registry) {
     
     sol::table map = lua["Maps"][name];
     sol::table env_map = map["EnvMap"];
@@ -241,7 +263,7 @@ void TileMap2D::place_environment(std::string name, sol::state& lua, entt::regis
     } 
 }
 */
-void TileMap2D::reset_map() {
+void TileMap::reset_map() {
     last_env = "";
     last_terrain = "";
     last_char = "";
@@ -253,12 +275,12 @@ void TileMap2D::reset_map() {
     terrain_tile_data.clear();
 }
 
-void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::load_map(std::string name, sol::state& lua, entt::registry& registry) {
     reset_map();
-
+    
     sol::table map = lua["Maps"][name];
-    int width = map["width"];
-    int height = map["height"];
+    width = map["width"];
+    height = map["height"];
     sol::table terrain_map = map["TerrainMap"];
 
     terrain_cache.resize(width);
@@ -274,17 +296,11 @@ void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& regi
             std::string tile_name = terrain_map[index];
             fmt::print("TILE {} @ INDEX {}\n", tile_name, index);
             
-            auto entity = registry.create();
-            
-            struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
-                    tile_data[tile_name].tileset, tile_data[tile_name].index, terrain_shader);
-            
-            registry.emplace<array_frame>(entity, arr_f);
             int x_index = x - 1;
             int y_index = height - y - 1;
-            registry.emplace<position>(entity, glm::vec3(
-                    tile_height / 2.0f + x_index * tile_height, 
-                    tile_width / 2.0f + y_index * tile_width, 0.0f));
+
+            auto entity = create_tile(registry, x_index, y_index, 
+                tile_data[tile_name].tileset, tile_data[tile_name].index);
             
             registry.emplace<terrain>(entity, 1, tile_name);
             fmt::print("X {} Y {}\n", x_index, y_index);
@@ -296,17 +312,17 @@ void TileMap2D::load_map(std::string name, sol::state& lua, entt::registry& regi
     place_characters(name, lua, registry);
 }
 
-bool TileMap2D::range::in_bounds(glm::ivec2 coord) {
+bool TileMap::range::in_bounds(glm::ivec2 coord) {
     return coord.x >= 0 && coord.y >= 0 && coord.x < length && coord.y < length;
 }
 
-glm::ivec2 TileMap2D::range::local_to_array_coords(glm::ivec2 coord) {
+glm::ivec2 TileMap::range::local_to_array_coords(glm::ivec2 coord) {
     int center = length / 2;
     fmt::print("length:  {}", length);
     return glm::ivec2(center + coord.x, center + coord.y);
 }
 
-void TileMap2D::range::print() {
+void TileMap::range::print() {
     for (int i = 0; i < length; i++) {
         for (int j = 0; j < length; j++) {
             if (in_range[i][j].has_value()) {
@@ -320,7 +336,7 @@ void TileMap2D::range::print() {
     }
 }
 
-TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) {
+TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
     typedef std::pair<glm::ivec2, int> coord_mag_pair;
 
     coord_mag_pair center = std::make_pair(glm::ivec2(magnitude, magnitude), magnitude + 1);
@@ -340,7 +356,6 @@ TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) 
         mag_array[i].resize(len);
     }
 
-
     std::initializer_list<glm::ivec2> adj_check = {glm::ivec2(1, 0),
         glm::ivec2(-1, 0),
         glm::ivec2(0, 1),
@@ -349,7 +364,7 @@ TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) 
     dfs_stack.push(center);
     res.in_range[magnitude][magnitude] = glm::ivec2(-1, -1);
     while (!dfs_stack.empty()) {
-        auto& curr = dfs_stack.top();
+        auto curr = dfs_stack.top();
         dfs_stack.pop();
         
         if (curr.second != 1) {
@@ -359,6 +374,7 @@ TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) 
                 auto child_coord = curr.first + offset;
                 if (res.in_bounds(child_coord)) {
                     auto child_mag = mag_array[child_coord.x][child_coord.y];
+                    /*
                     fmt::print("Curr: ({}, {}) Offset: ({}, {}) ({}, {}) Mag: {} Child_mag: {}\n", 
                         curr.first.x,
                         curr.first.y,
@@ -368,18 +384,34 @@ TileMap2D::range TileMap2D::get_range_no_collision(int x, int y, int magnitude) 
                         child_coord.y,
                         curr.second, 
                         child_mag);
-                    
+                    */
+
                     if (!res.in_range[child_coord.x][child_coord.y].has_value()) {
                         
                         mag_array[child_coord.x][child_coord.y] = next_mag;
                         res.in_range[child_coord.x][child_coord.y] = curr.first;
-                        //dfs_stack.push(std::make_pair(child_coord, next_mag));
+                        dfs_stack.push(std::make_pair(child_coord, next_mag));
                     }
                 }
-                
-                
             }
         }
     }
     return res;
+}
+
+void TileMap::add_player_range(entt::registry& registry, int x, int y, int magnitude) {
+    auto range = get_range_no_collision(x, y, magnitude); 
+    auto& center = range.center;
+    int mag = range.length / 2;
+    for (int m_x = 0; m_x < range.length; m_x++) {
+        for (int m_y = 0; m_y < range.length; m_y++) {
+            if (range.in_range[m_x][m_y].has_value()) {
+                int map_x = center.x + mag - m_x;
+                int map_y = center.y + mag - m_y;
+                
+                auto entity = create_tile(registry, map_x, map_y, tex_name, player_range_id);
+                player_range_entities.push_back(entity);
+            }
+        }
+    }
 }

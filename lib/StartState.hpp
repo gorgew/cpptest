@@ -26,7 +26,7 @@ class StartState : public State {
     std::shared_ptr<ScriptEngine> scripts;
     std::shared_ptr<ResourceManager> resources;
 
-    TileMap2D tmap;
+    TileMap tmap;
 
     void build_key_handlers();
     void build_mouse_handlers();

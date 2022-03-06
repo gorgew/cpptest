@@ -13,7 +13,9 @@
 /**
  * @brief Initialize tile entities? Environment only?
 */
-class TileMap2D {
+class TileMap {
+
+    int width, height;
 
     std::shared_ptr<Injector> injector;
     //Some sort of mapping from string to tile type?
@@ -30,6 +32,9 @@ class TileMap2D {
 
     unsigned int cursor_x = 0, cursor_y = 0; //cursor location in tilemap
 
+    int player_range_id = 6;
+    std::vector<entt::entity> player_range_entities;
+
     std::vector<std::vector<entt::entity>> env_cache;
     std::vector<std::vector<entt::entity>> char_cache; 
     std::vector<std::vector<entt::entity>> terrain_cache;
@@ -38,6 +43,7 @@ class TileMap2D {
     robin_hood::unordered_map<std::string, tile_data_t> tile_data;
     robin_hood::unordered_set<std::string> tilesets;
     
+    entt::entity create_tile(entt::registry& registry, int x, int y, std::string tileset, int tile_index);
     void place_tiles(std::string name, sol::state& lua, entt::registry& registry);
     void place_environment(std::string name, sol::state& lua, entt::registry& registry);
     void place_characters(std::string name, sol::state& lua, entt::registry& registry);
@@ -47,10 +53,11 @@ class TileMap2D {
         std::string last_char;
         std::string last_terrain;
 
-        TileMap2D() = default;
-        TileMap2D(std::shared_ptr<Injector>, std::string tex_name, std::string terrain_shader, 
+        TileMap() = default;
+        TileMap(std::shared_ptr<Injector>, std::string tex_name, std::string terrain_shader, 
                 std::string character_shader, entt::registry& registry);
-
+        
+        bool in_bounds(int x, int y);
         /**
          * Moves cursor to mouse coords in world space
          */
@@ -79,7 +86,7 @@ class TileMap2D {
 
             void print();
         };
-
+        
         //Set an anchor at current location
         void enable_anchor_mode();
 
@@ -94,4 +101,7 @@ class TileMap2D {
         //Get coordinates in range from entity at (x, y) with magnitude with colliding against 
         range get_range_collision(int x, int y, int magnitude);
 
-};      
+        void add_player_range(entt::registry& registry, int x, int y, int magnitude);
+        void clear_player_range();
+
+};

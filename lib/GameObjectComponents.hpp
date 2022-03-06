@@ -42,3 +42,8 @@ struct tile_data_t {
     bool walkable;
     bool flyable;
 };
+
+enum class faction {
+    player,
+    enemy
+};
