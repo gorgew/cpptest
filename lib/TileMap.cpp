@@ -21,7 +21,7 @@ TileMap::TileMap(std::shared_ptr<Injector> injector, std::string tex_name,
 
     auto x = get_range_no_collision(1, 1, 1);
     x.print(); 
-    add_player_range(registry, 1, 1, 3);
+    //add_player_range(registry, 1, 1, 3);
 }
 
 bool TileMap::in_bounds(int x, int y) {
@@ -44,6 +44,14 @@ entt::entity TileMap::create_tile(entt::registry& registry, int x, int y,
     return entity;
 }
 
+bool TileMap::cursor_in_range(range& r) {
+    int mag = r.length / 2;
+    int range_x = r.center.x + mag - cursor_x;
+    int range_y = r.center.y + mag - cursor_y;
+    //fmt::print("range_x {} range_y {}\n", range_x, range_y);
+    return r.in_local_bounds(range_x, range_y) && r.in_range[range_x][range_y].has_value();
+}
+
 void TileMap::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
 
     auto next_cursor_x = mouse_x / tile_width;
@@ -57,6 +65,150 @@ void TileMap::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigne
     }
 }
 
+void TileMap::clear_path(entt::registry& registry) {
+    for (const auto& entity : path_entities) {
+        registry.destroy(entity);
+    }
+    path_entities.clear();
+}
+
+bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+
+    auto next_cursor_x = mouse_x / tile_width;
+    auto next_cursor_y = mouse_y / tile_height;
+    if ((next_cursor_x != cursor_x || next_cursor_y != cursor_y)
+        && in_bounds(next_cursor_x, next_cursor_y)) {
+        cursor_x = next_cursor_x;
+        cursor_y = next_cursor_y;
+        registry.replace<position>(cursor, glm::vec3(tile_width / 2.0f + cursor_x * tile_width, 
+            tile_height / 2.0f + cursor_y * tile_height, 0.0f));
+        
+        if (cursor_in_range(player_range)) {
+            clear_path(registry);
+            direction last_direction;
+            int mag = player_range.length / 2;
+            int range_x = player_range.center.x + mag - cursor_x;
+            int range_y = player_range.center.y + mag - cursor_y;
+            fmt::print("b4 range_x {} range_y {}\n", range_x, range_y);
+            auto next = player_range.in_range[range_x][range_y].value();
+            int diff_x = next.x - range_x;
+            int diff_y = next.y - range_y;
+            if (diff_x == -1) {
+                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                    next_cursor_y, tex_name, left_arrow_path));
+                last_direction = direction::left;
+                range_x--;
+                next_cursor_x++;
+            }
+            else if (diff_x == 1) {
+                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                    next_cursor_y, tex_name, right_arrow_path));
+                last_direction = direction::right;
+                range_x++;
+                next_cursor_x--;
+            }
+            else if (diff_y == -1) {
+                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                    next_cursor_y, tex_name, down_arrow_path));
+                last_direction = direction::down;
+                range_y--;
+                next_cursor_y++;
+            }
+            else if (diff_y == 1) {
+                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                    next_cursor_y, tex_name, up_arrow_path));
+                last_direction = direction::up;
+                range_y++;
+                next_cursor_y--;
+            }
+            fmt::print("after range_x {} range_y {}\n", range_x, range_y);
+            
+            while (range_x != mag || range_y != mag) {
+                fmt::print("asdfasdfasdfasdfasdf\n");
+
+                next = player_range.in_range[range_x][range_y].value();
+                diff_x = next.x - range_x;
+                diff_y = next.y - range_y;
+                
+                if (diff_x == -1) {
+                    if (last_direction == direction::left) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, horizontal_path));
+                    }
+                    else if (last_direction == direction::up) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, dl_ru_path));
+                    }
+                    else if (last_direction == direction::down) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, ul_rd_path));
+                    }
+                    
+                    last_direction = direction::left;
+                    range_x--;
+                    next_cursor_x++;
+                }
+                else if (diff_x == 1) {
+                    if (last_direction == direction::right) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, horizontal_path));
+                    }
+                    else if (last_direction == direction::up) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, dr_lu_path));
+                    }
+                    else if (last_direction == direction::down) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, ur_ld_path));
+                    }
+                    last_direction = direction::right;
+                    range_x++;
+                    next_cursor_x--;
+                }
+                else if (diff_y == -1) {
+                    if (last_direction == direction::down) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, vertical_path));
+                    }
+                    else if (last_direction == direction::left) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, dl_ru_path));
+                    }
+                    else if (last_direction == direction::right) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, dr_lu_path));
+                    }
+                    last_direction = direction::down;
+                    range_y--;
+                    next_cursor_y++;
+                }
+                else if (diff_y == 1) {
+                    if (last_direction == direction::up) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, vertical_path));
+                    }
+                    else if (last_direction == direction::left) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, ul_rd_path));
+                    }
+                    else if (last_direction == direction::right) {
+                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        next_cursor_y, tex_name, ur_ld_path));
+                    }
+                    last_direction = direction::up;
+                    range_y++;
+                    next_cursor_y--;
+                }
+            
+            }
+            
+            
+            return true;
+        }
+    }
+    return false;
+}
+
 entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 
     if (cursor_x > 0 && char_cache[0].size() > cursor_x && 
@@ -65,7 +217,6 @@ entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 
             if (value != entt::null) {
                 last_char = registry.get<character>(value).name;
-                //fmt::print("NONNULL\n");
             }
             
             return value;
@@ -177,7 +328,7 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
         for (int x = width - 1; x >= 0; x--) {
             int index = y * width + x;
             std::string char_map_entry = char_map[index];
-            if (char_map_entry != "_") {
+            if (char_map_entry != "") {
                 
                 int x_index = x - 1;
                 int y_index = height - y - 1;
@@ -312,13 +463,12 @@ void TileMap::load_map(std::string name, sol::state& lua, entt::registry& regist
     place_characters(name, lua, registry);
 }
 
-bool TileMap::range::in_bounds(glm::ivec2 coord) {
-    return coord.x >= 0 && coord.y >= 0 && coord.x < length && coord.y < length;
+bool TileMap::range::in_local_bounds(int x, int y) {
+    return x >= 0 && y >= 0 && x < length && y < length;
 }
 
 glm::ivec2 TileMap::range::local_to_array_coords(glm::ivec2 coord) {
     int center = length / 2;
-    fmt::print("length:  {}", length);
     return glm::ivec2(center + coord.x, center + coord.y);
 }
 
@@ -343,7 +493,7 @@ TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
     std::stack<coord_mag_pair> dfs_stack;
 
     int len = 2 * magnitude + 1;
-    fmt::print("Length {}\n", len);
+
     range res = {.length = len, .center = glm::ivec2(x, y)};
     res.in_range.resize(len);
     for (int i = 0; i < len; i++) {
@@ -372,7 +522,7 @@ TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
 
             for (auto offset : adj_check) {
                 auto child_coord = curr.first + offset;
-                if (res.in_bounds(child_coord)) {
+                if (res.in_local_bounds(child_coord.x, child_coord.y)) {
                     auto child_mag = mag_array[child_coord.x][child_coord.y];
                     /*
                     fmt::print("Curr: ({}, {}) Offset: ({}, {}) ({}, {}) Mag: {} Child_mag: {}\n", 
@@ -400,12 +550,13 @@ TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
 }
 
 void TileMap::add_player_range(entt::registry& registry, int x, int y, int magnitude) {
-    auto range = get_range_no_collision(x, y, magnitude); 
-    auto& center = range.center;
-    int mag = range.length / 2;
-    for (int m_x = 0; m_x < range.length; m_x++) {
-        for (int m_y = 0; m_y < range.length; m_y++) {
-            if (range.in_range[m_x][m_y].has_value()) {
+    player_range = get_range_no_collision(x, y, magnitude); 
+    
+    auto& center = player_range.center;
+    int mag = player_range.length / 2;
+    for (int m_x = 0; m_x < player_range.length; m_x++) {
+        for (int m_y = 0; m_y < player_range.length; m_y++) {
+            if (player_range.in_range[m_x][m_y].has_value()) {
                 int map_x = center.x + mag - m_x;
                 int map_y = center.y + mag - m_y;
                 
@@ -414,4 +565,15 @@ void TileMap::add_player_range(entt::registry& registry, int x, int y, int magni
             }
         }
     }
+}
+
+void TileMap::clear_player_range(entt::registry& registry) {
+    for (const auto& entity : player_range_entities) {
+        registry.destroy(entity);
+    }
+    player_range_entities.clear();
+}
+
+void TileMap::add_player_range_cursor(entt::registry& registry, int magnitude) {
+    add_player_range(registry, cursor_x, cursor_y, magnitude);
 }

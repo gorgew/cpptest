@@ -15,6 +15,20 @@
 */
 class TileMap {
 
+    public:
+        typedef std::optional<glm::ivec2> coord_option;
+        struct range {
+            int length;
+            glm::ivec2 center;
+            std::vector<std::vector<coord_option>> in_range; //Holds parent node, coords are relative to center
+
+            bool in_local_bounds(int x, int y);
+            std::vector<glm::ivec2> get_path_from_center(int x, int y);
+            glm::ivec2 local_to_array_coords(glm::ivec2 coord);
+
+            void print();
+        };
+private:
     int width, height;
 
     std::shared_ptr<Injector> injector;
@@ -33,7 +47,23 @@ class TileMap {
     unsigned int cursor_x = 0, cursor_y = 0; //cursor location in tilemap
 
     int player_range_id = 6;
+    range player_range;
     std::vector<entt::entity> player_range_entities;
+
+    int ur_ld_path = 14;
+    int ul_rd_path = 15;
+    int dr_lu_path = 16;
+    int dl_ru_path = 17;
+    int horizontal_path = 8;
+    int vertical_path = 9;
+    int up_arrow_path = 10;
+    int right_arrow_path = 11;
+    int left_arrow_path = 12;
+    int down_arrow_path = 13;
+
+    std::vector<entt::entity> path_entities;
+    void draw_path(entt::registry& registry);
+    void clear_path(entt::registry& registry);
 
     std::vector<std::vector<entt::entity>> env_cache;
     std::vector<std::vector<entt::entity>> char_cache; 
@@ -47,7 +77,7 @@ class TileMap {
     void place_tiles(std::string name, sol::state& lua, entt::registry& registry);
     void place_environment(std::string name, sol::state& lua, entt::registry& registry);
     void place_characters(std::string name, sol::state& lua, entt::registry& registry);
-
+    
     public:
         std::string last_env;
         std::string last_char;
@@ -63,6 +93,9 @@ class TileMap {
          */
         void move_cusor(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
 
+        //Return 0 if cursor not in range, 1 if cursor in range
+        bool move_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+        bool cursor_in_range(range& r);
         entt::entity get_char_on_cursor(entt::registry& registry);
         entt::entity get_env_on_cursor(entt::registry& registry);
         entt::entity get_terrain_on_cursor(entt::registry& registry);
@@ -74,24 +107,8 @@ class TileMap {
 
         void load_tiles(sol::state& lua);
 
-        typedef std::optional<glm::ivec2> coord_option;
-        struct range {
-            int length;
-            glm::ivec2 center;
-            std::vector<std::vector<coord_option>> in_range; //Holds parent node, coords are relative to center
-
-            bool in_bounds(glm::ivec2 coord);
-            std::vector<glm::ivec2> get_path_from_center(int x, int y);
-            glm::ivec2 local_to_array_coords(glm::ivec2 coord);
-
-            void print();
-        };
-        
         //Set an anchor at current location
         void enable_anchor_mode();
-
-        //Draw a path from anchor to cursor location
-        void enable_draw_path_to_cursor();
 
         void enable_show_range();
 
@@ -102,6 +119,7 @@ class TileMap {
         range get_range_collision(int x, int y, int magnitude);
 
         void add_player_range(entt::registry& registry, int x, int y, int magnitude);
-        void clear_player_range();
+        void add_player_range_cursor(entt::registry& registry, int magnitude);
+        void clear_player_range(entt::registry& registry);
 
 };

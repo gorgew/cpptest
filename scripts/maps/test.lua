@@ -17,9 +17,9 @@ test = Map:new {
         _, _, _, _, _,
     },
     CharMap = {
-        "blank_tile", _, "blank_tile", _, _,
         _, _, _, _, _,
         _, _, _, _, _,
+        _, _, "blank_tile", _, _,
         _, _, _, _, _,
         _, _, _, _, _,
     }}

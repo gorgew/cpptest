@@ -19,6 +19,7 @@ function Character:new(arg_table)
         stats = Stats:new(arg_table)
         ,
         {
+            movement = arg_table.movement,
             hp_growth = arg_table.hp_growth,
             aim_growth = arg_table.aim_growth,
         },
@@ -33,7 +34,7 @@ Bob = Character:new{
     name = "Bob",
     hp = 69,
     aim = 69,
-    movement = 1,
+    movement = 3,
     hp_growth = 0.3,
     aim_growth = 0.7
 }

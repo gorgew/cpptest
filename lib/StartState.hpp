@@ -18,6 +18,13 @@ struct ui_character_data {
 
 class StartState : public State {
 
+
+    enum class substate {
+        observe_world,
+        character_select,
+        controls_disabled
+    };
+
     enum class next_state {
         game_state,
         credits_state
@@ -43,6 +50,8 @@ class StartState : public State {
 
     bool ui_show_demo = false;
     bool ui_show_character_hover = false;
+
+    substate m_substate = substate::observe_world;
     
     public:
 
@@ -67,6 +76,8 @@ class StartState : public State {
 
             link_scripts();
         };
+
+        void handle_event(entt::registry& registry, SDL_Event e);
         void process_systems(entt::registry& registry);
         std::shared_ptr<State> next(entt::registry& registry);
 

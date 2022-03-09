@@ -66,10 +66,33 @@ void StartState::build_mouse_handlers() {
     mouse_system.add_wheel_handler(false, zoom_out);
 
     std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
-        tmap.move_cusor(registry, mouse_system.world_x, mouse_system.world_y);
+        if (m_substate == substate::observe_world) {
+            tmap.move_cusor(registry, mouse_system.world_x, mouse_system.world_y);
+        }
+        else if (m_substate == substate::character_select) {
+            if (tmap.move_cursor_path(registry, mouse_system.world_x, mouse_system.world_y)) {
+                fmt::print("IN _RANGE \n");
+            }
+            else {
+                //fmt::print("asdfasdf\n");
+            }
+        }
     };
 
-    mouse_system.add_mousedown_handler(move_cursor, SDL_BUTTON_LEFT);
+    std::function<void(entt::registry&)> l_mouse_down = [=, this](entt::registry& registry) {
+        if (ui_show_character_hover && m_substate != substate::character_select) {
+            tmap.add_player_range_cursor(registry, 
+                (int) scripts->lua["Characters"][tmap.last_char]["stats"]["movement"]);
+            m_substate = substate::character_select;
+        }
+        else if (m_substate == substate::character_select) {
+            
+            tmap.clear_player_range(registry);
+            m_substate = substate::observe_world;
+        }
+    };
+
+    mouse_system.add_mousedown_handler(l_mouse_down, SDL_BUTTON_LEFT);
     mouse_system.set_motion_handler(move_cursor);
 }
 
@@ -145,7 +168,7 @@ void StartState::build_scene(entt::registry& registry) {
             true, frames, timings);
    }
   
-    injector->tex_man.add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 12);
+    injector->tex_man.add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 24);
     
     tmap = {injector, "art", "world", "billboard", registry};
     tmap.load_tileset(scripts->lua);
@@ -163,6 +186,13 @@ void StartState::build_scene(entt::registry& registry) {
     */
 };
 
+void StartState::handle_event(entt::registry& registry, SDL_Event e) {
+    if (m_substate != substate::controls_disabled) {
+        key_system.handle_event(registry, e);
+        mouse_system.handle_event(registry, e);
+    }
+}
+
 void StartState::process_systems(entt::registry& registry) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
@@ -175,7 +205,6 @@ void StartState::process_systems(entt::registry& registry) {
         else {
             ui_show_character_hover = false;
         }
-        
         
     }
 }
@@ -239,7 +268,7 @@ void StartState::update_char_hover_data(entt::registry& registry) {
     
     if (char_name != char_hover_data.char_name) {
 
-        resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
+        //resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
         
         sol::table characters = scripts->lua["Characters"];
         char_hover_data.char_name = char_name;
@@ -251,7 +280,7 @@ void StartState::update_char_hover_data(entt::registry& registry) {
 
 void StartState::show_character_hover_ui(nk_context* ctx) {
 
-    if (nk_begin(ctx, "CHARACTER", nk_rect(100, 100, 300, 500), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
+    if (nk_begin(ctx, "CHARACTER", nk_rect(0, 0, 300, 300), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
         
         nk_layout_row_static(ctx, 200, 200, 1);
         nk_image(ctx, char_hover_data.profile_pic);

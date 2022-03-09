@@ -47,3 +47,10 @@ enum class faction {
     player,
     enemy
 };
+
+enum class direction {
+    up,
+    down,
+    left,
+    right
+};
