@@ -44,6 +44,22 @@ entt::entity TileMap::create_tile(entt::registry& registry, int x, int y,
     return entity;
 }
 
+entt::entity TileMap::create_billboard_tile(entt::registry& registry, int x, int y, int width, int height,
+    std::string tileset, int tile_index) {
+
+    auto entity = registry.create();
+    struct array_frame arr_f = gorge::build_array_frame(injector, width, height,
+            tileset, tile_index, character_shader);
+    
+    registry.emplace<array_frame>(entity, arr_f);
+
+    registry.emplace<position>(entity, glm::vec3(
+            tile_height + x * tile_height, 
+            tile_width + y * tile_width, 0.0f));
+    
+    return entity;
+}
+
 bool TileMap::cursor_in_range(range& r) {
     int mag = r.length / 2;
     int range_x = r.center.x + mag - cursor_x;
@@ -336,21 +352,13 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
 
                 std::string char_name = roster[roster_index];
                 
-                auto entity = registry.create();
-
-                std::string fpath = characters[char_name]["spritesheet"];
-                struct array_frame arr_f = gorge::build_array_frame(injector, 
-                    tile_width, tile_height,
-                    fpath,
-                    0,
-                    character_shader);
-                registry.emplace<array_frame>(entity, arr_f);
                 
-                registry.emplace<position>(entity, glm::vec3(
-                    tile_height + x_index * tile_height, 
-                    tile_width + y_index * tile_width, 0.0f));
 
-                registry.emplace<character>(entity,1,  char_name);
+                std::string spritesheet = characters[char_name]["spritesheet"];
+                int sheet_index = 0;
+                auto entity = create_billboard_tile(registry, x_index, y_index, tile_width, tile_height,
+                    spritesheet, sheet_index);
+                registry.emplace<character>(entity,1, char_name);
                 char_cache[x_index][y_index] = entity;
 
                 if (roster_index < roster_size) {
@@ -365,7 +373,7 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
     } 
     LOOP_EXIT:;
 }
-/*
+
 void TileMap::place_environment(std::string name, sol::state& lua, entt::registry& registry) {
     
     sol::table map = lua["Maps"][name];
@@ -374,7 +382,7 @@ void TileMap::place_environment(std::string name, sol::state& lua, entt::registr
     
     int width = map["width"];
     int height = map["height"];
-
+    
     env_cache.resize(width);
     for (int i = 0; i < width; i++) {
         env_cache[i].resize(height);
@@ -387,33 +395,30 @@ void TileMap::place_environment(std::string name, sol::state& lua, entt::registr
         for (int x = width - 1; x >= 0; x--) {
             int index = y * width + x;
             std::string env_map_entry = env_map[index];
-            if (env_map_entry != "_") {
+            
+            if (env_map_entry != "") {
                 
                 int x_index = x - 1;
                 int y_index = height - y - 1;
-                
-                auto entity = registry.create();
 
-                std::string fpath = env_objs[env_map_entry]["spritesheet"];
-                struct array_frame arr_f = gorge::build_array_frame(injector, 
-                    tile_width, tile_height,
-                    fpath,
-                    0,
-                    character_shader);
-                registry.emplace<array_frame>(entity, arr_f);
+                std::string spritesheet = env_objs[env_map_entry]["spritesheet"];
                 
-                registry.emplace<position>(entity, glm::vec3(
-                    tile_height + x_index * tile_height, 
-                    tile_width + y_index * tile_width, 0.0f));
+                int index = env_objs[env_map_entry]["index_at_hp"][(int) env_objs[env_map_entry]["hp"]];
+                int height = env_objs[env_map_entry]["world_x"];
+                int width = env_objs[env_map_entry]["world_y"];
+                auto entity = create_billboard_tile(registry, x_index, y_index, height, width,
+                    spritesheet, index);
 
-                registry.emplace<character>(entity,1,  env_map_entry);
-                char_cache[x_index][y_index] = entity;
+                registry.emplace<environment>(entity, 1,  env_map_entry);
+                env_cache[x_index][y_index] = entity;
                 
             }
         }
+        
     } 
+    
 }
-*/
+
 void TileMap::reset_map() {
     last_env = "";
     last_terrain = "";
@@ -459,7 +464,7 @@ void TileMap::load_map(std::string name, sol::state& lua, entt::registry& regist
             terrain_tile_data[x_index][y_index] = tile_name;
         }
     }
-
+    place_environment(name, lua, registry);
     place_characters(name, lua, registry);
 }
 
@@ -576,4 +581,32 @@ void TileMap::clear_player_range(entt::registry& registry) {
 
 void TileMap::add_player_range_cursor(entt::registry& registry, int magnitude) {
     add_player_range(registry, cursor_x, cursor_y, magnitude);
+}
+
+bool TileMap::move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y) {
+    if (in_bounds(src_x, src_y) && in_bounds(tgt_x, tgt_y) 
+            && char_cache[src_x][src_y] != entt::null 
+            && char_cache[tgt_x][tgt_y] == entt::null) {
+        char_cache[tgt_x][tgt_y] = char_cache[src_x][src_y];
+        registry.replace<position>(char_cache[src_x][src_y], 
+            glm::vec3(
+            tile_height + tgt_x * tile_height, 
+            tile_width + tgt_y * tile_width, 0.0f)
+        );
+        char_cache[src_x][src_y] = entt::null;
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
+
+bool TileMap::move_character_selected_cursor(entt::registry& registry) {
+    if (cursor_in_range(player_range)) {
+        return move_character(registry, player_range.center.x, player_range.center.y, cursor_x, cursor_y);
+    }
+    else {
+        return false;
+    }
 }

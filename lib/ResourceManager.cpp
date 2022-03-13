@@ -18,9 +18,30 @@ void ResourceManager::load_character_resources(sol::state& lua) {
         profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
         
         std::string fpath = characters[char_name]["spritesheet"];
-        injector->tex_man.add_2d_array_texture(fpath, fpath, char_sprite_dim, 
-            char_sprite_dim, 
-            char_sheet_count);
+        int width = characters[char_name]["sheet_x"];
+        int height = characters[char_name]["sheet_y"];
+        int sheet_size = characters[char_name]["sheet_size"];
+        injector->tex_man.add_2d_array_texture(fpath, fpath, width,
+            height, sheet_size);
+    }
+    
+}
+
+void ResourceManager::load_environment_resources(sol::state& lua) {
+
+    sol::table env_objs = lua["EnvObjs"];
+    
+    for (const auto& pair : env_objs) {
+        std::string env_name = (pair.first).as<std::string>();
+        int sheet_x = env_objs[env_name]["sheet_x"];
+        int sheet_y = env_objs[env_name]["sheet_y"];
+        int sheet_size = env_objs[env_name]["sheet_size"];
+
+        std::string fpath = env_objs[env_name]["spritesheet"];
+        injector->tex_man.add_2d_array_texture(fpath, fpath, 
+            sheet_x, 
+            sheet_y, 
+            sheet_size);
     }
     
 }

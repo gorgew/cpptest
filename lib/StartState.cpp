@@ -51,6 +51,19 @@ void StartState::build_key_handlers() {
     key_system.add_held_key_handler(SDLK_e, pitch_right, placeholder);
     key_system.add_held_key_handler(SDLK_z, yaw_up, placeholder);
     key_system.add_held_key_handler(SDLK_x, yaw_down, placeholder);
+
+    std::function<void(entt::registry&)> exit = [=, this](entt::registry& registry) {
+        if (m_substate == substate::observe_world) {
+            //open pause menu
+        }
+        if (m_substate == substate::character_select) {
+            tmap.clear_player_range(registry);
+            tmap.clear_path(registry);
+            m_substate = substate::observe_world;
+        }
+    };
+    key_system.add_keydown_handler(SDLK_1, exit); 
+
 }
 
 void StartState::build_mouse_handlers() {
@@ -92,7 +105,23 @@ void StartState::build_mouse_handlers() {
         }
     };
 
+    std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
+            if (m_substate == substate::character_select) {
+                if (tmap.move_character_selected_cursor(registry)) {
+                    tmap.clear_player_range(registry);
+                    tmap.clear_path(registry);
+                    m_substate = substate::observe_world;
+                    fmt::print("MOVED\n");
+                }
+                else {
+                    fmt::print("DIDNI't MOVE\n");
+                }
+            }
+        };
+    
+
     mouse_system.add_mousedown_handler(l_mouse_down, SDL_BUTTON_LEFT);
+    mouse_system.add_mousedown_handler(r_mouse_down, SDL_BUTTON_RIGHT);
     mouse_system.set_motion_handler(move_cursor);
 }
 

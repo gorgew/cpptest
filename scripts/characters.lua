@@ -4,6 +4,11 @@ Roster = {"Bob"}
 
 Character = {
     spritesheet = "resources/DEFAULT_CHARACTER.png",
+    sheet_size = 2,
+    sheet_x = 32,
+    sheet_y = 32,
+    world_x = 100,
+    world_y = 100,
     stats = Stats,
     equipment = {},
     skills = {},

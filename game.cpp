@@ -60,6 +60,7 @@ int main(void) {
 
     std::shared_ptr<ResourceManager> resources = std::make_shared<ResourceManager>(injector);
     resources->load_character_resources(scripts->lua);
+    resources->load_environment_resources(scripts->lua);
     fmt::print("Resources Loaded\n");
 
     std::shared_ptr<State> game_state; 

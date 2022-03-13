@@ -63,7 +63,7 @@ private:
 
     std::vector<entt::entity> path_entities;
     void draw_path(entt::registry& registry);
-    void clear_path(entt::registry& registry);
+
 
     std::vector<std::vector<entt::entity>> env_cache;
     std::vector<std::vector<entt::entity>> char_cache; 
@@ -74,6 +74,8 @@ private:
     robin_hood::unordered_set<std::string> tilesets;
     
     entt::entity create_tile(entt::registry& registry, int x, int y, std::string tileset, int tile_index);
+    entt::entity create_billboard_tile(entt::registry& registry, int x, int y, int width, int height,
+        std::string tileset, int tile_index);
     void place_tiles(std::string name, sol::state& lua, entt::registry& registry);
     void place_environment(std::string name, sol::state& lua, entt::registry& registry);
     void place_characters(std::string name, sol::state& lua, entt::registry& registry);
@@ -122,4 +124,10 @@ private:
         void add_player_range_cursor(entt::registry& registry, int magnitude);
         void clear_player_range(entt::registry& registry);
 
+        void clear_path(entt::registry& registry);
+        
+        //Return true if successful, return false if src or tgt are null or if either are out of bounds
+        bool move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y);
+        //Return true if sucessful, return false if cursor is out of bounds
+        bool move_character_selected_cursor(entt::registry& registry);
 };

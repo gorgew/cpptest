@@ -33,13 +33,11 @@ class ResourceManager {
 
     std::shared_ptr<Injector> injector;
 
-    int char_sprite_dim = 32;
-    int char_sheet_count = 2;
-
     public:
 
         ResourceManager(std::shared_ptr<Injector> injector);
         void load_character_resources(sol::state& lua);
+        void load_environment_resources(sol::state& lua);
 
         //For the nuklear ui
         struct nk_image get_profile_pic(std::string name);
