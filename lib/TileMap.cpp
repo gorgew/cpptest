@@ -227,8 +227,8 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
 
 entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 
-    if (cursor_x > 0 && char_cache[0].size() > cursor_x && 
-        cursor_y > 0 && char_cache.size() > cursor_y) {
+    if (cursor_x >= 0 && char_cache[0].size() > cursor_x && 
+        cursor_y >= 0 && char_cache.size() > cursor_y) {
             entt::entity value = char_cache[cursor_x][cursor_y];
 
             if (value != entt::null) {
@@ -243,8 +243,8 @@ entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 }
 
 entt::entity TileMap::get_env_on_cursor(entt::registry& registry) {
-    if (cursor_x > 0 && env_cache[0].size() > cursor_x && 
-        cursor_y > 0 && env_cache.size() > cursor_y) {
+    if (cursor_x >= 0 && env_cache[0].size() > cursor_x && 
+        cursor_y >= 0 && env_cache.size() > cursor_y) {
 
             entt::entity value = env_cache[cursor_y][cursor_x];
 
@@ -260,8 +260,8 @@ entt::entity TileMap::get_env_on_cursor(entt::registry& registry) {
 }
 
 entt::entity TileMap::get_terrain_on_cursor(entt::registry& registry) {
-    if (cursor_x > 0 && terrain_cache[0].size() > cursor_x && 
-        cursor_y > 0 && terrain_cache.size() > cursor_y) {
+    if (cursor_x >= 0 && terrain_cache[0].size() > cursor_x && 
+        cursor_y >= 0 && terrain_cache.size() > cursor_y) {
         
             entt::entity value = terrain_cache[cursor_y][cursor_x];
 
