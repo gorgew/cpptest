@@ -103,8 +103,9 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
             clear_path(registry);
             direction last_direction;
             int mag = player_range.length / 2;
-            int range_x = player_range.center.x + mag - cursor_x;
-            int range_y = player_range.center.y + mag - cursor_y;
+            auto coord = player_range.local_to_array_coords(cursor_x, cursor_y);
+            int range_x = coord.x;
+            int range_y = coord.y;
             fmt::print("b4 range_x {} range_y {}\n", range_x, range_y);
             auto next = player_range.in_range[range_x][range_y].value();
             int diff_x = next.x - range_x;
@@ -472,9 +473,10 @@ bool TileMap::range::in_local_bounds(int x, int y) {
     return x >= 0 && y >= 0 && x < length && y < length;
 }
 
-glm::ivec2 TileMap::range::local_to_array_coords(glm::ivec2 coord) {
-    int center = length / 2;
-    return glm::ivec2(center + coord.x, center + coord.y);
+glm::ivec2 TileMap::range::local_to_array_coords(int x, int y) {
+    
+    int mag = length / 2;
+    return glm::ivec2(center.x + mag - x, center.y + mag - y);
 }
 
 void TileMap::range::print() {
@@ -528,19 +530,6 @@ TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
             for (auto offset : adj_check) {
                 auto child_coord = curr.first + offset;
                 if (res.in_local_bounds(child_coord.x, child_coord.y)) {
-                    auto child_mag = mag_array[child_coord.x][child_coord.y];
-                    /*
-                    fmt::print("Curr: ({}, {}) Offset: ({}, {}) ({}, {}) Mag: {} Child_mag: {}\n", 
-                        curr.first.x,
-                        curr.first.y,
-                        offset.x,
-                        offset.y,
-                        child_coord.x, 
-                        child_coord.y,
-                        curr.second, 
-                        child_mag);
-                    */
-
                     if (!res.in_range[child_coord.x][child_coord.y].has_value()) {
                         
                         mag_array[child_coord.x][child_coord.y] = next_mag;
@@ -554,18 +543,83 @@ TileMap::range TileMap::get_range_no_collision(int x, int y, int magnitude) {
     return res;
 }
 
+TileMap::range TileMap::get_range_collision(int x, int y, int magnitude) {
+    typedef std::pair<glm::ivec2, int> coord_mag_pair;
+
+    coord_mag_pair center = std::make_pair(glm::ivec2(magnitude, magnitude), magnitude + 1);
+    std::stack<coord_mag_pair> dfs_stack;
+
+    int len = 2 * magnitude + 1;
+
+    range res = {.length = len, .center = glm::ivec2(x, y)};
+    res.in_range.resize(len);
+    for (int i = 0; i < len; i++) {
+        res.in_range[i].resize(len);
+    }
+
+    std::vector<std::vector<int>> mag_array;
+    mag_array.resize(len);
+    for (int i = 0; i < len; i++) {
+        mag_array[i].resize(len);
+    }
+
+    std::initializer_list<glm::ivec2> adj_check = {glm::ivec2(1, 0),
+        glm::ivec2(-1, 0),
+        glm::ivec2(0, 1),
+        glm::ivec2(0, -1)};
+
+    dfs_stack.push(center);
+    res.in_range[magnitude][magnitude] = glm::ivec2(-1, -1);
+    while (!dfs_stack.empty()) {
+        auto curr = dfs_stack.top();
+        dfs_stack.pop();
+        
+        if (curr.second != 1) {
+            int next_mag = curr.second - 1;
+
+            for (auto offset : adj_check) {
+                auto child_coord = curr.first + offset;
+                if (res.in_local_bounds(child_coord.x, child_coord.y)) {
+                    auto child_mag = mag_array[child_coord.x][child_coord.y];
+                    
+                    fmt::print("Curr: ({}, {}) Offset: ({}, {}) child ({}, {}) Mag: {} Child_mag: {}\n", 
+                        curr.first.x,
+                        curr.first.y,
+                        offset.x,
+                        offset.y,
+                        child_coord.x, 
+                        child_coord.y,
+                        curr.second, 
+                        child_mag);
+                    
+                    auto world_coord = res.local_to_array_coords(child_coord.x, child_coord.y);
+                    
+                    if (!res.in_range[child_coord.x][child_coord.y].has_value() 
+                        && child_mag < next_mag
+                        && in_bounds(world_coord.x, world_coord.y)
+                        && env_cache[world_coord.x][world_coord.y] == entt::null
+                        ) {
+                        
+                        mag_array[child_coord.x][child_coord.y] = next_mag;
+                        res.in_range[child_coord.x][child_coord.y] = curr.first;
+                        dfs_stack.push(std::make_pair(child_coord, next_mag));
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+
 void TileMap::add_player_range(entt::registry& registry, int x, int y, int magnitude) {
-    player_range = get_range_no_collision(x, y, magnitude); 
-    
-    auto& center = player_range.center;
-    int mag = player_range.length / 2;
+    player_range = get_range_collision(x, y, magnitude); 
+
     for (int m_x = 0; m_x < player_range.length; m_x++) {
         for (int m_y = 0; m_y < player_range.length; m_y++) {
             if (player_range.in_range[m_x][m_y].has_value()) {
-                int map_x = center.x + mag - m_x;
-                int map_y = center.y + mag - m_y;
+                auto map_coord = player_range.local_to_array_coords(m_x, m_y);
                 
-                auto entity = create_tile(registry, map_x, map_y, tex_name, player_range_id);
+                auto entity = create_tile(registry, map_coord.x, map_coord.y, tex_name, player_range_id);
                 player_range_entities.push_back(entity);
             }
         }
@@ -609,4 +663,8 @@ bool TileMap::move_character_selected_cursor(entt::registry& registry) {
     else {
         return false;
     }
+}
+
+bool TileMap::is_empty_pos(int x, int y) {
+    return env_cache[x][y] != entt::null && char_cache[x][y] != entt::null;
 }

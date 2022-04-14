@@ -24,7 +24,7 @@ class TileMap {
 
             bool in_local_bounds(int x, int y);
             std::vector<glm::ivec2> get_path_from_center(int x, int y);
-            glm::ivec2 local_to_array_coords(glm::ivec2 coord);
+            glm::ivec2 local_to_array_coords(int x, int y);
 
             void print();
         };
@@ -130,4 +130,6 @@ private:
         bool move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y);
         //Return true if sucessful, return false if cursor is out of bounds
         bool move_character_selected_cursor(entt::registry& registry);
+
+        bool is_empty_pos(int x, int y);
 };
