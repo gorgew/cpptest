@@ -60,7 +60,7 @@ class State {
         };
 
         //Go through all the systems
-        virtual void process_systems(entt::registry& registry) = 0;
+        virtual void process_systems(entt::registry& registry, float& delta_time) = 0;
 
         /**
          * @brief Yikes!

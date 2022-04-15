@@ -14,6 +14,18 @@ struct old_world_pos {
     unsigned int z;
 };
 
+enum class faction {
+    player,
+    enemy
+};
+
+enum class direction {
+    up,
+    down,
+    left,
+    right
+};
+
 struct terrain {
     unsigned int id;
     std::string name;
@@ -27,6 +39,8 @@ struct environment {
 struct character {
     unsigned int id;
     std::string name;
+    faction fac;
+    direction dir;
 };
 
 struct ui {
@@ -43,14 +57,3 @@ struct tile_data_t {
     bool flyable;
 };
 
-enum class faction {
-    player,
-    enemy
-};
-
-enum class direction {
-    up,
-    down,
-    left,
-    right
-};

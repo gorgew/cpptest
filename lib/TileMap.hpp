@@ -60,6 +60,10 @@ private:
     int right_arrow_path = 11;
     int left_arrow_path = 12;
     int down_arrow_path = 13;
+    
+    void get_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+    void store_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+    std::vector<std::pair<direction, float>> stored_path;
 
     std::vector<entt::entity> path_entities;
     void draw_path(entt::registry& registry);
@@ -114,7 +118,7 @@ private:
 
         void enable_show_range();
 
-        //Get coordinates in range from entity at (x, y) with magnitude 
+        //Get coor  nates in range from entity at (x, y) with magnitude 
         range get_range_no_collision(int x, int y, int magnitude);
 
         //Get coordinates in range from entity at (x, y) with magnitude with colliding against 

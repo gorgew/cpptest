@@ -18,7 +18,7 @@ CreditsState::CreditsState(std::shared_ptr<Injector> injector, entt::registry& r
     //Other systems
 }
 
-void CreditsState::process_systems(entt::registry& registry) {
+void CreditsState::process_systems(entt::registry& registry, float&) {
 
     key_system.execute_holds(registry);
 }

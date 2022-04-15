@@ -81,6 +81,13 @@ void StartState::build_mouse_handlers() {
     std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
         if (m_substate == substate::observe_world) {
             tmap.move_cusor(registry, mouse_system.world_x, mouse_system.world_y);
+            if (tmap.get_char_on_cursor(registry) != entt::null) {
+                ui_show_character_hover = true;
+                update_char_hover_data(registry);
+            }
+            else {
+                ui_show_character_hover = false;
+            }
         }
         else if (m_substate == substate::character_select) {
             if (tmap.move_cursor_path(registry, mouse_system.world_x, mouse_system.world_y)) {
@@ -101,7 +108,9 @@ void StartState::build_mouse_handlers() {
         else if (m_substate == substate::character_select) {
             
             tmap.clear_player_range(registry);
+            tmap.clear_path(registry);
             m_substate = substate::observe_world;
+            ui_show_character_hover = false;
         }
     };
 
@@ -111,6 +120,7 @@ void StartState::build_mouse_handlers() {
                     tmap.clear_player_range(registry);
                     tmap.clear_path(registry);
                     m_substate = substate::observe_world;
+                    ui_show_character_hover = false;
                     fmt::print("MOVED\n");
                 }
                 else {
@@ -216,25 +226,31 @@ void StartState::build_scene(entt::registry& registry) {
 };
 
 void StartState::handle_event(entt::registry& registry, SDL_Event e) {
-    if (m_substate != substate::controls_disabled) {
+    if (m_substate != substate::lockout) {
         key_system.handle_event(registry, e);
         mouse_system.handle_event(registry, e);
     }
 }
 
-void StartState::process_systems(entt::registry& registry) {
+void StartState::set_lockout(int time) {
+    m_substate = substate::lockout;
+    lockout_timer = time;
+}
+
+void StartState::lockout_transition(float& time) {
+    if (lockout_timer != 0) {
+        lockout_timer -= time;
+        if (lockout_timer <= 0) {
+            lockout_timer = 0;
+            m_substate = substate::observe_world;
+        }
+    }
+}
+
+void StartState::process_systems(entt::registry& registry, float& delta_time) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
-
-        
-        if (tmap.get_char_on_cursor(registry) != entt::null) {
-            ui_show_character_hover = true;
-            update_char_hover_data(registry);
-        }
-        else {
-            ui_show_character_hover = false;
-        }
-        
+        lockout_transition(delta_time);
     }
 }
 

@@ -9,6 +9,8 @@ add_library(
     KeyEventSystem.hpp
     MouseEventSystem.hpp
     MouseEventSystem.cpp
+    PhysicsSystem.hpp
+    PhysicsSystem.cpp
     Injector.hpp
     Injector.cpp
     ScriptEngine.hpp

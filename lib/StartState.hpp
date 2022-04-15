@@ -22,7 +22,7 @@ class StartState : public State {
     enum class substate {
         observe_world,
         character_select,
-        controls_disabled
+        lockout
     };
 
     enum class next_state {
@@ -52,6 +52,8 @@ class StartState : public State {
     bool ui_show_character_hover = false;
 
     substate m_substate = substate::observe_world;
+
+    int lockout_timer = 0;
     
     public:
 
@@ -78,10 +80,13 @@ class StartState : public State {
         };
 
         void handle_event(entt::registry& registry, SDL_Event e);
-        void process_systems(entt::registry& registry);
+        void process_systems(entt::registry& registry, float& delta_time);
         std::shared_ptr<State> next(entt::registry& registry);
 
         void resize(int width, int height);
 
         void display_ui(nk_context* ctx);
+        
+        void set_lockout(int time);
+        void lockout_transition(float& time);
 };

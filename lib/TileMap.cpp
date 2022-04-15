@@ -2,6 +2,7 @@
 #include "GraphicsComponents.hpp"
 #include "PhysicsComponents.hpp"
 #include "GameObjectComponents.hpp"
+#include "PhysicsSystem.hpp"
 #include <fmt/printf.h>
 #include <cstdlib>
 #include <stack>
@@ -88,6 +89,103 @@ void TileMap::clear_path(entt::registry& registry) {
     path_entities.clear();
 }
 
+void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+    
+    stored_path.clear();
+    auto next_cursor_x = mouse_x;
+    auto next_cursor_y = mouse_y;
+    float distance = 100.0f;
+
+    if (in_bounds(next_cursor_x, next_cursor_y)) {
+        
+        cursor_x = next_cursor_x;
+        cursor_y = next_cursor_y;
+        
+        if (cursor_in_range(player_range)) {
+            
+            clear_path(registry);
+            direction last_direction;
+            int mag = player_range.length / 2;
+            auto coord = player_range.local_to_array_coords(cursor_x, cursor_y);
+            int range_x = coord.x;
+            int range_y = coord.y;
+
+            auto next = player_range.in_range[range_x][range_y].value();
+            int diff_x = next.x - range_x;
+            int diff_y = next.y - range_y;
+            if (diff_x == -1) {
+                last_direction = direction::left;
+                range_x--;
+                next_cursor_x++;
+            }
+            else if (diff_x == 1) {
+                last_direction = direction::right;
+                range_x++;
+                next_cursor_x--;
+            }
+            else if (diff_y == -1) {
+                last_direction = direction::down;
+                range_y--;
+                next_cursor_y++;
+            }
+            else if (diff_y == 1) {
+                last_direction = direction::up;
+                range_y++;
+                next_cursor_y--;
+            }
+            while (range_x != mag || range_y != mag) {
+                fmt::print("asdf\n");
+                next = player_range.in_range[range_x][range_y].value();
+                diff_x = next.x - range_x;
+                diff_y = next.y - range_y;
+                
+                if (diff_x == -1) {
+                    if (last_direction != direction::left) {
+                        stored_path.push_back(std::make_pair(last_direction, distance));
+                        distance = 0.0f;
+                    }
+                    last_direction = direction::left;
+                    range_x--;
+                    next_cursor_x++;
+                }
+                else if (diff_x == 1) {
+                    if (last_direction != direction::right) {
+                        stored_path.push_back(std::make_pair(last_direction, distance));
+                        distance = 0.0f;
+                    }
+                    last_direction = direction::right;
+                    range_x++;
+                    next_cursor_x--;
+                }
+                else if (diff_y == -1) {
+                    if (last_direction != direction::down) {
+                        stored_path.push_back(std::make_pair(last_direction, distance));
+                        distance = 0.0f;
+                    }
+                    last_direction = direction::down;
+                    range_y--;
+                    next_cursor_y++;
+                }
+                else if (diff_y == 1) {
+                    if (last_direction != direction::up) {
+                        stored_path.push_back(std::make_pair(last_direction, distance));
+                        distance = 0.0f;
+                    }
+                    last_direction = direction::up;
+                    range_y++;
+                    next_cursor_y--;
+                }
+                distance += 100.0f;
+            }
+            stored_path.push_back(std::make_pair(last_direction, distance));
+            for (auto& p: stored_path) {
+                fmt::print("Direction: {} Distance: {}\n", p.first, p.second);
+            }
+        }
+
+    }
+}
+
 bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
 
     auto next_cursor_x = mouse_x / tile_width;
@@ -138,10 +236,8 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                 range_y++;
                 next_cursor_y--;
             }
-            fmt::print("after range_x {} range_y {}\n", range_x, range_y);
             
             while (range_x != mag || range_y != mag) {
-                fmt::print("asdfasdfasdfasdfasdf\n");
 
                 next = player_range.in_range[range_x][range_y].value();
                 diff_x = next.x - range_x;
@@ -216,10 +312,7 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                     range_y++;
                     next_cursor_y--;
                 }
-            
             }
-            
-            
             return true;
         }
     }
@@ -359,7 +452,8 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
                 int sheet_index = 0;
                 auto entity = create_billboard_tile(registry, x_index, y_index, tile_width, tile_height,
                     spritesheet, sheet_index);
-                registry.emplace<character>(entity,1, char_name);
+                registry.emplace<character>(entity, 1, char_name, faction::player, direction::up);
+                registry.emplace<physics>(entity, glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.0f, 0.0f));
                 char_cache[x_index][y_index] = entity;
 
                 if (roster_index < roster_size) {
@@ -582,16 +676,6 @@ TileMap::range TileMap::get_range_collision(int x, int y, int magnitude) {
                 if (res.in_local_bounds(child_coord.x, child_coord.y)) {
                     auto child_mag = mag_array[child_coord.x][child_coord.y];
                     
-                    fmt::print("Curr: ({}, {}) Offset: ({}, {}) child ({}, {}) Mag: {} Child_mag: {}\n", 
-                        curr.first.x,
-                        curr.first.y,
-                        offset.x,
-                        offset.y,
-                        child_coord.x, 
-                        child_coord.y,
-                        curr.second, 
-                        child_mag);
-                    
                     auto world_coord = res.local_to_array_coords(child_coord.x, child_coord.y);
                     
                     if (!res.in_range[child_coord.x][child_coord.y].has_value() 
@@ -653,11 +737,11 @@ bool TileMap::move_character(entt::registry& registry, int src_x, int src_y, int
     else {
         return false;
     }
-
 }
 
 bool TileMap::move_character_selected_cursor(entt::registry& registry) {
     if (cursor_in_range(player_range)) {
+        store_cursor_path(registry, cursor_x, cursor_y);
         return move_character(registry, player_range.center.x, player_range.center.y, cursor_x, cursor_y);
     }
     else {

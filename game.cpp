@@ -4,6 +4,7 @@
 #include <PhysicsComponents.hpp>
 #include <GraphicsComponents.hpp>
 #include <GraphicsSystem.hpp>
+#include <PhysicsSystem.hpp>
 #include <FontBuilder.hpp>
 #include <ScriptEngine.hpp>
 #include <ResourceManager.hpp>
@@ -52,6 +53,8 @@ int main(void) {
     g_system.frame_delay = 5;
     FontBuilder f_builder{injector};
     f_builder.add_font("arial", "resources/FantasqueSansMono-Regular.ttf", 96);
+
+    PhysicsSystem phys_system;
 
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
@@ -138,7 +141,8 @@ int main(void) {
                 goto EXIT;
             }
         }
-        game_state->process_systems(registry);
+        game_state->process_systems(registry, delta_time);
+        phys_system.process_physics(registry, delta_time);
         g_system.draw(registry, delta_time);
 
         ImGui_ImplOpenGL3_NewFrame();
