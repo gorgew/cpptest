@@ -6,6 +6,9 @@
 #include <memory>
 #include <unordered_map>
 
+/**
+ * Resource manager for animations
+*/
 class AnimationManager {
     std::unordered_map<std::string, std::vector<array_frame>> frame_vectors;
     std::unordered_map<std::string, std::vector<int>> timing_vectors;

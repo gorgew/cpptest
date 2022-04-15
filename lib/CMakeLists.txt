@@ -25,6 +25,8 @@ add_library(
     GameObjectComponents.hpp
     Actor.cpp
     Actor.hpp
+    ActionSequencer.hpp
+    ActionSequencer.cpp
     WorldCharacters.hpp
     WorldCharacters.cpp
     TileMap.hpp

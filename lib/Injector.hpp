@@ -24,6 +24,4 @@ class Injector {
         ShaderManager shader_man;
 
         AudioSystem audio;
-
-        //AnimationManager anim;
 };

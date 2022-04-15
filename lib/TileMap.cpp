@@ -98,9 +98,6 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
 
     if (in_bounds(next_cursor_x, next_cursor_y)) {
         
-        cursor_x = next_cursor_x;
-        cursor_y = next_cursor_y;
-        
         if (cursor_in_range(player_range)) {
             
             clear_path(registry);
@@ -182,7 +179,7 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
                 fmt::print("Direction: {} Distance: {}\n", p.first, p.second);
             }
         }
-
+        std::reverse(stored_path.begin(), stored_path.end());
     }
 }
 
@@ -250,11 +247,11 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                     }
                     else if (last_direction == direction::up) {
                         path_entities.push_back(create_tile(registry, next_cursor_x, 
-                        next_cursor_y, tex_name, dl_ru_path));
+                        next_cursor_y, tex_name, dr_lu_path));
                     }
                     else if (last_direction == direction::down) {
                         path_entities.push_back(create_tile(registry, next_cursor_x, 
-                        next_cursor_y, tex_name, ul_rd_path));
+                        next_cursor_y, tex_name, ur_ld_path));
                     }
                     
                     last_direction = direction::left;
@@ -268,11 +265,11 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                     }
                     else if (last_direction == direction::up) {
                         path_entities.push_back(create_tile(registry, next_cursor_x, 
-                        next_cursor_y, tex_name, dr_lu_path));
+                        next_cursor_y, tex_name, dl_ru_path));
                     }
                     else if (last_direction == direction::down) {
                         path_entities.push_back(create_tile(registry, next_cursor_x, 
-                        next_cursor_y, tex_name, ur_ld_path));
+                        next_cursor_y, tex_name, ul_rd_path));
                     }
                     last_direction = direction::right;
                     range_x++;
@@ -453,7 +450,6 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
                 auto entity = create_billboard_tile(registry, x_index, y_index, tile_width, tile_height,
                     spritesheet, sheet_index);
                 registry.emplace<character>(entity, 1, char_name, faction::player, direction::up);
-                registry.emplace<physics>(entity, glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.0f, 0.0f));
                 char_cache[x_index][y_index] = entity;
 
                 if (roster_index < roster_size) {
@@ -726,11 +722,13 @@ bool TileMap::move_character(entt::registry& registry, int src_x, int src_y, int
             && char_cache[src_x][src_y] != entt::null 
             && char_cache[tgt_x][tgt_y] == entt::null) {
         char_cache[tgt_x][tgt_y] = char_cache[src_x][src_y];
+        /*
         registry.replace<position>(char_cache[src_x][src_y], 
             glm::vec3(
             tile_height + tgt_x * tile_height, 
             tile_width + tgt_y * tile_width, 0.0f)
         );
+        */
         char_cache[src_x][src_y] = entt::null;
         return true;
     }

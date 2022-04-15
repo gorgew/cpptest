@@ -9,6 +9,7 @@
 #include "Camera.hpp"
 #include "ScriptEngine.hpp"
 #include "ResourceManager.hpp"
+#include "ActionSequencer.hpp"
 
 struct ui_character_data {
     std::string char_name;
@@ -52,7 +53,7 @@ class StartState : public State {
     bool ui_show_character_hover = false;
 
     substate m_substate = substate::observe_world;
-
+    ActionSequencer action_seq = {resources};
     int lockout_timer = 0;
     
     public:

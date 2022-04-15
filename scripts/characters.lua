@@ -39,7 +39,7 @@ Bob = Character:new{
     name = "Bob",
     hp = 69,
     aim = 69,
-    movement = 2,
+    movement = 3,
     hp_growth = 0.3,
     aim_growth = 0.7
 }

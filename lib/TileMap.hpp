@@ -63,7 +63,7 @@ private:
     
     void get_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
     void store_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
-    std::vector<std::pair<direction, float>> stored_path;
+    
 
     std::vector<entt::entity> path_entities;
     void draw_path(entt::registry& registry);
@@ -129,7 +129,7 @@ private:
         void clear_player_range(entt::registry& registry);
 
         void clear_path(entt::registry& registry);
-        
+        std::vector<std::pair<direction, float>> stored_path;
         //Return true if successful, return false if src or tgt are null or if either are out of bounds
         bool move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y);
         //Return true if sucessful, return false if cursor is out of bounds

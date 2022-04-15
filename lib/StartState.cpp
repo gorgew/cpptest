@@ -117,10 +117,11 @@ void StartState::build_mouse_handlers() {
     std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
             if (m_substate == substate::character_select) {
                 if (tmap.move_character_selected_cursor(registry)) {
+                    action_seq.set_path(tmap.get_char_on_cursor(registry), tmap.stored_path, 1.0f);
                     tmap.clear_player_range(registry);
                     tmap.clear_path(registry);
                     m_substate = substate::observe_world;
-                    ui_show_character_hover = false;
+
                     fmt::print("MOVED\n");
                 }
                 else {
@@ -251,6 +252,7 @@ void StartState::process_systems(entt::registry& registry, float& delta_time) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
         lockout_transition(delta_time);
+        action_seq.process(registry, delta_time);
     }
 }
 
@@ -279,8 +281,6 @@ void StartState::display_ui(nk_context* ctx) {
     if (ui_show_character_hover) {
         show_character_hover_ui(ctx);
     }
-
-    
 }
 
 void StartState::display_demo(nk_context* ctx) {
