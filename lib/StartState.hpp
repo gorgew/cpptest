@@ -53,8 +53,8 @@ class StartState : public State {
     bool ui_show_character_hover = false;
 
     substate m_substate = substate::observe_world;
-    ActionSequencer action_seq = {resources};
-    int lockout_timer = 0;
+    ActionSequencer action_seq = {injector, resources};
+    float lockout_timer = 0.0f;
     
     public:
 
@@ -88,6 +88,6 @@ class StartState : public State {
 
         void display_ui(nk_context* ctx);
         
-        void set_lockout(int time);
+        void set_lockout(float time);
         void lockout_transition(float& time);
 };

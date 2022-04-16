@@ -8,6 +8,13 @@
 #include "PhysicsSystem.hpp"
 #include "GameObjectComponents.hpp"
 #include "ResourceManager.hpp"
+#include "Injector.hpp"
+
+struct action_instruction {
+    float time;
+    glm::vec3 velocity;
+    glm::vec3 acceleration;
+};
 
 /**
  * Controls physics and animations of entities
@@ -15,15 +22,29 @@
 class ActionSequencer {
 
     struct instruction {
+        float time;
         std::string animation;
         glm::vec3 velocity;
         glm::vec3 acceleration;
     };
 
-    robin_hood::unordered_map<entt::entity, std::queue<std::pair<float, instruction>>> instruction_queue;
+    robin_hood::unordered_map<entt::entity, std::queue<instruction>> instruction_queue;
     std::shared_ptr<ResourceManager> resources;
+    std::shared_ptr<Injector> injector;
+    
     public:
-        ActionSequencer(std::shared_ptr<ResourceManager> resources) : resources(resources) {}
+        ActionSequencer(std::shared_ptr<Injector> injector, std::shared_ptr<ResourceManager> resources) 
+            : injector(injector), resources(resources) {}
         void process(entt::registry& registry, float& delta_time);
-        void set_path(entt::entity, std::vector<std::pair<direction, float>>& path, float time);
+        /*
+        Set path in along tiles.
+        Return time taken.
+        */
+        float set_path(entt::registry&, entt::entity, std::vector<std::pair<direction, float>>& path, float time);
+
+        /*
+        Set path but also change to walking animations based off of direction
+        */
+        float set_path_walk(entt::registry&, entt::entity, std::string char_name,
+            std::vector<std::pair<direction, float>>& path, float time);
 };

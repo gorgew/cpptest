@@ -41,12 +41,12 @@
 using namespace std::chrono;
 using namespace entt::literals;
 
-constexpr float FRAME_TIME = 1.0f / 120.0f;
+
 
 int main(void) {
 
     auto injector = std::make_shared<Injector>();
-    
+    float FRAME_TIME = 1.0f / injector->config.FPS;
     fmt::print("Game initializing\n");
     Window window {"Game", injector->config.height, injector->config.width};
     GraphicsSystem g_system{injector};

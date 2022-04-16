@@ -15,6 +15,7 @@ void ResourceManager::load_character_resources(sol::state& lua) {
 
         injector->tex_man.add_texture(pic_name,
             "resources/sprites/" + pic_name + ".png");
+        
         profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
         
         std::string fpath = characters[char_name]["spritesheet"];

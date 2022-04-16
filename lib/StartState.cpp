@@ -117,11 +117,11 @@ void StartState::build_mouse_handlers() {
     std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
             if (m_substate == substate::character_select) {
                 if (tmap.move_character_selected_cursor(registry)) {
-                    action_seq.set_path(tmap.get_char_on_cursor(registry), tmap.stored_path, 1.0f);
+                    auto time = action_seq.set_path(registry, tmap.get_char_on_cursor(registry), 
+                        tmap.stored_path, 0.2f);
                     tmap.clear_player_range(registry);
                     tmap.clear_path(registry);
-                    m_substate = substate::observe_world;
-
+                    set_lockout(time);
                     fmt::print("MOVED\n");
                 }
                 else {
@@ -227,13 +227,11 @@ void StartState::build_scene(entt::registry& registry) {
 };
 
 void StartState::handle_event(entt::registry& registry, SDL_Event e) {
-    if (m_substate != substate::lockout) {
-        key_system.handle_event(registry, e);
-        mouse_system.handle_event(registry, e);
-    }
+    key_system.handle_event(registry, e);
+    mouse_system.handle_event(registry, e);
 }
 
-void StartState::set_lockout(int time) {
+void StartState::set_lockout(float time) {
     m_substate = substate::lockout;
     lockout_timer = time;
 }
@@ -241,6 +239,7 @@ void StartState::set_lockout(int time) {
 void StartState::lockout_transition(float& time) {
     if (lockout_timer != 0) {
         lockout_timer -= time;
+        fmt::print("lockout time: {}\n", lockout_timer);
         if (lockout_timer <= 0) {
             lockout_timer = 0;
             m_substate = substate::observe_world;
