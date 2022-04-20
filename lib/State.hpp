@@ -34,7 +34,7 @@ class State {
         //Specific handlers and what not
         KeyEventSystem key_system;
         MouseEventSystem mouse_system;
-        std::shared_ptr<Injector> injector;
+        Locator locator;
         
 
         bool go_next = false;

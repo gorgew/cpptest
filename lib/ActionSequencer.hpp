@@ -29,12 +29,9 @@ class ActionSequencer {
     };
 
     robin_hood::unordered_map<entt::entity, std::queue<instruction>> instruction_queue;
-    std::shared_ptr<ResourceManager> resources;
-    std::shared_ptr<Injector> injector;
+    Locator locator;
     
     public:
-        ActionSequencer(std::shared_ptr<Injector> injector, std::shared_ptr<ResourceManager> resources) 
-            : injector(injector), resources(resources) {}
         void process(entt::registry& registry, float& delta_time);
         /*
         Set path in along tiles.

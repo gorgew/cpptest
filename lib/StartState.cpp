@@ -102,7 +102,7 @@ void StartState::build_mouse_handlers() {
     std::function<void(entt::registry&)> l_mouse_down = [=, this](entt::registry& registry) {
         if (ui_show_character_hover && m_substate != substate::character_select) {
             tmap.add_player_range_cursor(registry, 
-                (int) scripts->lua["Characters"][tmap.last_char]["stats"]["movement"]);
+                (int) locator.get_scripts()->lua["Characters"][tmap.last_char]["stats"]["movement"]);
             m_substate = substate::character_select;
         }
         else if (m_substate == substate::character_select) {
@@ -138,14 +138,14 @@ void StartState::build_mouse_handlers() {
 
 void StartState::build_music() {
     /*
-    injector->audio.add_music("dd-town", "resources/dd-town.wav");
-    injector->audio.enqueue_music("dd-town");
+    locator.get_audio()->add_music("dd-town", "resources/dd-town.wav");
+    locator.get_audio()->enqueue_music("dd-town");
     //registry.emplace<audio_request>(music_command, "dd-town");
 
-    injector->audio.add_effect("slow-killer", "resources/slow_killer.wav");
+    locator.get_audio()->add_effect("slow-killer", "resources/slow_killer.wav");
     
     std::function<void(entt::registry&)> play_on_y= [=, this](entt::registry& registry) {
-        injector->audio.enqueue_effect("slow-killer");
+        locator.get_audio()->enqueue_effect("slow-killer");
     };
     key_system.add_keydown_handler(SDLK_y, play_on_y);
     */
@@ -154,37 +154,37 @@ void StartState::build_music() {
 void StartState::build_gfx() {
     fmt::print("Building gfx\n");
     //Other systems
-    injector->tex_man.add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("world.vert", "resources/world.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("world.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("world", {"world.vert", "world.frag"});
-    injector->shader_man.use("world");
-    program_id  = injector->shader_man.get_program_id("world");
+    locator.get_textures()->add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
+    locator.get_shaders()->add_shader("world.vert", "resources/world.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("world.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("world", {"world.vert", "world.frag"});
+    locator.get_shaders()->use("world");
+    program_id  = locator.get_shaders()->get_program_id("world");
 
     //sglUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
     
 
-    injector->shader_man.add_shader("billboard.vert", "resources/billboard.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_program("billboard", {"billboard.vert", "world.frag"});
+    locator.get_shaders()->add_shader("billboard.vert", "resources/billboard.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_program("billboard", {"billboard.vert", "world.frag"});
 
-    //glUniform1i(glGetUniformLocation(injector->shader_man.get_program_id("billboard"), "iTexture"), 0);
+    //glUniform1i(glGetUniformLocation(locator.get_shaders()->get_program_id("billboard"), "iTexture"), 0);
 
-    injector->shader_man.add_ubo("camera_ubo", sizeof(camera_data), 0);
-    injector->shader_man.bind_ubo("world", "camera_ubo", 0);
+    locator.get_shaders()->add_ubo("camera_ubo", sizeof(camera_data), 0);
+    locator.get_shaders()->bind_ubo("world", "camera_ubo", 0);
 
-    camera.reset(new Camera(static_cast<float>(injector->config.width), 
-        static_cast<float>(injector->config.height),
+    camera.reset(new Camera(static_cast<float>(locator.get_config()->width), 
+        static_cast<float>(locator.get_config()->height),
         100.0f, 
         1.0f,
-        injector->shader_man.get_ubo("camera_ubo")));
+        locator.get_shaders()->get_ubo("camera_ubo")));
 
 
     //auto light_color = color_vec::make_rgb(255, 255, 100, 1.0f);
     //glUniform3fv(glGetUniformLocation(program_id, "light_color"), 1, light_color);
 
     /*
-    injector->tex_man.add_2d_array_texture("dummy-menu", "resources/dummy-menu.png", 128, 128, 2);
-    injector->tex_man.add_2d_array_texture("tiles", "resources/iso-h-v1.png", 16, 16, 4);
+    locator.get_textures()->add_2d_array_texture("dummy-menu", "resources/dummy-menu.png", 128, 128, 2);
+    locator.get_textures()->add_2d_array_texture("tiles", "resources/iso-h-v1.png", 16, 16, 4);
     */
 };
 void StartState::build_scene(entt::registry& registry) {
@@ -196,7 +196,7 @@ void StartState::build_scene(entt::registry& registry) {
     registry.emplace<array_frame_node>(entity, my_animated_graphic);
     registry.emplace<position>(entity, glm::vec3(200.0f, 200.0f, 0.0f));
 
-    struct array_frame my_tile = gorge::build_array_frame(injector, 100.0f, 100.0f, "tiles", 1, "sprites");
+    struct array_frame my_tile = gorge::build_array_frame(100.0f, 100.0f, "tiles", 1, "sprites");
     const auto tile = registry.create();
     registry.emplace<array_frame>(tile, my_tile);
     registry.emplace<position>(tile, glm::vec3(400.0f, 200.0f, 0.0f));
@@ -204,16 +204,16 @@ void StartState::build_scene(entt::registry& registry) {
    {
         std::vector<int> frames = {0, 1, 2, 3};
         std::vector<int> timings = {1000, 1000, 1000, 1000};
-        resources->add_animation("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
+        locator.get_resources()->add_animation("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
             true, frames, timings);
    }
   
-    injector->tex_man.add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 24);
+    locator.get_textures()->add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 24);
     
-    tmap = {injector, "art", "world", "billboard", registry};
-    tmap.load_tileset(scripts->lua);
-    tmap.load_tiles(scripts->lua);
-    tmap.load_map("Test", scripts->lua, registry);
+    tmap = {"art", "world", "billboard", registry};
+    tmap.load_tileset(locator.get_scripts()->lua);
+    tmap.load_tiles(locator.get_scripts()->lua);
+    tmap.load_map("Test", locator.get_scripts()->lua, registry);
 
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
     
@@ -258,13 +258,13 @@ void StartState::process_systems(entt::registry& registry, float& delta_time) {
 std::shared_ptr<State> StartState::next(entt::registry& registry) {
 
     registry.clear();
-    return std::make_shared<CreditsState>(injector, registry);
+    return std::make_shared<CreditsState>(registry);
 }
 
 void StartState::resize(int x, int y) {
     camera->resize(x, y);
-    injector->config.width = x;
-    injector->config.height = y;
+    locator.get_config()->width = x;
+    locator.get_config()->height = y;
 }
 
 void StartState::link_scripts() {
@@ -312,12 +312,12 @@ void StartState::update_char_hover_data(entt::registry& registry) {
     
     if (char_name != char_hover_data.char_name) {
 
-        //resources->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
+        //locator.get_resources()->set_animation(registry, tmap.get_char_on_cursor(registry), "anim");
         
-        sol::table characters = scripts->lua["Characters"];
+        sol::table characters = locator.get_scripts()->lua["Characters"];
         char_hover_data.char_name = char_name;
         char_hover_data.label_name = "Name: " + char_hover_data.char_name;
-        char_hover_data.profile_pic = resources->get_profile_pic(char_hover_data.char_name);
+        char_hover_data.profile_pic = locator.get_resources()->get_profile_pic(char_hover_data.char_name);
     }
     
 }

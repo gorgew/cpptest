@@ -14,13 +14,14 @@
 #include <nuklear/nuklear.h>
 #include <robin_hood/robin_hood.h>
 #include <ScriptEngine.hpp>
-#include <Injector.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <glm/glm.hpp>
+#include "TextureManager.hpp"
 #include <GraphicsComponents.hpp>
 #include <GameObjectComponents.hpp>
-#include <glm/glm.hpp>
+#include "Locator.hpp"
 
 class ResourceManager {
 
@@ -31,14 +32,15 @@ class ResourceManager {
     robin_hood::unordered_map<std::string, glm::vec3> offsets;
     robin_hood::unordered_map<std::string, bool> loops;
 
-    std::shared_ptr<Injector> injector;
+    TextureManager* textures;
+    Locator locator;
 
     public:
 
-        ResourceManager(std::shared_ptr<Injector> injector);
-        void load_character_resources(sol::state& lua);
-        void load_environment_resources(sol::state& lua);
-
+        ResourceManager(TextureManager* tex) : textures(tex) {}
+        void load_character_resources();
+        void load_environment_resources();
+        void load_resources();
         //For the nuklear ui
         struct nk_image get_profile_pic(std::string name);
 

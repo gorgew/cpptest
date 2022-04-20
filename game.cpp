@@ -41,33 +41,48 @@
 using namespace std::chrono;
 using namespace entt::literals;
 
-
-
 int main(void) {
 
-    auto injector = std::make_shared<Injector>();
-    float FRAME_TIME = 1.0f / injector->config.FPS;
-    fmt::print("Game initializing\n");
-    Window window {"Game", injector->config.height, injector->config.width};
-    GraphicsSystem g_system{injector};
+    AudioSystem audio;
+    Locator locator;
+    Config c;
+    TextureManager tex;
+    ShaderManager shader;
+    VertexArrayManager vert;
+    ScriptEngine scripts;
+    Window window {"Game", c.height, c.width};
+    auto resources = std::make_shared<ResourceManager>(&tex);
+    //ResourceManager resources(&tex);
+
+    locator.provide_config(&c);
+    locator.provide_textures(&tex);
+    locator.provide_shaders(&shader);
+    locator.provide_vertices(&vert);
+    locator.provide_audio(&audio);
+    locator.provide_scripts(&scripts);
+    locator.provide_resources(resources.get());
+
+    //locator.get_resources()->load_resources();
+
+    GraphicsSystem g_system;
     g_system.frame_delay = 5;
-    FontBuilder f_builder{injector};
+
+    resources->load_resources();
+    fmt::print("Subsystems started!\n");
+
+    float FRAME_TIME = 1.0f / locator.get_config()->FPS;
+    fmt::print("Game initializing\n");
+
+    FontBuilder f_builder;
     f_builder.add_font("arial", "resources/FantasqueSansMono-Regular.ttf", 96);
 
     PhysicsSystem phys_system;
 
     entt::registry registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
-
-    std::shared_ptr<ScriptEngine> scripts = std::make_shared<ScriptEngine>();
-
-    std::shared_ptr<ResourceManager> resources = std::make_shared<ResourceManager>(injector);
-    resources->load_character_resources(scripts->lua);
-    resources->load_environment_resources(scripts->lua);
-    fmt::print("Resources Loaded\n");
-
+    
     std::shared_ptr<State> game_state; 
-    game_state = std::make_shared<StartState>(injector, registry, scripts, resources);
+    game_state = std::make_shared<StartState>(registry);
 
     fmt::print("Scene constructed\n");
     
@@ -76,7 +91,7 @@ int main(void) {
     ImGui::CreateContext();
     auto& imgui_io = ImGui::GetIO(); (void) imgui_io;
     ImGui::StyleColorsDark();
-    ImGui_ImplSDL2_InitForOpenGL(window.windowPtr, window.glContext);
+    ImGui_ImplSDL2_InitForOpenGL(locator.get_window()->windowPtr, locator.get_window()->glContext);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -84,7 +99,7 @@ int main(void) {
     //nuklear
     struct nk_context *ctx;
 
-    ctx = nk_sdl_init(window.windowPtr);
+    ctx = nk_sdl_init(locator.get_window()->windowPtr);
     {
         struct nk_font_atlas *atlas;
         nk_sdl_font_stash_begin(&atlas);
@@ -92,8 +107,8 @@ int main(void) {
     }
 
     /*
-    injector->tex_man.add_texture("profile_pic", "resources/bush.png", false);
-    struct nk_image profile_pic = nk_image_id(static_cast<int>(injector->tex_man.get_id("profile_pic")));
+    locator.get_textures()->add_texture("profile_pic", "resources/bush.png", false);
+    struct nk_image profile_pic = nk_image_id(static_cast<int>(locator.get_textures()->get_id("profile_pic")));
     */
 
     //Timing clocks
@@ -169,7 +184,7 @@ int main(void) {
         nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);;
 
         SDL_GL_SwapWindow(window.windowPtr);
-        injector->audio.handle_request();
+        locator.get_audio()->handle_request();
         //Check if going to next state
         if (game_state->ready_next()) {
 

@@ -5,7 +5,7 @@ extern "C" {
 }
 #include "FontComponents.hpp"
 #include "FrameBufferObject.hpp"
-#include <Injector.hpp>
+#include "Locator.hpp"
 #include <memory>
 #include <glm/glm.hpp>
 #include <entt/entity/registry.hpp>
@@ -15,7 +15,7 @@ class GraphicsSystem {
     //Dimensions of fbo and default buffer
     int fbo_width, fbo_height, default_width, default_height;
 
-    std::shared_ptr<Injector> injector;
+    Locator locator;
 
     std::unique_ptr<FrameBufferObject> offscreenBuffer;
 
@@ -44,9 +44,8 @@ class GraphicsSystem {
         /**
          * @brief Graphics system that draws entities with graphics components.
          *        Also initializes OpenGL.
-         * @param injector Dependency injector
          */
-        GraphicsSystem(std::shared_ptr<Injector> injector);
+        GraphicsSystem();
 
         ~GraphicsSystem();
 

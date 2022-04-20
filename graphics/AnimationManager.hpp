@@ -1,6 +1,6 @@
 #pragma once
 #include "GraphicsComponents.hpp"
-#include <Injector.hpp>
+#include "Locator.hpp"
 #include <entt/entt.hpp>
 
 #include <memory>
@@ -15,11 +15,10 @@ class AnimationManager {
     std::unordered_map<std::string, glm::vec3> offsets;
     std::unordered_map<std::string, bool> loops;
 
-    std::shared_ptr<Injector> injector;
+    Locator locator;
 
     public:
-        AnimationManager(std::shared_ptr<Injector>);
-        //void set_injector(std::shared_ptr<Injector>);
+        AnimationManager();
         
         /**
          * @param frames Indices of frames in sheet

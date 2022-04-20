@@ -6,8 +6,7 @@
 #include <GraphicsComponents.hpp>
 #include <PhysicsComponents.hpp>
 
-CreditsState::CreditsState(std::shared_ptr<Injector> injector, entt::registry& registry) {
-    this->injector = injector;
+CreditsState::CreditsState(entt::registry& registry) {
     
     //Key handlers
     key_system = {};

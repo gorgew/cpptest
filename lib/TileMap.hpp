@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <entt/entity/registry.hpp>
 #include <sol/sol.hpp>
-#include "Injector.hpp"
 #include <robin_hood/robin_hood.h>
+#include "Locator.hpp"
 #include <string>
 #include <vector>
 #include <memory>
@@ -31,7 +31,7 @@ class TileMap {
 private:
     int width, height;
 
-    std::shared_ptr<Injector> injector;
+    Locator locator;
     //Some sort of mapping from string to tile type?
     std::unordered_map<std::string, int> name_to_tile_type_map;
 
@@ -90,7 +90,7 @@ private:
         std::string last_terrain;
 
         TileMap() = default;
-        TileMap(std::shared_ptr<Injector>, std::string tex_name, std::string terrain_shader, 
+        TileMap(std::string tex_name, std::string terrain_shader, 
                 std::string character_shader, entt::registry& registry);
         
         bool in_bounds(int x, int y);

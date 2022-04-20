@@ -39,6 +39,9 @@ add_library(
     ResourceManager.cpp
 
     WidgetComponent.hpp
+
+    Locator.hpp
+    Locator.cpp
 )
 
 target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

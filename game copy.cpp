@@ -1,5 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include <Injector.hpp>
+#include "Locator.hpp"
 #include <Window.hpp>
 #include <PhysicsComponents.hpp>
 #include <GraphicsComponents.hpp>
@@ -29,7 +29,7 @@ int main(void) {
     auto injector = std::make_shared<Injector>();
 
     fmt::print("Game initializing\n");
-    Window window {"Game", injector->config.height, injector->config.width};
+    Window window {"Game", locator.get_config()->height, locator.get_config()->width};
     GraphicsSystem g_system{injector};
     FontBuilder f_builder{injector};
     f_builder.add_font("arial", "resources/FantasqueSansMono-Regular.ttf", 96);
@@ -42,19 +42,19 @@ int main(void) {
     //TESTING GRAPHICS SYSTEM!!
     //REMOVE LATER!!
     //MAKING THE OPENGL DATA
-    injector->tex_man.add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
-    injector->shader_man.add_shader("sprites-v", "resources/sprites.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("array-tex", "resources/array-tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("sprites", {"sprites-v", "array-tex"});
-    injector->shader_man.use("sprites");
+    locator.get_textures()->add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
+    locator.get_shaders()->add_shader("sprites-v", "resources/sprites.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("array-tex", "resources/array-tex.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("sprites", {"sprites-v", "array-tex"});
+    locator.get_shaders()->use("sprites");
 
-    int id = injector->shader_man.get_program_id("sprites");
+    int id = locator.get_shaders()->get_program_id("sprites");
     glUniform1i(glGetUniformLocation(id, "iTexture"), 0);
-    fmt::print("texture_id: {}\n", injector->tex_man.get_id("blank"));
+    fmt::print("texture_id: {}\n", locator.get_textures()->get_id("blank"));
     fmt::print("shader id: {}\n", id);
 
     //glm::mat4 projection = glm::mat4(1.0f);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, static_cast<float>(injector->config.height));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(locator.get_config()->width), 0.0f, static_cast<float>(locator.get_config()->height));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(id, "model"), 1, GL_FALSE, glm::value_ptr(model));

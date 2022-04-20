@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Injector.hpp>
+#include "Locator.hpp"
 #include <Camera.hpp>
 #include <SDL2/SDL_events.h>
 #include <entt/entt.hpp>
@@ -21,7 +21,7 @@ struct rect_clickable {
 class MouseEventSystem {
 
     std::vector<rect_clickable> rect_handlers;
-    std::shared_ptr<Injector> injector;
+    Locator locator;
     std::shared_ptr<Camera> camera;
 
     float world_x_to_ndc(float x);
@@ -40,7 +40,7 @@ class MouseEventSystem {
 
     public:
         MouseEventSystem() = default;
-        MouseEventSystem(std::shared_ptr<Injector> injector, std::shared_ptr<Camera> camera);
+        MouseEventSystem(std::shared_ptr<Camera> camera);
         void handle_event(entt::registry& registry, SDL_Event e);
         void add_rect_button(std::function<void(entt::registry&)> handler, Uint8 type, int min_x, int min_y, int max_x, int max_y);
         void add_rect_button(std::function<void(entt::registry&)> handler, Uint8 type, float min_x, float min_y, float max_x, float max_y);

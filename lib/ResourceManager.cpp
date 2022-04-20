@@ -1,35 +1,33 @@
 #include "ResourceManager.hpp"
 #include <fmt/printf.h>
 
-ResourceManager::ResourceManager(std::shared_ptr<Injector> injector) {
-    this->injector = injector;
-}
+void ResourceManager::load_character_resources() {
 
-void ResourceManager::load_character_resources(sol::state& lua) {
-
+    auto& lua = locator.get_scripts()->lua;
     sol::table characters = lua["Characters"];
     
     for (const auto& pair : characters) {
         std::string char_name = (pair.first).as<std::string>();
         std::string pic_name = char_name + "_profile";
 
-        injector->tex_man.add_texture(pic_name,
+        fmt::print("Point 4\n");
+        textures->add_texture(pic_name,
             "resources/sprites/" + pic_name + ".png");
-        
-        profile_pics[char_name] = nk_image_id(static_cast<int>(injector->tex_man.get_id(pic_name)));
+        fmt::print("Point 5\n");
+        profile_pics[char_name] = nk_image_id(static_cast<int>(textures->get_id(pic_name)));
         
         std::string fpath = characters[char_name]["spritesheet"];
         int width = characters[char_name]["sheet_x"];
         int height = characters[char_name]["sheet_y"];
         int sheet_size = characters[char_name]["sheet_size"];
-        injector->tex_man.add_2d_array_texture(fpath, fpath, width,
+        textures->add_2d_array_texture(fpath, fpath, width,
             height, sheet_size);
     }
     
 }
 
-void ResourceManager::load_environment_resources(sol::state& lua) {
-
+void ResourceManager::load_environment_resources() {
+    auto& lua = locator.get_scripts()->lua;
     sol::table env_objs = lua["EnvObjs"];
     
     for (const auto& pair : env_objs) {
@@ -39,12 +37,17 @@ void ResourceManager::load_environment_resources(sol::state& lua) {
         int sheet_size = env_objs[env_name]["sheet_size"];
 
         std::string fpath = env_objs[env_name]["spritesheet"];
-        injector->tex_man.add_2d_array_texture(fpath, fpath, 
+        textures->add_2d_array_texture(fpath, fpath, 
             sheet_x, 
             sheet_y, 
             sheet_size);
     }
     
+}
+
+void ResourceManager::load_resources() {
+    load_character_resources();
+    load_environment_resources();
 }
 
 struct nk_image ResourceManager::get_profile_pic(std::string name) {
@@ -70,14 +73,14 @@ void ResourceManager::add_animation(std::string name, std::string filepath,
         offsets[name] = offset;
         loops[name] = loop;
 
-        injector->tex_man.add_2d_array_texture(name, filepath, tile_width, tile_height, num_layers);
+        textures->add_2d_array_texture(name, filepath, tile_width, tile_height, num_layers);
 
         int n = frames.size();
         auto& frame_vector  = frame_vectors[name];
         frame_vector.resize(n);
 
         for (int i = 0; i < n; i++) {
-            frame_vector[i] =  gorge::build_array_frame(injector, width, height, name, 
+            frame_vector[i] =  gorge::build_array_frame(width, height, name, 
                 frames[i], program_name);
         }
     }

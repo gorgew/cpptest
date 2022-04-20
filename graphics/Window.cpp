@@ -32,7 +32,7 @@ void Window::swap() {
     
     SDL_GL_SwapWindow(windowPtr);
 }
-Window::~Window() {
+void Window::shutdown() {
     
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(windowPtr); 

@@ -3,11 +3,11 @@
 #include "FontComponents.hpp"
 #include <entt/entity/registry.hpp>
 #include <glm/glm.hpp>
+#include <Locator.hpp>
 
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <Injector.hpp>
 #include <map>
 #include <tuple>
 #include <utility>
@@ -21,14 +21,13 @@ struct font_data {
 class FontBuilder {
     GLuint char_vert_id;
     GLuint program_id;
-    std::shared_ptr<Injector> injector;
     FT_Library ft_lib;
     std::map<std::tuple<std::string, unsigned int, unsigned char>, char_frame_data> font_char_to_data_map;
     std::map<std::pair<std::string, unsigned int>, font_data> font_to_data_map;
     //robin_hood::unordered_node_map<std::pair<std::string, unsigned int>, TextureManager> font_height_pair_to_tex_man_map;
-
+    Locator locator;
     public:
-        FontBuilder(std::shared_ptr<Injector> injector);
+        FontBuilder();
 
         void add_font(std::string font_name, const char* file_path, unsigned int height);
 

@@ -22,6 +22,8 @@ add_library(
     AnimationManager.cpp
 )
 
+target_include_directories(graphics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
 target_link_libraries(graphics PRIVATE
         dragonbox::dragonbox_to_chars 
         robin_hood
@@ -34,5 +36,3 @@ target_link_libraries(graphics PRIVATE
         freetype
         ecs
         lib)
-
-target_include_directories(graphics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

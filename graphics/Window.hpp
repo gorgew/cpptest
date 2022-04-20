@@ -22,5 +22,5 @@ class Window {
 
         void swap();
         
-        ~Window();
+        void shutdown();
 };

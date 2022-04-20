@@ -11,11 +11,9 @@
 #include <SDL2/SDL.h>
 #include <fmt/core.h>
 
-GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
-
-    this->injector = injector;
-    fbo_width = injector->config.width;
-    fbo_height = injector->config.height;
+GraphicsSystem::GraphicsSystem() {
+    fbo_width = locator.get_config()->width;
+    fbo_height = locator.get_config()->height;
     default_width = fbo_width;
     default_height = fbo_height;
     //Load glad
@@ -31,19 +29,19 @@ GraphicsSystem::GraphicsSystem(std::shared_ptr<Injector> injector) {
     offscreenBuffer->addDepthStencilRenderBuffer(fbo_width, fbo_height);
     offscreenBuffer->checkCompiled();
     
-    injector->shader_man.add_shader("db_vert", "resources/vert_tex.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("db_tex", "resources/tex.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("double_buffer", {"db_vert", "db_tex"});
+    locator.get_shaders()->add_shader("db_vert", "resources/vert_tex.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("db_tex", "resources/tex.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("double_buffer", {"db_vert", "db_tex"});
     
-    double_buffer_program = injector->shader_man.get_program_id("double_buffer");
+    double_buffer_program = locator.get_shaders()->get_program_id("double_buffer");
     
-    injector->vert_man.add_rect("buffer_rect", 2.0f, 2.0f);
+    locator.get_vertices()->add_rect("buffer_rect", 2.0f, 2.0f);
 
-    buffer_vertices = injector->vert_man.get_array_id("buffer_rect");
+    buffer_vertices = locator.get_vertices()->get_array_id("buffer_rect");
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
-    glViewport(0, 0, injector->config.width, injector->config.height);
+    glViewport(0, 0, locator.get_config()->width, locator.get_config()->height);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
@@ -198,7 +196,7 @@ void GraphicsSystem::resize(int width, int height) {
 }
 
 void GraphicsSystem::viewport() {
-    glViewport(0, 0, injector->config.width, injector->config.height);
+    glViewport(0, 0, locator.get_config()->width, locator.get_config()->height);
 }
 
 GraphicsSystem::~GraphicsSystem() {

@@ -3,7 +3,6 @@
 #include "State.hpp"
 
 #include <AudioSystem.hpp>
-#include "Injector.hpp"
 #include "TileMap.hpp"
 #include "glm/glm.hpp"
 #include "Camera.hpp"
@@ -31,8 +30,6 @@ class StartState : public State {
         credits_state
     };
     std::shared_ptr<Camera> camera;
-    std::shared_ptr<ScriptEngine> scripts;
-    std::shared_ptr<ResourceManager> resources;
 
     TileMap tmap;
 
@@ -53,18 +50,12 @@ class StartState : public State {
     bool ui_show_character_hover = false;
 
     substate m_substate = substate::observe_world;
-    ActionSequencer action_seq = {injector, resources};
+    ActionSequencer action_seq;
     float lockout_timer = 0.0f;
     
     public:
 
-        StartState(std::shared_ptr<Injector> injector, entt::registry& registry, 
-            std::shared_ptr<ScriptEngine> scripts, std::shared_ptr<ResourceManager> resources){
-
-            this->injector = injector;
-            this->scripts = scripts;
-            this->resources = resources;
-            
+        StartState(entt::registry& registry){
             build_gfx();
             
             build_music();
@@ -72,7 +63,7 @@ class StartState : public State {
             build_scene(registry);
 
             key_system = {};
-            mouse_system = {injector, camera};
+            mouse_system = {camera};
 
             build_key_handlers();
             build_mouse_handlers();

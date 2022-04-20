@@ -1,9 +1,7 @@
 #include "AnimationManager.hpp"
 #include <fmt/printf.h>
 
-AnimationManager::AnimationManager(std::shared_ptr<Injector> i) {
-    this->injector = i;
-}
+AnimationManager::AnimationManager() {}
 
 /*
 void AnimationManager::set_injector(std::shared_ptr<Injector> i) {
@@ -21,14 +19,14 @@ void AnimationManager::add_animation(std::string name, std::string filepath,
         offsets[name] = offset;
         loops[name] = loop;
 
-        injector->tex_man.add_2d_array_texture(name, filepath, width, height, num_layers);
+        locator.get_textures()->add_2d_array_texture(name, filepath, width, height, num_layers);
 
         int n = frames.size();
         auto& frame_vector  = frame_vectors[name];
         frame_vector.resize(n);
 
         for (int i = 0; i < n; i++) {
-            frame_vector[i] =  gorge::build_array_frame(injector, width, height, name, 
+            frame_vector[i] =  gorge::build_array_frame(width, height, name, 
                 frames[i], program_name);
         }
     }

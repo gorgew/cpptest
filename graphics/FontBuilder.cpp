@@ -8,24 +8,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-FontBuilder::FontBuilder(std::shared_ptr<Injector> injector) {
-
-    this->injector = injector;
+FontBuilder::FontBuilder() {
     
     if (FT_Init_FreeType(&ft_lib)) {
         fmt::print("Freetype loading failure\n");
         std::exit(1);
     }
 
-    injector->shader_man.add_shader("fonts-v", "resources/fonts.vert", GL_VERTEX_SHADER);
-    injector->shader_man.add_shader("fonts-f", "resources/fonts.frag", GL_FRAGMENT_SHADER);
-    injector->shader_man.add_program("fonts", {"fonts-v", "fonts-f"});
-    program_id = injector->shader_man.get_program_id("fonts");
+    locator.get_shaders()->add_shader("fonts-v", "resources/fonts.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("fonts-f", "resources/fonts.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("fonts", {"fonts-v", "fonts-f"});
+    program_id = locator.get_shaders()->get_program_id("fonts");
     glUseProgram(program_id);
     fmt::print("Font programid: {}\n", program_id);
     //glm::mat4 projection = glm::mat4(1.0f);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(injector->config.width), 0.0f, 
-        static_cast<float>(injector->config.height));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(locator.get_config()->width), 0.0f, 
+        static_cast<float>(locator.get_config()->height));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
     fmt::print("uniform location: {}\n", glGetUniformLocation(program_id, "model"));
@@ -35,8 +33,8 @@ FontBuilder::FontBuilder(std::shared_ptr<Injector> injector) {
 
     glUniform2f(glGetUniformLocation(program_id, "size"), 100.0f, 100.0f);
     glUniform3f(glGetUniformLocation(program_id, "color"), 0.604, 0.804, 0.196);
-    injector->vert_man.add_rect_flipped("square", 1.0f, 1.0f);
-    char_vert_id = injector->vert_man.get_array_id("square");
+    locator.get_vertices()->add_rect_flipped("square", 1.0f, 1.0f);
+    char_vert_id = locator.get_vertices()->get_array_id("square");
 }
 
 void FontBuilder::add_font(std::string font_name, const char* file_path, unsigned int height) {
@@ -60,11 +58,11 @@ void FontBuilder::add_font(std::string font_name, const char* file_path, unsigne
 
         std::string tex_name = font_name + "-" + std::to_string(height) + '-' + (char) c; 
         
-        injector->tex_man.add_font_texture(tex_name, face);
+        locator.get_textures()->add_font_texture(tex_name, face);
         /*
         fmt::print("char: {} width: {}, height: {}, bearing_x: {}, bearing_y: {}, advance: {}\n", 
             c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap_left, face->glyph->bitmap_top, (face->glyph->advance.x / 64));
-        fmt::print("tex_name: {} | tex_id: {}\n", tex_name, injector->tex_man.get_id(tex_name));
+        fmt::print("tex_name: {} | tex_id: {}\n", tex_name, locator.get_textures()->get_id(tex_name));
         */
        
        auto glyph_height = face->glyph->bitmap.rows;
@@ -77,7 +75,7 @@ void FontBuilder::add_font(std::string font_name, const char* file_path, unsigne
                 char_vert_id,
                 4,
                 GL_TRIANGLE_FAN,
-                injector->tex_man.get_id(tex_name),
+                locator.get_textures()->get_id(tex_name),
                 program_id
             },
             c,

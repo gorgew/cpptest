@@ -7,12 +7,10 @@
 #include <cstdlib>
 #include <stack>
 
-TileMap::TileMap(std::shared_ptr<Injector> injector, std::string tex_name, 
-    std::string terrain_shader, std::string character_shader, entt::registry& registry) {    
+TileMap::TileMap(std::string tex_name, std::string terrain_shader, std::string character_shader, entt::registry& registry) {    
 
-    this->injector = injector;
-    tile_width = injector->config.tile_width;
-    tile_height = injector->config.tile_height;
+    tile_width = locator.get_config()->tile_width;
+    tile_height = locator.get_config()->tile_height;
     this->terrain_shader = terrain_shader;
     this->character_shader = character_shader;
     this->tex_name = tex_name;
@@ -33,7 +31,7 @@ entt::entity TileMap::create_tile(entt::registry& registry, int x, int y,
     std::string tileset, int tile_index) {
 
     auto entity = registry.create();
-    struct array_frame arr_f = gorge::build_array_frame(injector, tile_width, tile_height,
+    struct array_frame arr_f = gorge::build_array_frame(tile_width, tile_height,
             tileset, tile_index, terrain_shader);
     
     registry.emplace<array_frame>(entity, arr_f);
@@ -49,7 +47,7 @@ entt::entity TileMap::create_billboard_tile(entt::registry& registry, int x, int
     std::string tileset, int tile_index) {
 
     auto entity = registry.create();
-    struct array_frame arr_f = gorge::build_array_frame(injector, width, height,
+    struct array_frame arr_f = gorge::build_array_frame(width, height,
             tileset, tile_index, character_shader);
     
     registry.emplace<array_frame>(entity, arr_f);
@@ -377,7 +375,7 @@ void TileMap::load_tileset(sol::state& lua) {
         int height = tilesets[i]["height"];
         int count = tilesets[i]["count"];
 
-        injector->tex_man.add_2d_array_texture(name, fpath, width, height, count);
+        locator.get_textures()->add_2d_array_texture(name, fpath, width, height, count);
 
         this->tilesets.insert(name);
         fmt::print("Loaded tileset {} @ \n", name, fpath);

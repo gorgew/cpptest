@@ -2,17 +2,16 @@
 #include <fmt/format.h>
 #include <PhysicsComponents.hpp>
 
-MouseEventSystem::MouseEventSystem(std::shared_ptr<Injector> injector, std::shared_ptr<Camera> camera) {
-    this->injector = injector;
+MouseEventSystem::MouseEventSystem(std::shared_ptr<Camera> camera) {
     this->camera = camera;
 }
 
 float MouseEventSystem::world_x_to_ndc(float x) {
-    return (2.0f * x) / injector->config.width - 1.0f;
+    return (2.0f * x) / locator.get_config()->width - 1.0f;
 }
 
 float MouseEventSystem::world_y_to_ndc(float y) {
-    return 1.0f  - (2.0f * y) / injector->config.height;
+    return 1.0f  - (2.0f * y) / locator.get_config()->height;
 }
 
 void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
@@ -46,7 +45,7 @@ void MouseEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
 
 void MouseEventSystem::check_rect_buttons(entt::registry& registry, float gl_x, float gl_y) {
 
-    if (injector->config.debug) {
+    if (locator.get_config()->debug) {
         //fmt::print("Checking rect buttons\n");
     }
 
@@ -66,7 +65,7 @@ void MouseEventSystem::check_rect_buttons(entt::registry& registry, float gl_x, 
         float gl_max_y = world_y_to_ndc(world_max_y);
         fmt::print("gl_min_x: {}, gl_max_x: {}, gl_min_y: {}, gl_max_y: {}\n", gl_min_x, gl_max_x, gl_min_y, gl_max_y);
         if (gl_x >= gl_min_x && gl_x <= gl_max_x && gl_y >= gl_min_y && gl_y <= gl_max_y) {
-            if (injector->config.debug) {
+            if (locator.get_config()->debug) {
                 fmt::print("Button down\n");
             }
             button.event(registry);
@@ -138,7 +137,7 @@ void MouseEventSystem::set_world_coords(int x, int y) {
     world_x = static_cast<unsigned int>(intersect_x);
     world_y = static_cast<unsigned int>(intersect_y);
     
-    if (injector->config.debug) {
+    if (locator.get_config()->debug) {
         /*
         fmt::print("Mouse: sdl coords: ({}, {}), gl coords: ({}, {})\n", e.button.x, e.button.y, gl_x, gl_y);
         fmt::print("Mouse ray cast: ({}, {}, {})\n", ray_view.x, ray_view.y, ray_view.z);

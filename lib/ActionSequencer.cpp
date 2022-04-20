@@ -23,7 +23,7 @@ void ActionSequencer::process(entt::registry& registry, float& delta_time) {
                 ins.velocity = next_ins.velocity;
                 ins.acceleration = next_ins.acceleration;
                 if (next_ins.animation != "") {
-                    resources->set_animation(registry, id, next_ins.animation);
+                    locator.get_resources()->set_animation(registry, id, next_ins.animation);
                 }
                 q.pop();
             }            
