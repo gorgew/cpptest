@@ -1,10 +1,13 @@
 EnvObjs = {}
 EnvObj = {
     name = "DEFAULT_ENV_OBJ",
-    spritesheet = "resources/DEFAULT_ENV.png",
-    sheet_size = 3,
-    sheet_x = 32,
-    sheet_y = 32,
+    spritesheet = Spritesheet:new({
+        name = "DEFAULT_ENV",
+        path = "resources/DEFAULT_ENV.png",
+        count = 3,
+        width = 32,
+        height = 32
+    }),
     world_x = 70,
     world_y = 70,
     flammable = true,
@@ -21,11 +24,14 @@ function EnvObj:interact()
 end
 
 function EnvObj:new(args)
+    local spritesheet_
+    if (args.spritesheet == nil) then 
+        spritesheet = nil
+    else 
+        spritesheet = Spritesheet:new(args.spritesheet)
+    end
     EnvObjs[args.name] = setmetatable({
-        spritesheet = args.spritesheet,
-        sheet_size = args.sheet_size,
-        sheet_x = args.sheet_x,
-        sheet_y = args.sheet_y,
+        spritesheet = spritesheet_,
         world_x = args.world_x,
         world_y = args.world_y,
         flammable = args.flammable,

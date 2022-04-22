@@ -5,7 +5,6 @@
 #include "ShaderManager.hpp"
 #include "AudioSystem.hpp"
 #include "ScriptEngine.hpp"
-#include "Window.hpp"
 
 class ResourceManager;
 
@@ -67,14 +66,6 @@ class Locator {
             script_service = se;
         }
 
-        static Window* get_window() {
-            return window;
-        }
-
-        static void provide_window(Window* win) {
-            window = win;
-        }
-
     private:
         static Config* config;
         static VertexArrayManager* vertex_service;
@@ -83,5 +74,4 @@ class Locator {
         static AudioSystem* audio_service;
         static ResourceManager* resource_service;
         static ScriptEngine* script_service;
-        static Window* window;
 };

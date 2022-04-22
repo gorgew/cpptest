@@ -441,11 +441,11 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
 
                 std::string char_name = roster[roster_index];
                 
-                
-
-                std::string spritesheet = characters[char_name]["spritesheet"];
+                std::string spritesheet = characters[char_name]["spritesheet"]["path"];
                 int sheet_index = 0;
-                auto entity = create_billboard_tile(registry, x_index, y_index, tile_width, tile_height,
+                auto entity = create_billboard_tile(registry, x_index, y_index, 
+                    (int) characters[char_name]["world_x"], 
+                    (int) characters[char_name]["world_y"],
                     spritesheet, sheet_index);
                 registry.emplace<character>(entity, 1, char_name, faction::player, direction::up);
                 char_cache[x_index][y_index] = entity;
@@ -490,7 +490,7 @@ void TileMap::place_environment(std::string name, sol::state& lua, entt::registr
                 int x_index = x - 1;
                 int y_index = height - y - 1;
 
-                std::string spritesheet = env_objs[env_map_entry]["spritesheet"];
+                std::string spritesheet = env_objs[env_map_entry]["spritesheet"]["path"];
                 
                 int index = env_objs[env_map_entry]["index_at_hp"][(int) env_objs[env_map_entry]["hp"]];
                 int height = env_objs[env_map_entry]["world_x"];

@@ -16,10 +16,10 @@ void ResourceManager::load_character_resources() {
         fmt::print("Point 5\n");
         profile_pics[char_name] = nk_image_id(static_cast<int>(textures->get_id(pic_name)));
         
-        std::string fpath = characters[char_name]["spritesheet"];
-        int width = characters[char_name]["sheet_x"];
-        int height = characters[char_name]["sheet_y"];
-        int sheet_size = characters[char_name]["sheet_size"];
+        std::string fpath = characters[char_name]["spritesheet"]["path"];
+        int width = characters[char_name]["spritesheet"]["width"];
+        int height = characters[char_name]["spritesheet"]["height"];
+        int sheet_size = characters[char_name]["spritesheet"]["count"];
         textures->add_2d_array_texture(fpath, fpath, width,
             height, sheet_size);
     }
@@ -32,11 +32,11 @@ void ResourceManager::load_environment_resources() {
     
     for (const auto& pair : env_objs) {
         std::string env_name = (pair.first).as<std::string>();
-        int sheet_x = env_objs[env_name]["sheet_x"];
-        int sheet_y = env_objs[env_name]["sheet_y"];
-        int sheet_size = env_objs[env_name]["sheet_size"];
+        int sheet_x = env_objs[env_name]["spritesheet"]["width"];
+        int sheet_y = env_objs[env_name]["spritesheet"]["height"];
+        int sheet_size = env_objs[env_name]["spritesheet"]["count"];
 
-        std::string fpath = env_objs[env_name]["spritesheet"];
+        std::string fpath = env_objs[env_name]["spritesheet"]["path"];
         textures->add_2d_array_texture(fpath, fpath, 
             sheet_x, 
             sheet_y, 

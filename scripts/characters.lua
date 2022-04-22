@@ -3,10 +3,12 @@ Characters = {}
 Roster = {"Bob"}
 
 Character = {
-    spritesheet = "resources/DEFAULT_CHARACTER.png",
-    sheet_size = 2,
-    sheet_x = 32,
-    sheet_y = 32,
+    spritesheet = Spritesheet:new({
+        path = "resources/DEFAULT_CHARACTER.png",
+        count = 2,
+        width = 32,
+        height = 32
+    }),
     world_x = 100,
     world_y = 100,
     stats = Stats,
@@ -19,8 +21,14 @@ Character = {
 CharacterMeta = { __index = Character }
 
 function Character:new(arg_table)
+    local spritesheet_
+    if (arg_table.spritesheet == nil) then 
+        spritesheet = nil
+    else 
+        spritesheet = Spritesheet:new(arg_table.spritesheet)
+    end
     Characters[arg_table.name] = setmetatable({
-        spritesheet = arg_table.spritesheet,
+        spritesheet = spritesheet_,
         stats = Stats:new(arg_table)
         ,
         {

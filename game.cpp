@@ -91,7 +91,7 @@ int main(void) {
     ImGui::CreateContext();
     auto& imgui_io = ImGui::GetIO(); (void) imgui_io;
     ImGui::StyleColorsDark();
-    ImGui_ImplSDL2_InitForOpenGL(locator.get_window()->windowPtr, locator.get_window()->glContext);
+    ImGui_ImplSDL2_InitForOpenGL(window.windowPtr, window.glContext);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -99,7 +99,7 @@ int main(void) {
     //nuklear
     struct nk_context *ctx;
 
-    ctx = nk_sdl_init(locator.get_window()->windowPtr);
+    ctx = nk_sdl_init(window.windowPtr);
     {
         struct nk_font_atlas *atlas;
         nk_sdl_font_stash_begin(&atlas);
