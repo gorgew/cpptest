@@ -19,7 +19,7 @@ TileMap::TileMap(std::string tex_name, std::string terrain_shader, std::string c
     registry.emplace<ui>(cursor);
 
     auto x = get_range_no_collision(1, 1, 1);
-    x.print(); 
+    //x.print(); 
     //add_player_range(registry, 1, 1, 3);
 }
 
@@ -129,7 +129,7 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
                 next_cursor_y--;
             }
             while (range_x != mag || range_y != mag) {
-                fmt::print("asdf\n");
+                //fmt::print("asdf\n");
                 next = player_range.in_range[range_x][range_y].value();
                 diff_x = next.x - range_x;
                 diff_y = next.y - range_y;
@@ -174,7 +174,7 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
             }
             stored_path.push_back(std::make_pair(last_direction, distance));
             for (auto& p: stored_path) {
-                fmt::print("Direction: {} Distance: {}\n", p.first, p.second);
+                //fmt::print("Direction: {} Distance: {}\n", p.first, p.second);
             }
         }
         std::reverse(stored_path.begin(), stored_path.end());
@@ -199,7 +199,7 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
             auto coord = player_range.local_to_array_coords(cursor_x, cursor_y);
             int range_x = coord.x;
             int range_y = coord.y;
-            fmt::print("b4 range_x {} range_y {}\n", range_x, range_y);
+            //fmt::print("b4 range_x {} range_y {}\n", range_x, range_y);
             auto next = player_range.in_range[range_x][range_y].value();
             int diff_x = next.x - range_x;
             int diff_y = next.y - range_y;
@@ -539,7 +539,7 @@ void TileMap::load_map(std::string name, sol::state& lua, entt::registry& regist
         for (int x = width; x > 0; x--) {
             int index = y * width + x;
             std::string tile_name = terrain_map[index];
-            fmt::print("TILE {} @ INDEX {}\n", tile_name, index);
+            //fmt::print("TILE {} @ INDEX {}\n", tile_name, index);
             
             int x_index = x - 1;
             int y_index = height - y - 1;

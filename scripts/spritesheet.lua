@@ -9,8 +9,9 @@ Spritesheet = {
 
 SpritesheetMeta = {__index = Spritesheet}
 
-function Spritesheet:add_animation(start, stop)
-    table.insert(self.animations, {start, stop})
+function Spritesheet:add_animation(name, start, stop, timings, loop)
+    loop = loop or false
+    self.animations[name] = {start, stop, timings}
 end
 
 function Spritesheet:new(arg_table)
@@ -22,5 +23,3 @@ function Spritesheet:new(arg_table)
         height = arg_table.height
     }, SpritesheetMeta)
 end
-
-

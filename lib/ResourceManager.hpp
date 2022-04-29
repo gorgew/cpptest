@@ -43,8 +43,10 @@ class ResourceManager {
         void load_resources();
         //For the nuklear ui
         struct nk_image get_profile_pic(std::string name);
-
-        void add_animation(std::string name, std::string filepath, int tile_width, int tile_height, int num_layers,
+        void add_animation(std::string name, std::string tex_name, int width, int height,
+            std::string program_name, bool loop,
+            std::vector<int> frames, std::vector<int> timings, glm::vec3 offset = glm::vec3(0.0f));
+        void add_animation_texture(std::string name, std::string filepath, int tile_width, int tile_height, int num_layers,
             int width, int height,
             std::string program_name, bool loop,
             std::vector<int> frames, std::vector<int> timings, glm::vec3 offset = glm::vec3(0.0f));

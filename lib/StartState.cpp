@@ -162,11 +162,6 @@ void StartState::build_gfx() {
     program_id  = locator.get_shaders()->get_program_id("world");
 
     //sglUniform1i(glGetUniformLocation(program_id, "iTexture"), 0);
-    
-
-    locator.get_shaders()->add_shader("billboard.vert", "resources/billboard.vert", GL_VERTEX_SHADER);
-    locator.get_shaders()->add_program("billboard", {"billboard.vert", "world.frag"});
-
     //glUniform1i(glGetUniformLocation(locator.get_shaders()->get_program_id("billboard"), "iTexture"), 0);
 
     locator.get_shaders()->add_ubo("camera_ubo", sizeof(camera_data), 0);
@@ -204,7 +199,7 @@ void StartState::build_scene(entt::registry& registry) {
    {
         std::vector<int> frames = {0, 1, 2, 3};
         std::vector<int> timings = {1000, 1000, 1000, 1000};
-        locator.get_resources()->add_animation("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
+        locator.get_resources()->add_animation_texture("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
             true, frames, timings);
    }
   

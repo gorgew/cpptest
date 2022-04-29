@@ -40,6 +40,7 @@ function Character:new(arg_table)
         skills = arg_table.skills,
         arts = arg_table.arts
     }, CharacterMeta)
+    return Characters[arg_table.name]
 end
 
 
@@ -51,6 +52,8 @@ Bob = Character:new{
     hp_growth = 0.3,
     aim_growth = 0.7
 }
+
+Bob.spritesheet:add_animation("walk_up", 0, 1, {250, 250})
 
 function dump(o)
     if type(o) == 'table' then

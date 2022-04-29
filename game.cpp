@@ -67,6 +67,10 @@ int main(void) {
     GraphicsSystem g_system;
     g_system.frame_delay = 5;
 
+    locator.get_shaders()->add_shader("billboard.vert", "resources/billboard.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("billboard.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("billboard", {"billboard.vert", "billboard.frag"});
+
     resources->load_resources();
     fmt::print("Subsystems started!\n");
 

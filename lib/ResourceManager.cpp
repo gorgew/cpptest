@@ -1,5 +1,6 @@
 #include "ResourceManager.hpp"
 #include <fmt/printf.h>
+#include <numeric>
 
 void ResourceManager::load_character_resources() {
 
@@ -22,6 +23,25 @@ void ResourceManager::load_character_resources() {
         int sheet_size = characters[char_name]["spritesheet"]["count"];
         textures->add_2d_array_texture(fpath, fpath, width,
             height, sheet_size);
+
+        sol::table animations = characters[char_name]["spritesheet"]["animations"];
+        
+        for (const auto& animation_pair : animations) {
+            std::string anim_name = char_name + "." + (animation_pair.first).as<std::string>();
+            sol::table anim_data = (animation_pair.second).as<sol::table>();
+            int start = anim_data[1];
+            int end = anim_data[2];
+            std::vector<int> frames(end - start + 1);
+            std::iota(frames.begin(), frames.end(), start);
+            sol::table timing_table = anim_data[3];
+            int timing_size = timing_table.size();
+            std::vector<int> timings(timing_size);
+            
+            for (int i = 1; i <= timing_size; i++) {
+                timings[i-1] = timing_table[i];
+            }
+            add_animation(anim_name, fpath, width, height, "billboard", anim_data["loop"], frames, timings);
+        }
     }
     
 }
@@ -60,34 +80,42 @@ struct nk_image ResourceManager::get_profile_pic(std::string name) {
         return profile_pics["Default"];
     }
 }
-
-void ResourceManager::add_animation(std::string name, std::string filepath, 
-    int tile_width, int tile_height, int num_layers,
+void ResourceManager::add_animation(std::string name, std::string tex_name,
     int width, int height,
     std::string program_name, bool loop,
     std::vector<int> frames, std::vector<int> timings,
     glm::vec3 offset) {
 
-    if (timings.size() == frames.size()) {
+        if (timings.size() == frames.size()) {
         timing_vectors[name] = timings;
         offsets[name] = offset;
         loops[name] = loop;
-
-        textures->add_2d_array_texture(name, filepath, tile_width, tile_height, num_layers);
 
         int n = frames.size();
         auto& frame_vector  = frame_vectors[name];
         frame_vector.resize(n);
 
         for (int i = 0; i < n; i++) {
-            frame_vector[i] =  gorge::build_array_frame(width, height, name, 
+            frame_vector[i] =  gorge::build_array_frame(width, height, tex_name, 
                 frames[i], program_name);
         }
+        fmt::print("\nAdded animation {}\n", name);
     }
     else {
         fmt::print("Couldn't load {} because number of frame and timings are not the same\n", name);
     }
-    
+
+}
+
+void ResourceManager::add_animation_texture(std::string name, std::string filepath, 
+    int tile_width, int tile_height, int num_layers,
+    int width, int height,
+    std::string program_name, bool loop,
+    std::vector<int> frames, std::vector<int> timings,
+    glm::vec3 offset) {
+
+    textures->add_2d_array_texture(name, filepath, tile_width, tile_height, num_layers);
+    add_animation(name, name, width, height, program_name, loop, frames, timings, offset);
 }
 
 void ResourceManager::set_animation(entt::registry& registry, entt::entity entity, std::string name) {
