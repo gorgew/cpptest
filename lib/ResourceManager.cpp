@@ -24,6 +24,9 @@ void ResourceManager::load_character_resources() {
         textures->add_2d_array_texture(fpath, fpath, width,
             height, sheet_size);
 
+        int world_x = characters[char_name]["world_x"];
+        int world_y = characters[char_name]["world_y"];
+
         sol::table animations = characters[char_name]["spritesheet"]["animations"];
         
         for (const auto& animation_pair : animations) {
@@ -40,7 +43,7 @@ void ResourceManager::load_character_resources() {
             for (int i = 1; i <= timing_size; i++) {
                 timings[i-1] = timing_table[i];
             }
-            add_animation(anim_name, fpath, width, height, "billboard", anim_data["loop"], frames, timings);
+            add_animation(anim_name, fpath, world_x, world_y, "billboard", anim_data["loop"], frames, timings);
         }
     }
     

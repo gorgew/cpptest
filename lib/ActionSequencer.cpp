@@ -16,6 +16,9 @@ void ActionSequencer::process(entt::registry& registry, float& delta_time) {
             if (q.empty()) {
                 instruction_queue.erase(id);
                 registry.remove<action_instruction>(id);
+                if (registry.any_of<animation>(id)) {
+                    registry.remove<animation>(id);
+                }
             }
             else {
                 auto& next_ins = q.front();
@@ -61,6 +64,51 @@ float ActionSequencer::set_path(entt::registry& registry, entt::entity id, std::
         float step_time = curr.second / 100.0f * time;
         acc_time += step_time;
         instruction i = {step_time, "", vel, glm::vec3(0.0f)};
+        ins.push(i);
+    }
+    
+    instruction_queue[id] = ins;
+    return acc_time;
+}
+
+float ActionSequencer::set_path_walk(entt::registry& registry, entt::entity id, std::vector<std::pair<direction, float>>& path, float time) {
+
+    std::string name = registry.get<character>(id).name;
+    std::string walk_up = name + ".walk_up";
+    std::string walk_left = name + ".walk_left";
+    std::string walk_down = name + ".walk_down";
+    std::string walk_right = name + ".walk_right";
+
+    std::queue<instruction> ins;
+    float velocity = 100.0f / time;
+
+    registry.emplace<action_instruction>(id, 0.0f, glm::vec3(0.0f), glm::vec3(0.0f));
+    float acc_time = 0.0f;
+    for (auto& curr : path) {
+
+        auto vel = glm::vec3(0.0f);
+        
+        float step_time = curr.second / 100.0f * time;
+        acc_time += step_time;
+        instruction i;
+
+        if (curr.first == direction::up) {
+            vel = glm::vec3(0.0f, velocity, 0.0f);  
+            i = {step_time, walk_up, vel, glm::vec3(0.0f)};
+        }
+        else if (curr.first == direction::down) {
+            vel = glm::vec3(0.0f, -velocity, 0.0f);
+            i = {step_time, walk_down, vel, glm::vec3(0.0f)};
+        }
+        else if (curr.first == direction::right) {
+            vel = glm::vec3(velocity, 0.0f, 0.0f);
+            i = {step_time, walk_right, vel, glm::vec3(0.0f)};
+        }
+        else if (curr.first == direction::left) {
+            vel = glm::vec3(-velocity, 0.0f, 0.0f);
+            i = {step_time, walk_left, vel, glm::vec3(0.0f)};
+        }
+        
         ins.push(i);
     }
     

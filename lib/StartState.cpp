@@ -117,7 +117,7 @@ void StartState::build_mouse_handlers() {
     std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
             if (m_substate == substate::character_select) {
                 if (tmap.move_character_selected_cursor(registry)) {
-                    auto time = action_seq.set_path(registry, tmap.get_char_on_cursor(registry), 
+                    auto time = action_seq.set_path_walk(registry, tmap.get_char_on_cursor(registry), 
                         tmap.stored_path, 0.2f);
                     tmap.clear_player_range(registry);
                     tmap.clear_path(registry);

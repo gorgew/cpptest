@@ -139,7 +139,8 @@ void GraphicsSystem::draw(entt::registry& registry, const float& delta_time) {
     auto animation_view = registry.view<animation, position>();
     for (auto [entity, a, pos] : animation_view.each()) {
         a.accumulator += static_cast<int>(delta_time * 1000 );
-        
+        struct position temp = {pos.pos + a.offset};
+        draw_array_frame_component(a.frames[a.curr], temp);
         if (a.accumulator > a.timings[a.curr]) {
             //fmt::print("asdfasdf {}\n", a.frame_count);
             a.accumulator -= a.timings[a.curr];
@@ -152,8 +153,7 @@ void GraphicsSystem::draw(entt::registry& registry, const float& delta_time) {
                 a.curr = 0;
             }
         }
-        struct position temp = {pos.pos + a.offset};
-        draw_array_frame_component(a.frames[a.curr], temp);
+        
     }
 
     auto frame_view = registry.view<frame, position>(

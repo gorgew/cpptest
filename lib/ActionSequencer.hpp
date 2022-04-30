@@ -8,7 +8,7 @@
 #include "PhysicsSystem.hpp"
 #include "GameObjectComponents.hpp"
 #include "ResourceManager.hpp"
-#include "Injector.hpp"
+#include "Locator.hpp"
 
 struct action_instruction {
     float time;
@@ -42,6 +42,6 @@ class ActionSequencer {
         /*
         Set path but also change to walking animations based off of direction
         */
-        float set_path_walk(entt::registry&, entt::entity, std::string char_name,
+        float set_path_walk(entt::registry& registry, entt::entity id, 
             std::vector<std::pair<direction, float>>& path, float time);
 };
