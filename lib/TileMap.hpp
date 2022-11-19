@@ -32,6 +32,8 @@ private:
     int width, height;
 
     Locator locator;
+
+    entt::registry& registry = locator.get_registry();
     //Some sort of mapping from string to tile type?
     std::unordered_map<std::string, int> name_to_tile_type_map;
 
@@ -46,7 +48,9 @@ private:
 
     unsigned int cursor_x = 0, cursor_y = 0; //cursor location in tilemap
 
-    int player_range_id = 6;
+    int neutral_tile_id = 6;
+    int enemy_tile_id = 7;
+    int ally_tile_id = 6;
     range player_range;
     std::vector<entt::entity> player_range_entities;
 
@@ -61,12 +65,12 @@ private:
     int left_arrow_path = 12;
     int down_arrow_path = 13;
     
-    void get_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
-    void store_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+    void get_cursor_path(unsigned int mouse_x, unsigned int mouse_y);
+    void store_cursor_path(unsigned int mouse_x, unsigned int mouse_y);
     
 
     std::vector<entt::entity> path_entities;
-    void draw_path(entt::registry& registry);
+    void draw_path();
 
 
     std::vector<std::vector<entt::entity>> env_cache;
@@ -77,37 +81,39 @@ private:
     robin_hood::unordered_map<std::string, tile_data_t> tile_data;
     robin_hood::unordered_set<std::string> tilesets;
     
-    entt::entity create_tile(entt::registry& registry, int x, int y, std::string tileset, int tile_index);
-    entt::entity create_billboard_tile(entt::registry& registry, int x, int y, int width, int height,
+    entt::entity create_tile( int x, int y, std::string tileset, int tile_index);
+    entt::entity create_billboard_tile( int x, int y, int width, int height,
         std::string tileset, int tile_index);
-    void place_tiles(std::string name, sol::state& lua, entt::registry& registry);
-    void place_environment(std::string name, sol::state& lua, entt::registry& registry);
-    void place_characters(std::string name, sol::state& lua, entt::registry& registry);
+    void place_tiles(std::string name, sol::state& lua);
+    void place_environment(std::string name, sol::state& lua);
+    void place_characters(std::string name, sol::state& lua);
     
     public:
         std::string last_env;
         std::string last_char;
+        int last_char_x;
+        int last_char_y;
         std::string last_terrain;
 
         TileMap() = default;
         TileMap(std::string tex_name, std::string terrain_shader, 
-                std::string character_shader, entt::registry& registry);
+                std::string character_shader);
         
         bool in_bounds(int x, int y);
         /**
          * Moves cursor to mouse coords in world space
          */
-        void move_cusor(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+        void move_cusor(unsigned int mouse_x, unsigned int mouse_y);
 
         //Return 0 if cursor not in range, 1 if cursor in range
-        bool move_cursor_path(entt::registry&, unsigned int mouse_x, unsigned int mouse_y);
+        bool move_cursor_path(unsigned int mouse_x, unsigned int mouse_y);
         bool cursor_in_range(range& r);
-        entt::entity get_char_on_cursor(entt::registry& registry);
-        entt::entity get_env_on_cursor(entt::registry& registry);
-        entt::entity get_terrain_on_cursor(entt::registry& registry);
+        entt::entity get_char_on_cursor();
+        entt::entity get_env_on_cursor();
+        entt::entity get_terrain_on_cursor();
 
         void reset_map();
-        void load_map(std::string name, sol::state& lua, entt::registry& registry);
+        void load_map(std::string name, sol::state& lua);
 
         void load_tileset(sol::state& lua);
 
@@ -124,16 +130,16 @@ private:
         //Get coordinates in range from entity at (x, y) with magnitude with colliding against 
         range get_range_collision(int x, int y, int magnitude);
 
-        void add_player_range(entt::registry& registry, int x, int y, int magnitude);
-        void add_player_range_cursor(entt::registry& registry, int magnitude);
-        void clear_player_range(entt::registry& registry);
+        void add_player_range( int x, int y, int magnitude, bool collisions = true, range_t tgt = range_t::neutral);
+        void add_player_range_cursor( int magnitude);
+        void clear_player_range();
 
-        void clear_path(entt::registry& registry);
+        void clear_path();
         std::vector<std::pair<direction, float>> stored_path;
         //Return true if successful, return false if src or tgt are null or if either are out of bounds
-        bool move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y);
+        bool move_character( int src_x, int src_y, int tgt_x, int tgt_y);
         //Return true if sucessful, return false if cursor is out of bounds
-        bool move_character_selected_cursor(entt::registry& registry);
+        bool move_character_selected_cursor();
 
         bool is_empty_pos(int x, int y);
 };

@@ -51,6 +51,7 @@ int main(void) {
     VertexArrayManager vert;
     ScriptEngine scripts;
     Window window {"Game", c.height, c.width};
+    Registry reg;
     auto resources = std::make_shared<ResourceManager>(&tex);
     //ResourceManager resources(&tex);
 
@@ -61,6 +62,7 @@ int main(void) {
     locator.provide_audio(&audio);
     locator.provide_scripts(&scripts);
     locator.provide_resources(resources.get());
+    locator.provide_registry(&reg);
 
     //locator.get_resources()->load_resources();
 
@@ -82,8 +84,13 @@ int main(void) {
 
     PhysicsSystem phys_system;
 
-    entt::registry registry;
+    entt::registry& registry = reg.registry;
     f_builder.add_string(registry, "hello world", "arial", 96, glm::vec3(0, 800.0f, 0.0f), glm::vec3(1.0));
+    
+    locator.get_textures()->add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 24);
+    locator.get_shaders()->add_shader("world.vert", "resources/world.vert", GL_VERTEX_SHADER);
+    locator.get_shaders()->add_shader("world.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
+    locator.get_shaders()->add_program("world", {"world.vert", "world.frag"});
     
     std::shared_ptr<State> game_state; 
     game_state = std::make_shared<StartState>(registry);
@@ -135,11 +142,12 @@ int main(void) {
         nk_input_begin(ctx);
 
         while (SDL_PollEvent(&event)) {
-
-            game_state->handle_event(registry, event);
-            ImGui_ImplSDL2_ProcessEvent(&event);
             nk_sdl_handle_event(&event);
-
+            if (!nk_item_is_any_active(ctx)) {
+                game_state->handle_event(registry, event);
+                ImGui_ImplSDL2_ProcessEvent(&event);
+            }
+            
             if (event.type == SDL_QUIT) {
                 goto EXIT;
             } else if (event.type == SDL_KEYDOWN) {

@@ -29,7 +29,6 @@ target_link_libraries(graphics PRIVATE
         robin_hood
         fmt::fmt
         glad::glad
-        ${STB_INCLUDE_DIRS}
         SDL2::SDL2
         EnTT::EnTT
         glm::glm

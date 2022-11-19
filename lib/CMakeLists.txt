@@ -42,6 +42,9 @@ add_library(
 
     Locator.hpp
     Locator.cpp
+
+    Registry.hpp
+    Registry.cpp
 )
 
 target_include_directories(lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -50,10 +53,10 @@ target_link_libraries(lib PRIVATE
     EnTT::EnTT
     robin_hood
     graphics
-    SDL2::SDL2_mixer
+    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
     fmt::fmt
     ecs
     color-vec
     ${LUA_LIBRARIES}
-    sol2::sol2
+    sol2
     )

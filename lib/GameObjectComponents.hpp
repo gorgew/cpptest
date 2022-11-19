@@ -57,3 +57,15 @@ struct tile_data_t {
     bool flyable;
 };
 
+enum class skill_indicator_t {
+    melee,
+    path,
+    ranged
+};
+
+enum class range_t {
+    enemy,
+    ally,
+    neutral
+};
+

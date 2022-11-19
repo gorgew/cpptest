@@ -7,3 +7,4 @@ ShaderManager* Locator::shader_service;
 AudioSystem* Locator::audio_service;
 ResourceManager* Locator::resource_service;
 ScriptEngine* Locator::script_service;
+Registry* Locator::registry;

@@ -26,7 +26,7 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 message(STATUS "SDL found in ${SDL2_INCLUDE_DIRS}")
 
-find_package(sdl2-mixer REQUIRED)
+find_package(SDL2_mixer REQUIRED)
 
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 # message(STATUS "OpenGL found in ${OPENGL_LIBRARIES}")
@@ -36,7 +36,7 @@ find_package(glad CONFIG REQUIRED)
 
 find_package(EnTT CONFIG REQUIRED)
 
-find_path(STB_INCLUDE_DIRS "stb.h")
+find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 
 find_package(glm REQUIRED)
 
@@ -50,7 +50,7 @@ find_package(Lua REQUIRED)
 message(STATUS "Lua found at ${LUA_INCLUDE_DIR}")
 
 find_package(sol2 CONFIG REQUIRED)
-target_link_libraries(sol2::sol2 INTERFACE ${LUA_INCLUDE_DIR})
+# target_link_libraries(sol2 INTERFACE ${LUA_INCLUDE_DIR})
 add_subdirectory(3rdparty)
 
 add_subdirectory(lib)

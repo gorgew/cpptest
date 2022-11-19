@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <stack>
 
-TileMap::TileMap(std::string tex_name, std::string terrain_shader, std::string character_shader, entt::registry& registry) {    
+TileMap::TileMap(std::string tex_name, std::string terrain_shader, std::string character_shader) {    
 
     tile_width = locator.get_config()->tile_width;
     tile_height = locator.get_config()->tile_height;
@@ -15,19 +15,19 @@ TileMap::TileMap(std::string tex_name, std::string terrain_shader, std::string c
     this->character_shader = character_shader;
     this->tex_name = tex_name;
 
-    cursor = create_tile(registry, 0, 0, tex_name, cursor_id);
+    cursor = create_tile(0, 0, tex_name, cursor_id);
     registry.emplace<ui>(cursor);
 
     auto x = get_range_no_collision(1, 1, 1);
     //x.print(); 
-    //add_player_range(registry, 1, 1, 3);
+    //add_player_range(1, 1, 3);
 }
 
 bool TileMap::in_bounds(int x, int y) {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-entt::entity TileMap::create_tile(entt::registry& registry, int x, int y, 
+entt::entity TileMap::create_tile(int x, int y, 
     std::string tileset, int tile_index) {
 
     auto entity = registry.create();
@@ -43,7 +43,7 @@ entt::entity TileMap::create_tile(entt::registry& registry, int x, int y,
     return entity;
 }
 
-entt::entity TileMap::create_billboard_tile(entt::registry& registry, int x, int y, int width, int height,
+entt::entity TileMap::create_billboard_tile(int x, int y, int width, int height,
     std::string tileset, int tile_index) {
 
     auto entity = registry.create();
@@ -67,7 +67,7 @@ bool TileMap::cursor_in_range(range& r) {
     return r.in_local_bounds(range_x, range_y) && r.in_range[range_x][range_y].has_value();
 }
 
-void TileMap::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+void TileMap::move_cusor(unsigned int mouse_x, unsigned int mouse_y) {
 
     auto next_cursor_x = mouse_x / tile_width;
     auto next_cursor_y = mouse_y / tile_height;
@@ -80,14 +80,14 @@ void TileMap::move_cusor(entt::registry& registry, unsigned int mouse_x, unsigne
     }
 }
 
-void TileMap::clear_path(entt::registry& registry) {
+void TileMap::clear_path() {
     for (const auto& entity : path_entities) {
         registry.destroy(entity);
     }
     path_entities.clear();
 }
 
-void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+void TileMap::store_cursor_path(unsigned int mouse_x, unsigned int mouse_y) {
     
     stored_path.clear();
     auto next_cursor_x = mouse_x;
@@ -98,7 +98,7 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
         
         if (cursor_in_range(player_range)) {
             
-            clear_path(registry);
+            clear_path();
             direction last_direction;
             int mag = player_range.length / 2;
             auto coord = player_range.local_to_array_coords(cursor_x, cursor_y);
@@ -181,7 +181,7 @@ void TileMap::store_cursor_path(entt::registry& registry, unsigned int mouse_x, 
     }
 }
 
-bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, unsigned int mouse_y) {
+bool TileMap::move_cursor_path(unsigned int mouse_x, unsigned int mouse_y) {
 
     auto next_cursor_x = mouse_x / tile_width;
     auto next_cursor_y = mouse_y / tile_height;
@@ -193,7 +193,7 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
             tile_height / 2.0f + cursor_y * tile_height, 0.0f));
         
         if (cursor_in_range(player_range)) {
-            clear_path(registry);
+            clear_path();
             direction last_direction;
             int mag = player_range.length / 2;
             auto coord = player_range.local_to_array_coords(cursor_x, cursor_y);
@@ -204,28 +204,28 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
             int diff_x = next.x - range_x;
             int diff_y = next.y - range_y;
             if (diff_x == -1) {
-                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                path_entities.push_back(create_tile(next_cursor_x, 
                     next_cursor_y, tex_name, left_arrow_path));
                 last_direction = direction::left;
                 range_x--;
                 next_cursor_x++;
             }
             else if (diff_x == 1) {
-                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                path_entities.push_back(create_tile(next_cursor_x, 
                     next_cursor_y, tex_name, right_arrow_path));
                 last_direction = direction::right;
                 range_x++;
                 next_cursor_x--;
             }
             else if (diff_y == -1) {
-                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                path_entities.push_back(create_tile(next_cursor_x, 
                     next_cursor_y, tex_name, down_arrow_path));
                 last_direction = direction::down;
                 range_y--;
                 next_cursor_y++;
             }
             else if (diff_y == 1) {
-                path_entities.push_back(create_tile(registry, next_cursor_x, 
+                path_entities.push_back(create_tile(next_cursor_x, 
                     next_cursor_y, tex_name, up_arrow_path));
                 last_direction = direction::up;
                 range_y++;
@@ -240,15 +240,15 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                 
                 if (diff_x == -1) {
                     if (last_direction == direction::left) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, horizontal_path));
                     }
                     else if (last_direction == direction::up) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, dr_lu_path));
                     }
                     else if (last_direction == direction::down) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, ur_ld_path));
                     }
                     
@@ -258,15 +258,15 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                 }
                 else if (diff_x == 1) {
                     if (last_direction == direction::right) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, horizontal_path));
                     }
                     else if (last_direction == direction::up) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, dl_ru_path));
                     }
                     else if (last_direction == direction::down) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, ul_rd_path));
                     }
                     last_direction = direction::right;
@@ -275,15 +275,15 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                 }
                 else if (diff_y == -1) {
                     if (last_direction == direction::down) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, vertical_path));
                     }
                     else if (last_direction == direction::left) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, dl_ru_path));
                     }
                     else if (last_direction == direction::right) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, dr_lu_path));
                     }
                     last_direction = direction::down;
@@ -292,15 +292,15 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
                 }
                 else if (diff_y == 1) {
                     if (last_direction == direction::up) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, vertical_path));
                     }
                     else if (last_direction == direction::left) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, ul_rd_path));
                     }
                     else if (last_direction == direction::right) {
-                        path_entities.push_back(create_tile(registry, next_cursor_x, 
+                        path_entities.push_back(create_tile(next_cursor_x, 
                         next_cursor_y, tex_name, ur_ld_path));
                     }
                     last_direction = direction::up;
@@ -314,7 +314,7 @@ bool TileMap::move_cursor_path(entt::registry& registry, unsigned int mouse_x, u
     return false;
 }
 
-entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_char_on_cursor() {
 
     if (cursor_x >= 0 && char_cache[0].size() > cursor_x && 
         cursor_y >= 0 && char_cache.size() > cursor_y) {
@@ -322,6 +322,8 @@ entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
 
             if (value != entt::null) {
                 last_char = registry.get<character>(value).name;
+                last_char_x = cursor_x;
+                last_char_y = cursor_y;
             }
             
             return value;
@@ -331,11 +333,11 @@ entt::entity TileMap::get_char_on_cursor(entt::registry& registry) {
     }
 }
 
-entt::entity TileMap::get_env_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_env_on_cursor() {
     if (cursor_x >= 0 && env_cache[0].size() > cursor_x && 
         cursor_y >= 0 && env_cache.size() > cursor_y) {
 
-            entt::entity value = env_cache[cursor_y][cursor_x];
+            entt::entity value = env_cache[cursor_x][cursor_y];
 
             if (value != entt::null) {
                 last_env = registry.get<environment>(value).name;
@@ -348,11 +350,11 @@ entt::entity TileMap::get_env_on_cursor(entt::registry& registry) {
     }
 }
 
-entt::entity TileMap::get_terrain_on_cursor(entt::registry& registry) {
+entt::entity TileMap::get_terrain_on_cursor() {
     if (cursor_x >= 0 && terrain_cache[0].size() > cursor_x && 
         cursor_y >= 0 && terrain_cache.size() > cursor_y) {
         
-            entt::entity value = terrain_cache[cursor_y][cursor_x];
+            entt::entity value = terrain_cache[cursor_x][cursor_y];
 
             if (value != entt::null) {
                 last_terrain = registry.get<terrain>(value).name;
@@ -407,7 +409,7 @@ void TileMap::load_tiles(sol::state& lua) {
     }
 }
 
-void TileMap::place_characters(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::place_characters(std::string name, sol::state& lua) {
     
     sol::table map = lua["Maps"][name];
     sol::table char_map = map["CharMap"];
@@ -434,36 +436,36 @@ void TileMap::place_characters(std::string name, sol::state& lua, entt::registry
             int index = y * width + x;
             std::string char_map_entry = char_map[index];
             if (char_map_entry != "") {
-                
+
                 int x_index = x - 1;
                 int y_index = height - y - 1;
-                spawn_points.emplace_back(std::make_pair(x_index, y_index)); //Use later
 
-                std::string char_name = roster[roster_index];
+                std::string char_name;
+                if (char_map_entry == "spawn" && roster_index <= roster_size) {
+                    char_name = roster[roster_index];
+                    
+                    spawn_points.emplace_back(std::make_pair(x_index, y_index)); //Use later
+                    roster_index++;
+                }
+                else {
+                    char_name = char_map_entry;
+                    //make copy of it or something
+                }
                 
                 std::string spritesheet = characters[char_name]["spritesheet"]["path"];
                 int sheet_index = 0;
-                auto entity = create_billboard_tile(registry, x_index, y_index, 
+                auto entity = create_billboard_tile(x_index, y_index, 
                     (int) characters[char_name]["world_x"], 
                     (int) characters[char_name]["world_y"],
                     spritesheet, sheet_index);
                 registry.emplace<character>(entity, 1, char_name, faction::player, direction::up);
                 char_cache[x_index][y_index] = entity;
-
-                if (roster_index < roster_size) {
-                    roster_index++;
-                }
-                else {
-                    goto LOOP_EXIT;
-                }
-                
             }
         }
     } 
-    LOOP_EXIT:;
 }
 
-void TileMap::place_environment(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::place_environment(std::string name, sol::state& lua) {
     
     sol::table map = lua["Maps"][name];
     sol::table env_map = map["EnvMap"];
@@ -495,15 +497,13 @@ void TileMap::place_environment(std::string name, sol::state& lua, entt::registr
                 int index = env_objs[env_map_entry]["index_at_hp"][(int) env_objs[env_map_entry]["hp"]];
                 int height = env_objs[env_map_entry]["world_x"];
                 int width = env_objs[env_map_entry]["world_y"];
-                auto entity = create_billboard_tile(registry, x_index, y_index, height, width,
+                auto entity = create_billboard_tile(x_index, y_index, height, width,
                     spritesheet, index);
 
                 registry.emplace<environment>(entity, 1,  env_map_entry);
                 env_cache[x_index][y_index] = entity;
-                
             }
         }
-        
     } 
     
 }
@@ -520,7 +520,7 @@ void TileMap::reset_map() {
     terrain_tile_data.clear();
 }
 
-void TileMap::load_map(std::string name, sol::state& lua, entt::registry& registry) {
+void TileMap::load_map(std::string name, sol::state& lua) {
     reset_map();
     
     sol::table map = lua["Maps"][name];
@@ -544,7 +544,7 @@ void TileMap::load_map(std::string name, sol::state& lua, entt::registry& regist
             int x_index = x - 1;
             int y_index = height - y - 1;
 
-            auto entity = create_tile(registry, x_index, y_index, 
+            auto entity = create_tile(x_index, y_index, 
                 tile_data[tile_name].tileset, tile_data[tile_name].index);
             
             registry.emplace<terrain>(entity, 1, tile_name);
@@ -553,8 +553,8 @@ void TileMap::load_map(std::string name, sol::state& lua, entt::registry& regist
             terrain_tile_data[x_index][y_index] = tile_name;
         }
     }
-    place_environment(name, lua, registry);
-    place_characters(name, lua, registry);
+    place_environment(name, lua);
+    place_characters(name, lua);
 }
 
 bool TileMap::range::in_local_bounds(int x, int y) {
@@ -689,33 +689,49 @@ TileMap::range TileMap::get_range_collision(int x, int y, int magnitude) {
     return res;
 }
 
-void TileMap::add_player_range(entt::registry& registry, int x, int y, int magnitude) {
-    player_range = get_range_collision(x, y, magnitude); 
+void TileMap::add_player_range(int x, int y, int magnitude, bool collisions, range_t tgt) {
+    if (collisions) {
+        player_range = get_range_collision(x, y, magnitude); 
+    } 
+    else {
+        player_range = get_range_no_collision(x, y, magnitude);
+    }
+
+    int range_tile;
+    if (tgt == range_t::neutral) {
+        range_tile = neutral_tile_id;
+    }
+    else if (tgt == range_t::ally) {
+        range_tile = ally_tile_id;
+    }
+    else if (tgt == range_t::enemy) {
+        range_tile = enemy_tile_id;
+    }
 
     for (int m_x = 0; m_x < player_range.length; m_x++) {
         for (int m_y = 0; m_y < player_range.length; m_y++) {
             if (player_range.in_range[m_x][m_y].has_value()) {
                 auto map_coord = player_range.local_to_array_coords(m_x, m_y);
                 
-                auto entity = create_tile(registry, map_coord.x, map_coord.y, tex_name, player_range_id);
+                auto entity = create_tile(map_coord.x, map_coord.y, tex_name, range_tile);
                 player_range_entities.push_back(entity);
             }
         }
     }
 }
 
-void TileMap::clear_player_range(entt::registry& registry) {
+void TileMap::clear_player_range() {
     for (const auto& entity : player_range_entities) {
         registry.destroy(entity);
     }
     player_range_entities.clear();
 }
 
-void TileMap::add_player_range_cursor(entt::registry& registry, int magnitude) {
-    add_player_range(registry, cursor_x, cursor_y, magnitude);
+void TileMap::add_player_range_cursor(int magnitude) {
+    add_player_range(cursor_x, cursor_y, magnitude);
 }
 
-bool TileMap::move_character(entt::registry& registry, int src_x, int src_y, int tgt_x, int tgt_y) {
+bool TileMap::move_character(int src_x, int src_y, int tgt_x, int tgt_y) {
     if (in_bounds(src_x, src_y) && in_bounds(tgt_x, tgt_y) 
             && char_cache[src_x][src_y] != entt::null 
             && char_cache[tgt_x][tgt_y] == entt::null) {
@@ -735,10 +751,10 @@ bool TileMap::move_character(entt::registry& registry, int src_x, int src_y, int
     }
 }
 
-bool TileMap::move_character_selected_cursor(entt::registry& registry) {
+bool TileMap::move_character_selected_cursor() {
     if (cursor_in_range(player_range)) {
-        store_cursor_path(registry, cursor_x, cursor_y);
-        return move_character(registry, player_range.center.x, player_range.center.y, cursor_x, cursor_y);
+        store_cursor_path(cursor_x, cursor_y);
+        return move_character(player_range.center.x, player_range.center.y, cursor_x, cursor_y);
     }
     else {
         return false;

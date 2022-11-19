@@ -1,11 +1,7 @@
-add resource manager / initializer
 reorganize state class
 add 3d object creator
-reorganize - make class with general functions like pan()
-
-mouse in grid
-transparent overlay for distance
-distance calculation on grid
 
 fix camera?
 add camera to gui
+
+skill icons :/

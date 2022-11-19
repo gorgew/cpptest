@@ -12,6 +12,12 @@
 #include "UboStructs.hpp"
 #include "CreditsState.hpp"
 
+void StartState::setState(Substate& s) {
+    _substate->exit(this);
+    _substate = &s;
+    _substate->enter(this);
+}
+
 void StartState::build_key_handlers() {
 
    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
@@ -56,9 +62,9 @@ void StartState::build_key_handlers() {
         if (m_substate == substate::observe_world) {
             //open pause menu
         }
-        if (m_substate == substate::character_select) {
-            tmap.clear_player_range(registry);
-            tmap.clear_path(registry);
+        if (m_substate == substate::character_select || m_substate == substate::skill_target) {
+            tmap.clear_player_range();
+            tmap.clear_path();
             m_substate = substate::observe_world;
         }
     };
@@ -80,8 +86,8 @@ void StartState::build_mouse_handlers() {
 
     std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
         if (m_substate == substate::observe_world) {
-            tmap.move_cusor(registry, mouse_system.world_x, mouse_system.world_y);
-            if (tmap.get_char_on_cursor(registry) != entt::null) {
+            tmap.move_cusor(mouse_system.world_x, mouse_system.world_y);
+            if (tmap.get_char_on_cursor() != entt::null) {
                 ui_show_character_hover = true;
                 update_char_hover_data(registry);
             }
@@ -89,26 +95,45 @@ void StartState::build_mouse_handlers() {
                 ui_show_character_hover = false;
             }
         }
+        else if (m_substate == substate::skill_target) {
+            tmap.move_cusor(mouse_system.world_x, mouse_system.world_y);
+            if (tmap.get_char_on_cursor() != entt::null) {
+                //show target / stats hover
+            }
+        }
         else if (m_substate == substate::character_select) {
-            if (tmap.move_cursor_path(registry, mouse_system.world_x, mouse_system.world_y)) {
+            if (tmap.move_cursor_path(mouse_system.world_x, mouse_system.world_y)) {
                 fmt::print("IN _RANGE \n");
             }
             else {
                 //fmt::print("asdfasdf\n");
             }
         }
+
+        if (tmap.get_env_on_cursor() != entt::null) {
+            ui_show_env = true;
+        }
+        else {
+            ui_show_env = false;
+        }
+        if (tmap.get_terrain_on_cursor() != entt::null) {
+            ui_show_terrain = true;
+        }
+        else {
+            ui_show_terrain = false;
+        }
     };
 
     std::function<void(entt::registry&)> l_mouse_down = [=, this](entt::registry& registry) {
-        if (ui_show_character_hover && m_substate != substate::character_select) {
-            tmap.add_player_range_cursor(registry, 
+        if (ui_show_character_hover && m_substate == substate::observe_world) {
+            tmap.add_player_range_cursor(
                 (int) locator.get_scripts()->lua["Characters"][tmap.last_char]["stats"]["movement"]);
             m_substate = substate::character_select;
         }
         else if (m_substate == substate::character_select) {
             
-            tmap.clear_player_range(registry);
-            tmap.clear_path(registry);
+            tmap.clear_player_range();
+            tmap.clear_path();
             m_substate = substate::observe_world;
             ui_show_character_hover = false;
         }
@@ -116,11 +141,11 @@ void StartState::build_mouse_handlers() {
 
     std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
             if (m_substate == substate::character_select) {
-                if (tmap.move_character_selected_cursor(registry)) {
-                    auto time = action_seq.set_path_walk(registry, tmap.get_char_on_cursor(registry), 
+                if (tmap.move_character_selected_cursor()) {
+                    auto time = action_seq.set_path_walk(registry, tmap.get_char_on_cursor(), 
                         tmap.stored_path, 0.2f);
-                    tmap.clear_player_range(registry);
-                    tmap.clear_path(registry);
+                    tmap.clear_player_range();
+                    tmap.clear_path();
                     set_lockout(time);
                     fmt::print("MOVED\n");
                 }
@@ -155,9 +180,6 @@ void StartState::build_gfx() {
     fmt::print("Building gfx\n");
     //Other systems
     locator.get_textures()->add_2d_array_texture("blank", "resources/NumsPacked.png", 32, 32, 6);
-    locator.get_shaders()->add_shader("world.vert", "resources/world.vert", GL_VERTEX_SHADER);
-    locator.get_shaders()->add_shader("world.frag", "resources/world.frag", GL_FRAGMENT_SHADER);
-    locator.get_shaders()->add_program("world", {"world.vert", "world.frag"});
     locator.get_shaders()->use("world");
     program_id  = locator.get_shaders()->get_program_id("world");
 
@@ -202,13 +224,10 @@ void StartState::build_scene(entt::registry& registry) {
         locator.get_resources()->add_animation_texture("anim", "resources/anim.png", 16, 16, 4, 100, 100, "billboard",
             true, frames, timings);
    }
-  
-    locator.get_textures()->add_2d_array_texture("art", "resources/programmer-art.png", 16, 16, 24);
     
-    tmap = {"art", "world", "billboard", registry};
     tmap.load_tileset(locator.get_scripts()->lua);
     tmap.load_tiles(locator.get_scripts()->lua);
-    tmap.load_map("Test", locator.get_scripts()->lua, registry);
+    tmap.load_map("Test", locator.get_scripts()->lua);
 
     std::function<void(entt::registry&)> shift_down = [](entt::registry& registry) {
     
@@ -271,9 +290,14 @@ void StartState::display_ui(nk_context* ctx) {
     if (ui_show_demo) {
         display_demo(ctx);
     }
-
     if (ui_show_character_hover) {
         show_character_hover_ui(ctx);
+    }
+    if (ui_show_env) {
+        show_env_ui(ctx);
+    }
+    else if (ui_show_terrain) {
+        show_terrain_ui(ctx);
     }
 }
 
@@ -313,6 +337,20 @@ void StartState::update_char_hover_data(entt::registry& registry) {
         char_hover_data.char_name = char_name;
         char_hover_data.label_name = "Name: " + char_hover_data.char_name;
         char_hover_data.profile_pic = locator.get_resources()->get_profile_pic(char_hover_data.char_name);
+
+        char_hover_data.active_skills.clear();
+        char_hover_data.passive_skills.clear();
+        sol::table active_skills = characters[char_name]["active_skills"];
+        sol::table passive_skills = characters[char_name]["passive_skills"];
+        if (char_name == "Bob") {
+            fmt::print("asdfasdf {}\n", active_skills.size());
+        }
+        for (const auto& skill : active_skills) {
+            char_hover_data.active_skills.push_back(skill.second.as<std::string>());
+        }
+        for (const auto& skill : passive_skills) {
+            char_hover_data.passive_skills.push_back(skill.second.as<std::string>());
+        }
     }
     
 }
@@ -324,9 +362,45 @@ void StartState::show_character_hover_ui(nk_context* ctx) {
         nk_layout_row_static(ctx, 200, 200, 1);
         nk_image(ctx, char_hover_data.profile_pic);
 
-        nk_layout_row_static(ctx, 10, 200, 4);
+        nk_layout_row_static(ctx, 10, 200, 1);
 
         nk_label(ctx, char_hover_data.label_name.c_str(), NK_TEXT_LEFT);
+        nk_layout_row_dynamic(ctx, 20, 1);
+        nk_label(ctx, "Active Skills", NK_TEXT_LEFT);
+        nk_layout_row_dynamic(ctx, 20, char_hover_data.active_skills.size());
+        for (const auto& s: char_hover_data.active_skills) {
+            if (nk_button_label(ctx, s.c_str())) {
+                auto skill = locator.get_scripts()->lua["ActiveSkills"][s.c_str()];
+                
+                if (skill["isAttack"]) {
+                    m_substate = substate::skill_target;
+                    skill_indicator = skill_indicator_t::path;
+                    tmap.clear_path();
+                    tmap.clear_player_range();
+                    tmap.add_player_range(tmap.last_char_x, tmap.last_char_y, 1, false, range_t::enemy);
+                    skill_indicator = skill_indicator_t::melee;
+                }
+
+                fmt::print("Use active skill {}\n", s);
+            }
+        }
+
+    }
+    nk_end(ctx);
+}
+
+void StartState::show_env_ui(nk_context* ctx) {
+    if (nk_begin(ctx, "", nk_rect(0, 800, 300, 100), NK_WINDOW_BORDER)) {
+        nk_layout_row_static(ctx, 100, 200, 1);
+        nk_label(ctx, tmap.last_env.c_str(), NK_TEXT_LEFT);
+    }
+    nk_end(ctx);
+}   
+
+void StartState::show_terrain_ui(nk_context* ctx) {
+    if (nk_begin(ctx, "", nk_rect(0, 800, 300, 100), NK_WINDOW_BORDER)) {
+        nk_layout_row_static(ctx, 100, 200, 1);
+        nk_label(ctx, tmap.last_terrain.c_str(), NK_TEXT_LEFT);
     }
     nk_end(ctx);
 }

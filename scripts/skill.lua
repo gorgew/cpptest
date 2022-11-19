@@ -3,15 +3,16 @@ Skills = {}
 Skill = {
     magnitude = 1,
     magnitudeRangeLow = 0,
-    magnitudeRangeHigh = 0
-    delayTime = 0
+    magnitudeRangeHigh = 0,
+    delayTime = 0,
     rangeMagnitude = 0
 }
 
 SkillMeta = { __index = Skill }
 
 
-function Skill:act()
+function Skill:run()
+    f1()
 end
 
 ActiveSkills = {}
@@ -28,9 +29,11 @@ ActiveSkill = {
     rangeMagnitude = 1
 }
 
-ActiveSkillMeta = { __index = ActiveSkill }
+ActiveSkill.__index = ActiveSkill
+setmetatable(ActiveSkill, Skill)
 
 function ActiveSkill:new(args)
+    if (args.name == nil) then print("Skill is unnamed!\n") end
     ActiveSkills[args.name] = setmetatable({
         isAttack = args.isAttack,
         targetSelf = args.targetSelf,
@@ -41,11 +44,11 @@ function ActiveSkill:new(args)
         rangeCollideEnemy = args.rangeCollideEnemy,
         magnitude = args.magnitude,
         magnitudeRangeLow = args.magnitudeRangeLow,
-        magnitudeRangeHigh args.magnitudeRangeHigh
-    }, ActiveSkillMeta)
+        magnitudeRangeHigh = args.magnitudeRangeHigh
+    }, ActiveSkill)
 end
 
-function ActiveSkill:act()
+function ActiveSkill:run()
 end
 
 PassiveSkills = {}
@@ -66,6 +69,7 @@ PassiveSkill = {
 PassiveSkillMeta = { __index = PassiveSkill }
 
 function PassiveSkill:new(args)
+    if (args.name == nil) then print("Skill is unnamed!\n") end
     PassiveSkills[args.name] = setmetatable({
         onTurnStart = args.onTurnStart,
         onTurnEnd = args.onTurnEnd,
@@ -78,22 +82,24 @@ function PassiveSkill:new(args)
         onKill = args.onKill,
         onDeath = args.onDeath
     }, PassiveSkillMeta)
+    return args.name
 end
 
-function PassiveSkill:act()
+function PassiveSkill:run()
 end
 
 
 --IDK JUST A TEST ON WHAT MY API to LOOK LIKE
-
+ 
 BasicAttack = ActiveSkill:new({
+    name = 'BasicAttack',
     isAttack = true
 })
-
+--[[
 Fireball = ActiveSkill:new({
     targetCollideEnemy = true,
     targetCollideEnvironment = true,
-    rangeMagnitude = 5
+    rangeMagnitude = 5,
     skill = "FireballSkill"
 })
 
@@ -101,6 +107,7 @@ FireballSkill = Skill:new({
     magnitude = 2,
 })
 
-function FireballSkill:act()
+function FireballSkill:run()
     --deal magnitude damage to 
 end
+]]

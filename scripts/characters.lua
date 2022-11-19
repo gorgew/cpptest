@@ -13,10 +13,20 @@ Character = {
     world_y = 100,
     stats = Stats,
     equipment = {},
-    skills = {},
     arts = {},
     flying = false
 }
+
+function Character:add_skill(skill)
+    assert(type(skill) == "string", "add_skill requires a string")
+    if (PassiveSkills[skill] ~= nil) then 
+        table.insert(Characters[self.name]["passive_skills"], skill)
+    elseif (ActiveSkills[skill] ~= nil) then
+        table.insert(Characters[self.name]["active_skills"], skill)
+    else
+         assert(false, "add_skill: skill not found: " + skill)
+    end
+end 
 
 CharacterMeta = { __index = Character }
 
@@ -37,12 +47,13 @@ function Character:new(arg_table)
             aim_growth = arg_table.aim_growth,
         },
         equipment = arg_table.equipment,
-        skills = arg_table.skills,
+        active_skills = {},
+        passive_skills = {},
         arts = arg_table.arts,
         world_x = arg_table.world_x,
         world_y = arg_table.world_y
     }, CharacterMeta)
-    return Characters[arg_table.name]
+    return setmetatable({name = arg_table.name}, CharacterMeta)
 end
 
 
@@ -67,6 +78,22 @@ Bob.spritesheet:add_animation("walk_up", 0, 3, {250, 250, 250, 250})
 Bob.spritesheet:add_animation("walk_left", 0, 3, {250, 250, 250, 250})
 Bob.spritesheet:add_animation("walk_down", 4, 7, {250, 250, 250, 250})
 Bob.spritesheet:add_animation("walk_right", 4, 7, {250, 250, 250, 250})
+local temp = Bob.add_skill(Bob, "BasicAttack")
+--Characters["Bob"]["active_skills"][1] = "BasicAttack"
+
+Character:new{
+    name = "TargetDummy",
+    hp = 1000,
+    movement = 0,
+    spritesheet = {
+        path = "resources/target_dummy.png",
+        count = 1;
+        width = 32,
+        height = 32
+    },
+    world_x = 100,
+    world_y = 100
+}
 
 function dump(o)
     if type(o) == 'table' then

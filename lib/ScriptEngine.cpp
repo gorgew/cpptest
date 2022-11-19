@@ -15,6 +15,7 @@ ScriptEngine::ScriptEngine() {
     lua.script_file("scripts/stats.lua");
     lua.script_file("scripts/test.lua");
     lua.script_file("scripts/spritesheet.lua");
+    lua.script_file("scripts/skill.lua");
     lua.script_file("scripts/characters.lua");
     lua.script_file("scripts/animations.lua");
     lua.script_file("scripts/tileset.lua");

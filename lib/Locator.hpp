@@ -4,6 +4,7 @@
 #include "TextureManager.hpp"
 #include "ShaderManager.hpp"
 #include "AudioSystem.hpp"
+#include "Registry.hpp"
 #include "ScriptEngine.hpp"
 
 class ResourceManager;
@@ -56,7 +57,6 @@ class Locator {
         static void provide_resources(ResourceManager* rm) {
             resource_service = rm;
         }
-        
 
         static ScriptEngine* get_scripts() {
             return script_service;
@@ -64,6 +64,14 @@ class Locator {
 
         static void provide_scripts(ScriptEngine* se) {
             script_service = se;
+        }
+
+        static void provide_registry(Registry* reg) {
+            registry = reg;
+        }
+
+        static entt::registry& get_registry() {
+            return registry->registry;
         }
 
     private:
@@ -74,4 +82,5 @@ class Locator {
         static AudioSystem* audio_service;
         static ResourceManager* resource_service;
         static ScriptEngine* script_service;
+        static Registry* registry;
 };

@@ -14,24 +14,50 @@ struct ui_character_data {
     std::string char_name;
     std::string label_name;
     struct nk_image profile_pic;
+    std::vector<std::string> active_skills;
+    std::vector<std::string> passive_skills;
 };
 
 class StartState : public State {
 
+private:
+    class Substate {
+        private:
+            KeyEventSystem key_system;
+            MouseEventSystem mouse_system;
+        public:
+            virtual void enter(StartState* parent) = 0;
+            virtual void exit(StartState* parent) = 0;
+            void handleEvent(SDL_Event e);
+    };
 
+    class ObserveSubstate : public Substate {
+        public:
+        void enter(StartState* parent);
+        void exit(StartState* parent);
+    };
+
+    Substate* _substate;
+
+    void setState(Substate& s);
+    
     enum class substate {
         observe_world,
         character_select,
-        lockout
+        lockout,
+        skill_target
     };
-
+    
     enum class next_state {
         game_state,
         credits_state
     };
+
+    skill_indicator_t skill_indicator;
+
     std::shared_ptr<Camera> camera;
 
-    TileMap tmap;
+    TileMap tmap{"art", "world", "billboard"};
 
     void build_key_handlers();
     void build_mouse_handlers();
@@ -44,10 +70,14 @@ class StartState : public State {
 
     void update_char_hover_data(entt::registry&);
     void show_character_hover_ui(nk_context* ctx);
+    void show_env_ui(nk_context* ctx);
+    void show_terrain_ui(nk_context* ctx);
     void display_demo(nk_context* ctx);
 
     bool ui_show_demo = false;
     bool ui_show_character_hover = false;
+    bool ui_show_env = false;
+    bool ui_show_terrain = false;
 
     substate m_substate = substate::observe_world;
     ActionSequencer action_seq;
