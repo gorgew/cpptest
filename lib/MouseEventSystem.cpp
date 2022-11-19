@@ -4,6 +4,12 @@
 
 MouseEventSystem::MouseEventSystem(std::shared_ptr<Camera> camera) {
     this->camera = camera;
+    std::function<void(entt::registry&)> empty = [=, this](entt::registry& registry) {};
+    wheel_up_handler = empty;
+    wheel_down_handler = empty;
+    leftmouse_down = empty;
+    rightmouse_down = empty;
+    motion_handler = empty;
 }
 
 float MouseEventSystem::world_x_to_ndc(float x) {
