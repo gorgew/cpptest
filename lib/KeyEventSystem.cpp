@@ -42,16 +42,20 @@ void KeyEventSystem::add_held_key_handler(SDL_Keycode key_code,
 
 void KeyEventSystem::handle_event(entt::registry& registry, SDL_Event e) {
 
+    
     if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
         auto key_code = e.key.keysym.sym;
-
+        auto c = SDL_GetKeyName(key_code);
+        
         if (mapped_keys.contains(key_code)) {
+            
             if (e.type == SDL_KEYDOWN) {
 
                 if (e.key.repeat == 0) {
                     held_keys.insert(key_code);
                     
                     if (press_keydown_handlers.contains(key_code)) {
+                        printf("%s\n", c);
                         press_keydown_handlers[key_code](registry);
                     }
                 }

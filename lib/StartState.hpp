@@ -22,20 +22,106 @@ class StartState : public State {
 
 private:
     class Substate {
+        friend class StartState;
         private:
+            virtual void build_key_handlers() {}
+            virtual void build_mouse_handlers() {}
+        protected:
+            
             KeyEventSystem key_system;
             MouseEventSystem mouse_system;
+            std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
+                s->camera->pan(1, 0, 0, s->delta_time);
+            };
+
+            std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
+                s->camera->pan(-1, 0, 0, s->delta_time);
+            };
+            std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
+                s->camera->pan(0, 1, 0, s->delta_time);
+            };
+            std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
+                s->camera->pan(0, -1, 0, s->delta_time);
+            };
+            std::function<void(entt::registry&)> placeholder = [](entt::registry&){
+
+            };
+
         public:
+            
+            Substate() {
+                key_system = {};
+                mouse_system = {s->camera};
+            }
             virtual void enter(StartState* parent) = 0;
             virtual void exit(StartState* parent) = 0;
-            void handleEvent(SDL_Event e);
+            void handle_event(entt::registry& registry, SDL_Event e);
+
+            static StartState* s;
     };
 
     class ObserveSubstate : public Substate {
+        friend class StartState;
+        private:
+            ObserveSubstate() {
+                build_key_handlers(); 
+                build_mouse_handlers();
+            }
+            void build_key_handlers();
+            void build_mouse_handlers();
         public:
-        void enter(StartState* parent);
-        void exit(StartState* parent);
+        
+        static ObserveSubstate& instance();
+        void enter(StartState* parent) {}
+        void exit(StartState* parent) {}
+        ObserveSubstate(ObserveSubstate const&) = delete;             // Copy construct
+        ObserveSubstate(ObserveSubstate&&) = delete;                  // Move construct
+        ObserveSubstate& operator=(ObserveSubstate const&) = delete;  // Copy assign
+        ObserveSubstate& operator=(ObserveSubstate &&) = delete; 
     };
+    friend class ObserveSubstate;
+
+     class CharacterSelected : public Substate {
+        friend class StartState;
+        private:
+            CharacterSelected() {
+                build_key_handlers(); 
+                build_mouse_handlers();
+            }
+            void build_key_handlers();
+            void build_mouse_handlers();
+        public:
+        
+        static CharacterSelected& instance();
+        void enter(StartState* parent) {}
+        void exit(StartState* parent) {}
+        CharacterSelected(CharacterSelected const&) = delete;             // Copy construct
+        CharacterSelected(CharacterSelected&&) = delete;                  // Move construct
+        CharacterSelected& operator=(CharacterSelected const&) = delete;  // Copy assign
+        CharacterSelected& operator=(CharacterSelected &&) = delete; 
+    };
+    friend class CharacterSelected;
+    
+    class SkillSelected : public Substate {
+        friend class StartState;
+        private:
+            SkillSelected() {
+                build_key_handlers(); 
+                build_mouse_handlers();
+            }
+            void build_key_handlers();
+            void build_mouse_handlers();
+        public:
+        
+        static SkillSelected& instance();
+        void enter(StartState* parent) {}
+        void exit(StartState* parent) {}
+        SkillSelected(SkillSelected const&) = delete;             // Copy construct
+        SkillSelected(SkillSelected&&) = delete;                  // Move construct
+        SkillSelected& operator=(SkillSelected const&) = delete;  // Copy assign
+        SkillSelected& operator=(SkillSelected &&) = delete; 
+    };
+    friend class SkillSelected;
 
     Substate* _substate;
 
@@ -91,7 +177,8 @@ private:
             build_music();
             
             build_scene(registry);
-
+            Substate::s = this;
+            _substate = &ObserveSubstate::instance();
             key_system = {};
             mouse_system = {camera};
 

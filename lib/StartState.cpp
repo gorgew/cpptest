@@ -12,6 +12,142 @@
 #include "UboStructs.hpp"
 #include "CreditsState.hpp"
 
+StartState* StartState::Substate::s = nullptr;
+
+void StartState::Substate::handle_event(entt::registry& registry, SDL_Event e) {
+    
+    key_system.handle_event(registry, e);
+    mouse_system.handle_event(registry, e);
+    
+}
+
+StartState::ObserveSubstate& StartState::ObserveSubstate::instance() {
+    static ObserveSubstate instance;
+    return instance;
+}
+
+void StartState::ObserveSubstate::build_key_handlers() {
+    fmt::print("BUILD OBSERVE STATE HANDLERS\n");
+    std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
+        fmt::print("PANRIGHT\n");
+        s->camera->pan(1, 0, 0, s->delta_time);
+    };
+
+    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
+    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
+    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
+    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);    
+
+    std::function<void(entt::registry&)> pause = [&](entt::registry& registry) mutable {
+        fmt::print("TODO add pause menu\n");
+    };
+    key_system.add_keydown_handler(SDLK_ESCAPE, pause);
+}
+
+void StartState::ObserveSubstate::build_mouse_handlers() {
+    fmt::print("observestate mnouse\n");
+    std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
+        s->tmap.move_cusor(mouse_system.world_x, mouse_system.world_y);
+        if (s->tmap.get_char_on_cursor() != entt::null) {
+            s->ui_show_character_hover = true;
+            s->update_char_hover_data(registry);
+        }
+        else {
+            s->ui_show_character_hover = false;
+        }
+    };
+
+    std::function<void(entt::registry&)> l_mouse_down = [=, this](entt::registry& registry) {
+        if (s->ui_show_character_hover) {
+            s->tmap.add_player_range_cursor(
+                (int) s->locator.get_scripts()->lua["Characters"][s->tmap.last_char]["stats"]["movement"]);
+            s->setState(CharacterSelected::instance());
+        }
+    };
+   
+    mouse_system.set_motion_handler(move_cursor);
+    mouse_system.add_mousedown_handler(l_mouse_down, SDL_BUTTON_LEFT);
+   
+}
+
+StartState::CharacterSelected& StartState::CharacterSelected::instance() {
+    static CharacterSelected instance;
+    return instance;
+}
+
+void StartState::CharacterSelected::build_key_handlers() {
+    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
+    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
+    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
+    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder); 
+
+    std::function<void(entt::registry&)> exit = [=, this](entt::registry& registry) {
+        s->tmap.clear_player_range();
+        s->tmap.clear_path();
+        s->setState(ObserveSubstate::instance());
+    };
+    key_system.add_keydown_handler(SDLK_1, exit); 
+}
+
+void StartState::CharacterSelected::build_mouse_handlers() {  
+    std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
+        s->tmap.move_cursor_path(mouse_system.world_x, mouse_system.world_y);
+    }; 
+    mouse_system.set_motion_handler(move_cursor);
+
+    std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
+        if (s->tmap.move_character_selected_cursor()) {
+            auto time = s->action_seq.set_path_walk(registry, s->tmap.get_char_on_cursor(), 
+                s->tmap.stored_path, 0.2f);
+            s->tmap.clear_player_range();
+            s->tmap.clear_path();
+            s->set_lockout(time);
+            fmt::print("MOVED\n");
+            s->setState(ObserveSubstate::instance());
+        }
+        else {
+            fmt::print("DIDNI't MOVE\n");
+        }
+        
+    };
+
+    mouse_system.add_mousedown_handler(r_mouse_down, SDL_BUTTON_RIGHT);
+    
+}
+
+StartState::SkillSelected& StartState::SkillSelected::instance() {
+    static SkillSelected instance;
+    return instance;
+}
+
+void StartState::SkillSelected::build_key_handlers() {
+    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
+    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
+    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
+    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder); 
+
+    std::function<void(entt::registry&)> exit = [=, this](entt::registry& registry) {
+        s->tmap.clear_player_range();
+        s->tmap.clear_path();
+        s->setState(ObserveSubstate::instance());
+    };
+    key_system.add_keydown_handler(SDLK_1, exit); 
+}
+
+void StartState::SkillSelected::build_mouse_handlers() {  
+    std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
+        s->tmap.move_cursor_path(mouse_system.world_x, mouse_system.world_y);
+    }; 
+    mouse_system.set_motion_handler(move_cursor);
+
+    std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
+        
+    };
+
+    mouse_system.add_mousedown_handler(r_mouse_down, SDL_BUTTON_RIGHT);
+    
+}
+
 void StartState::setState(Substate& s) {
     _substate->exit(this);
     _substate = &s;
@@ -19,27 +155,10 @@ void StartState::setState(Substate& s) {
 }
 
 void StartState::build_key_handlers() {
-
-   std::function<void(entt::registry&)> pan_right = [&](entt::registry& registry) mutable {
-        camera->pan(1, 0, 0, delta_time);
-    };
-
-    std::function<void(entt::registry&)> pan_left = [=, this](entt::registry& registry) {
-        camera->pan(-1, 0, 0, delta_time);
-    };
-    std::function<void(entt::registry&)> pan_up = [=, this](entt::registry& registry) {
-        camera->pan(0, 1, 0, delta_time);
-    };
-    std::function<void(entt::registry&)> pan_down = [=, this](entt::registry& registry) {
-        camera->pan(0, -1, 0, delta_time);
-    };
+    /*
     std::function<void(entt::registry&)> placeholder = [](entt::registry&){
 
     };
-    key_system.add_held_key_handler(SDLK_d, pan_right, placeholder);
-    key_system.add_held_key_handler(SDLK_a, pan_left, placeholder);
-    key_system.add_held_key_handler(SDLK_w, pan_up, placeholder);
-    key_system.add_held_key_handler(SDLK_s, pan_down, placeholder);
     
     std::function<void(entt::registry&)> pitch_left = [=, this](entt::registry& registry) {
         camera->update_pitch(-1.0f);
@@ -47,7 +166,8 @@ void StartState::build_key_handlers() {
     std::function<void(entt::registry&)> pitch_right = [=, this](entt::registry& registry) {
         camera->update_pitch(1.0f);
     };
-    std::function<void(entt::registry&)> yaw_down = [=, this](entt::registry& registry) {
+    system.add_held_key_handler(SDLK_s, pan_down, placeholder);
+    d::function<void(entt::registry&)> yaw_down = [=, this](entt::registry& registry) {
         camera->update_yaw(1.0f);
     };
     std::function<void(entt::registry&)> yaw_up = [=, this](entt::registry& registry) {
@@ -57,19 +177,7 @@ void StartState::build_key_handlers() {
     key_system.add_held_key_handler(SDLK_e, pitch_right, placeholder);
     key_system.add_held_key_handler(SDLK_z, yaw_up, placeholder);
     key_system.add_held_key_handler(SDLK_x, yaw_down, placeholder);
-
-    std::function<void(entt::registry&)> exit = [=, this](entt::registry& registry) {
-        if (m_substate == substate::observe_world) {
-            //open pause menu
-        }
-        if (m_substate == substate::character_select || m_substate == substate::skill_target) {
-            tmap.clear_player_range();
-            tmap.clear_path();
-            m_substate = substate::observe_world;
-        }
-    };
-    key_system.add_keydown_handler(SDLK_1, exit); 
-
+*/
 }
 
 void StartState::build_mouse_handlers() {
@@ -85,28 +193,10 @@ void StartState::build_mouse_handlers() {
     mouse_system.add_wheel_handler(false, zoom_out);
 
     std::function<void(entt::registry&)> move_cursor = [=, this](entt::registry& registry) {
-        if (m_substate == substate::observe_world) {
-            tmap.move_cusor(mouse_system.world_x, mouse_system.world_y);
-            if (tmap.get_char_on_cursor() != entt::null) {
-                ui_show_character_hover = true;
-                update_char_hover_data(registry);
-            }
-            else {
-                ui_show_character_hover = false;
-            }
-        }
-        else if (m_substate == substate::skill_target) {
+         if (m_substate == substate::skill_target) {
             tmap.move_cusor(mouse_system.world_x, mouse_system.world_y);
             if (tmap.get_char_on_cursor() != entt::null) {
                 //show target / stats hover
-            }
-        }
-        else if (m_substate == substate::character_select) {
-            if (tmap.move_cursor_path(mouse_system.world_x, mouse_system.world_y)) {
-                fmt::print("IN _RANGE \n");
-            }
-            else {
-                //fmt::print("asdfasdf\n");
             }
         }
 
@@ -139,26 +229,7 @@ void StartState::build_mouse_handlers() {
         }
     };
 
-    std::function<void(entt::registry&)> r_mouse_down = [=, this](entt::registry& registry) {
-            if (m_substate == substate::character_select) {
-                if (tmap.move_character_selected_cursor()) {
-                    auto time = action_seq.set_path_walk(registry, tmap.get_char_on_cursor(), 
-                        tmap.stored_path, 0.2f);
-                    tmap.clear_player_range();
-                    tmap.clear_path();
-                    set_lockout(time);
-                    fmt::print("MOVED\n");
-                }
-                else {
-                    fmt::print("DIDNI't MOVE\n");
-                }
-            }
-        };
-    
-
     mouse_system.add_mousedown_handler(l_mouse_down, SDL_BUTTON_LEFT);
-    mouse_system.add_mousedown_handler(r_mouse_down, SDL_BUTTON_RIGHT);
-    mouse_system.set_motion_handler(move_cursor);
 }
 
 void StartState::build_music() {
@@ -241,8 +312,9 @@ void StartState::build_scene(entt::registry& registry) {
 };
 
 void StartState::handle_event(entt::registry& registry, SDL_Event e) {
-    key_system.handle_event(registry, e);
-    mouse_system.handle_event(registry, e);
+    _substate->handle_event(registry, e);
+    //key_system.handle_event(registry, e);
+    //mouse_system.handle_event(registry, e);
 }
 
 void StartState::set_lockout(float time) {
@@ -264,6 +336,7 @@ void StartState::lockout_transition(float& time) {
 void StartState::process_systems(entt::registry& registry, float& delta_time) {
     if (systems_enabled) {
         key_system.execute_holds(registry);
+        _substate->key_system.execute_holds(registry);
         lockout_transition(delta_time);
         action_seq.process(registry, delta_time);
     }
@@ -373,7 +446,7 @@ void StartState::show_character_hover_ui(nk_context* ctx) {
                 auto skill = locator.get_scripts()->lua["ActiveSkills"][s.c_str()];
                 
                 if (skill["isAttack"]) {
-                    m_substate = substate::skill_target;
+                    setState(SkillSelected::instance());
                     skill_indicator = skill_indicator_t::path;
                     tmap.clear_path();
                     tmap.clear_player_range();
