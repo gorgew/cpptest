@@ -21,8 +21,6 @@ Stats = {
 Stats.meta = {}
 
 function Stats:add(s1, s2)
-    --print("", dump(s1))
-    print("", dump(self)) 
 
     return setmetatable({
         
@@ -57,17 +55,3 @@ function Stats:new(arg_table)
     return stat
 end
 
-S1 = Stats:new({})
-S2 = Stats:new({})
-print(dump(S1))
-print(dump(S2))
-
---Stats:add(S1, S2)
-
-function sum(x, y)
-    return {x.x + y.x}
-end
-
-local X = {x = 5}
-X = sum (X, X)
-print(dump(X))

@@ -44,15 +44,10 @@ function Character:equip(slot, equipment)
 
     if (Equipments[equipment.name] ~= nil and Characters[self.name]["equipment"][slot] == "") then
         Characters[self.name]["equipment"][slot] = equipment.name
-        print("", dump(Characters[self.name]["stats"] ))
-        print("", dump(Equipments[equipment.name]["stats"]))
         local s1 = Characters[self.name]["stats"]
         local s2 = Equipments[equipment.name]["stats"]
-        print(getmetatable(Characters[self.name]["stats"]))
-        print(getmetatable(Equipments[equipment.name]["stats"]))
 
-        Characters[self.name]["stats"] = Stats:add(Characters[self.name]["stats"], Equipments[equipment.name]["stats"]) 
-        --print("", dump(Characters[self.name]["stats"] ))
+        Characters[self.name]["stats"] = Stats:add(Characters[self.name]["stats"], Characters[self.name]["stats"]) 
     end
 end
 
