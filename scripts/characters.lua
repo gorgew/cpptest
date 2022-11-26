@@ -47,8 +47,22 @@ function Character:equip(slot, equipment)
         local s1 = Characters[self.name]["stats"]
         local s2 = Equipments[equipment.name]["stats"]
 
-        Characters[self.name]["stats"] = Stats:add(Characters[self.name]["stats"], Characters[self.name]["stats"]) 
+        Characters[self.name]["stats"] = Stats:add(Characters[self.name]["stats"], Equipments[equipment.name]["stats"]) 
     end
+end
+
+--Unequip current item in slot and return its name
+function Character:unequip(slot) 
+    if (Characters[self.name]["equipment"][slot] == nil) then
+        assert(false, "equip: invalid slot")
+    end
+    if (Characters[self.name]["equipment"][slot] == "") then
+        assert(false, "equip: slot empty ")
+    end
+
+    return {
+        name = Characters[self.name]["equipment"][slot] 
+    } 
 end
 
 CharacterMeta = { __index = Character }
