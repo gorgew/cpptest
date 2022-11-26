@@ -676,6 +676,7 @@ TileMap::range TileMap::get_range_collision(int x, int y, int magnitude) {
                         && child_mag < next_mag
                         && in_bounds(world_coord.x, world_coord.y)
                         && env_cache[world_coord.x][world_coord.y] == entt::null
+                        && char_cache[world_coord.x][world_coord.y] == entt::null
                         ) {
                         
                         mag_array[child_coord.x][child_coord.y] = next_mag;
