@@ -32,6 +32,13 @@ ActiveSkill = {
 ActiveSkill.__index = ActiveSkill
 setmetatable(ActiveSkill, Skill)
 
+--[[
+    isAttack: modified empowered attack
+    // how to know which animation?
+    execute(caster, targets, ...)
+    
+
+--]]
 function ActiveSkill:new(args)
     if (args.name == nil) then print("Skill is unnamed!\n") end
     ActiveSkills[args.name] = setmetatable({
@@ -45,6 +52,7 @@ function ActiveSkill:new(args)
         magnitude = args.magnitude,
         magnitudeRangeLow = args.magnitudeRangeLow,
         magnitudeRangeHigh = args.magnitudeRangeHigh
+
     }, ActiveSkill)
 end
 

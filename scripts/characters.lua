@@ -1,3 +1,5 @@
+
+
 Characters = {}
 
 Roster = {"Bob"}
@@ -12,7 +14,7 @@ Character = {
     world_x = 100,
     world_y = 100,
     stats = Stats,
-    equipment = {},
+    equipment = {weapon = "", head = "", chest = "", feet = ""},
     arts = {},
     flying = false
 }
@@ -28,6 +30,32 @@ function Character:add_skill(skill)
     end
 end 
 
+function Character:equip(slot, equipment) 
+    --Error checking
+    if (Equipments[equipment.name] == nil) then
+        assert(false, "equip: equipment not found" )
+    end
+    if (Characters[self.name]["equipment"][slot] == nil) then
+        assert(false, "equip: invalid slot")
+    end
+    if (Characters[self.name]["equipment"][slot] ~= "") then
+        assert(false, "equip: slot already used ")
+    end
+
+    if (Equipments[equipment.name] ~= nil and Characters[self.name]["equipment"][slot] == "") then
+        Characters[self.name]["equipment"][slot] = equipment.name
+        print("", dump(Characters[self.name]["stats"] ))
+        print("", dump(Equipments[equipment.name]["stats"]))
+        local s1 = Characters[self.name]["stats"]
+        local s2 = Equipments[equipment.name]["stats"]
+        print(getmetatable(Characters[self.name]["stats"]))
+        print(getmetatable(Equipments[equipment.name]["stats"]))
+
+        Characters[self.name]["stats"] = Stats:add(Characters[self.name]["stats"], Equipments[equipment.name]["stats"]) 
+        --print("", dump(Characters[self.name]["stats"] ))
+    end
+end
+
 CharacterMeta = { __index = Character }
 
 function Character:new(arg_table)
@@ -42,7 +70,6 @@ function Character:new(arg_table)
         stats = Stats:new(arg_table)
         ,
         {
-            movement = arg_table.movement,
             hp_growth = arg_table.hp_growth,
             aim_growth = arg_table.aim_growth,
         },
@@ -56,6 +83,7 @@ function Character:new(arg_table)
     return setmetatable({name = arg_table.name}, CharacterMeta)
 end
 
+        
 
 Bob = Character:new{
     name = "Bob",
@@ -73,6 +101,8 @@ Bob = Character:new{
     world_x = 200,
     world_y = 200,
 }
+
+Bob.equip(Bob, "feet", LeatherBoots)
 
 Bob.spritesheet:add_animation("walk_up", 0, 3, {250, 250, 250, 250})
 Bob.spritesheet:add_animation("walk_left", 0, 3, {250, 250, 250, 250})
@@ -95,17 +125,6 @@ Character:new{
     world_y = 100
 }
 
-function dump(o)
-    if type(o) == 'table' then
-       local s = '{ '
-       for k,v in pairs(o) do
-          if type(k) ~= 'number' then k = '"'..k..'"' end
-          s = s .. '['..k..'] = ' .. dump(v) .. ','
-       end
-       return s .. '}'
-    else
-       return tostring(o)
-    end
- end
 
- print("Characters:", dump(characters))
+
+ print("Characters:", dump(Characters))

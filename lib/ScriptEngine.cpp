@@ -13,6 +13,7 @@ ScriptEngine::ScriptEngine() {
     lua.set_function("f1", &a_function);
     
     lua.script_file("scripts/stats.lua");
+    lua.script_file("scripts/equipment.lua");
     lua.script_file("scripts/test.lua");
     lua.script_file("scripts/spritesheet.lua");
     lua.script_file("scripts/skill.lua");
